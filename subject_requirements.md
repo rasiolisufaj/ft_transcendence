@@ -25,7 +25,7 @@ You’ll create a real-world web application as a team that can move in many dir
 **Multi-user Support (Mandatory):**
 Your website must support multiple users simultaneously. This is a core requirement of the project.
 Users should be able to interact with the application at the same
-time without conflicts or performance issues. 
+time without conflicts or performance issues.
 This includes:
 - Multiple users can be logged in and active at the same time.
 - Concurrent actions by different users are handled properly.
@@ -82,19 +82,18 @@ Your team must assign the following roles (one person can have multiple roles if
 ---
 
 ## 4. Team Members and Interests
-- **Adrien:** 3 years exerience as a web developer. 
+- **Adrien:**
     - Product Owner (PO)
-    - Technical Lead (TL)
     - Developer
-    - Interested in AI & DevOps
-- **Rasiol:** 1 year experience as a web developer. 
+- **Rasiol:**
     - Project Manager (PM)
-    - Architect
     - Developer
     - Authentication & Security
-- **Alexandre:** 
+- **Alexandre:**
     - Developer
     - Real-Time & WebSockets
-- **Amir:** 
+    - Interested in AI & DevOps
+- **Amir:**
     - Developer
-    - Database 
+    - Database
+    - Technical Lead (TL)
