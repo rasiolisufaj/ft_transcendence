@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  FirstName String @db.VarChar(15)
+  LastName  String @db.VarChar(15)
+  Email     String @unique @db.VarChar(100)
+  Pseudo    String @unique @db.VarChar(15)
+  password  String @db.VarChar(100)
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(50)
+}
+
+model family {
+  id             Int      @id @default(autoincrement())
+  name           String   @map("Name") @db.VarChar(100)
+  createdAt      DateTime @default(now()) @map("created_at")
+  createdBy      Int      @map("created_by")
+  invitationCode String?  @unique @map("invitation_code") @db.VarChar(20)
+}
+
+model FamilyMember {
+  id       Int      @id @default(autoincrement())
+  userId   Int      @map("user_id")
+  familyId Int      @map("family_id")
+  role     String   @map("Role") @db.VarChar(50)
+  joinedAt DateTime @default(now()) @map("joined_at")
+}
+
+model comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int      @map("post_id")
+  userId    Int      @map("user_id")
+  content   String   @db.VarChar(1000)
+  createdAt DateTime @default(now()) @map("created_at")
+}
+
+model post {
+  id         Int      @id @default(autoincrement()) // create primary clé
+  user_id    BigInt   @map("user_id")
+  channel_id BigInt   @map("channel_id")
+  title      String   @db.VarChar(25)
+  content    String   @db.VarChar(1000)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @map("updated_at")
+}
+
+model friendship {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  friendId  Int      @map("friend_id")
+  status    String   @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+}
+
+model visibility {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(50)
+}
+
+model channelmenber {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  channelId Int      @map("channel_id")
+  role      String   @map("Role") @db.VarChar(50)
+  joinedAt  DateTime @default(now()) @map("joined_at")
+}
+
+model genericdocument {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @map("user_id")
+  documentName   String   @map("document_name") @db.VarChar(100)
+  documentType   String   @map("document_type") @db.VarChar(50)
+  issuer         String   @db.VarChar(100)
+  issueDate      DateTime @map("issue_date") // after look if is it optional or not
+  expirationDate DateTime @map("expiration_date") // after look if is it optional or not
+  fileurl        String   @map("file_url") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+}
+
+model notification {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  type          String   @db.VarChar(50)
+  title         String   @db.VarChar(100)
+  message       String   @db.VarChar(255)
+  isRead        Boolean  @default(false) @map("is_read")
+  documenttable String   @map("document_table") @db.VarChar(100)
+  createdAt     DateTime @default(now()) @map("created_at")
+}
+
+model channel {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(100)
+  description    String   @db.VarChar(255)
+  visibilityId   Int      @map("visibility_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  createdBy      Int      @map("created_by")
+  invitationCode String?  @unique @map("invitation_code") @db.VarChar(20)
+}
+
+model passeport {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @map("user_id")
+  passportNumber String   @map("passport_number") @db.VarChar(20)
+  issueDate      DateTime @map("issue_date")
+  expirationDate DateTime @map("expiration_date")
+  countryOfIssue String   @map("country_of_issue") @db.VarChar(50)
+  createdAt      DateTime @default(now()) @map("created_at")
+  fileurl        String   @map("file_url") @db.VarChar(255)
+}
+
+model idcard {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @map("user_id")
+  idCardNumber   String   @map("id_card_number") @db.VarChar(20)
+  issueDate      DateTime @map("issue_date")
+  expirationDate DateTime @map("expiration_date")
+  countryOfIssue String   @map("country_of_issue") @db.VarChar(50)
+  createdAt      DateTime @default(now()) @map("created_at")
+  fileurl        String   @map("file_url") @db.VarChar(255)
+}
+
+// @id = primary key
+// @unique avoid multiple users having the same name or the same email
