@@ -2,7 +2,7 @@
 node_modules/
 
 # --- generated artefacts -----------------------------------------------------
-/generated
+src/generated/
 *.tsbuildinfo
 
 # --- local database volume ---------------------------------------------------
