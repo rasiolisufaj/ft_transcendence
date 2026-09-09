@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by TODO_LOGIN_ADRIEN, risufaj, TODO_LOGIN_ALEXANDRE, amkhelif.*
+*This project has been created as part of the 42 curriculum by logins.*
 
 <!-- TODO(team): replace the TODO_LOGIN_* placeholders with real 42 logins, and
      confirm `risufaj` and `amkhelif` are the right ones. The subject requires
