@@ -1,0 +1,30 @@
+# --- dependencies ------------------------------------------------------------
+node_modules/
+
+# --- generated artefacts -----------------------------------------------------
+src/generated/
+*.tsbuildinfo
+
+# --- local database volume ---------------------------------------------------
+# Historical bind mount (docker-compose now uses a named volume). Kept ignored
+# so a stale ./postgres-data can never be committed again — see commit 151a2eb.
+/postgres-data/
+
+# --- secrets -----------------------------------------------------------------
+# .env is local-only; .env.example is committed on purpose (subject III.3).
+.env
+.env.*
+!.env.example
+
+# --- os / editor -------------------------------------------------------------
+.DS_Store
+
+# --- next.js -----------------------------------------------------------------
+/.next/
+/out/
+/build
+next-env.d.ts
+
+# --- misc --------------------------------------------------------------------
+/coverage
+*.pem
