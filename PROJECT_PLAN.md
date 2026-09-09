@@ -11,25 +11,26 @@ documents into tracked, deadline-aware typed objects, lets users interrogate and
 through an AI assistant, and surrounds it with a mutual-aid community where people help each
 other through administrative procedures — as a **22-point**, 4-person, 5-week graded project.
 
-**Architecture:** A containerised TypeScript monorepo behind an NGINX TLS proxy. Next.js
-(App Router) owns UI and HTTP backend; a separate Node WebSocket service fans community and
-notification events out via Redis pub/sub; a separate worker container runs the deadline scan.
-PostgreSQL via Prisma is the single source of truth, MinIO holds the files, and every document
-status is derived at read time rather than stored.
+**Architecture:** One containerised TypeScript application behind an NGINX TLS proxy, run as
+**three processes from a single image**. Next.js (App Router) owns UI and HTTP backend; a
+separate Node WebSocket process fans community and notification events out via Redis pub/sub;
+a third process runs the deadline scan on a timer. PostgreSQL via Prisma is the single source
+of truth, object storage holds the files, and every document status is derived at read time
+rather than stored.
 
-**Tech Stack:** TypeScript · Next.js 15 (App Router) · Tailwind · Prisma + PostgreSQL 17 ·
-Redis 7 · `ws` · BullMQ · MinIO · NGINX · Docker Compose · `next-intl` ·
+**Tech Stack:** TypeScript · Next.js 16 (App Router) · Tailwind · Prisma + PostgreSQL 17 ·
+Redis 7 · `ws` · NGINX · Docker Compose · `next-intl` ·
 Anthropic `claude-opus-5` · Vitest + Playwright · GitHub Actions
 
 **Specs:** [`mespapiers_project_vision.md`](mespapiers_project_vision.md) (product) ·
 [`subject_requirements.md`](subject_requirements.md) (graded requirements). This plan argues
 from both; executors read all three.
 
-> ⚠️ **The vision document is currently stale.** It still describes the earlier
-> household-sharing concept with an analytics dashboard. This plan reflects the current scope:
-> individual document ownership, an AI assistant with price comparison, and an entraide
-> community. Reconcile the vision doc against §1 and §2 before Week 1 planning, or the two
-> specs will contradict each other in front of the evaluators.
+> **Spec reconciliation status.** The vision document has since been rewritten to the current
+> scope — individual document ownership, an AI assistant with price comparison, and an entraide
+> community — and its §7 records the household-sharing concept and the analytics dashboard as
+> deliberately dropped. The two specs agree as of the current revision. If they ever diverge
+> again, reconcile before the week's planning, never during evaluation.
 
 ---
 
@@ -55,8 +56,10 @@ Project-wide rules. Every task's definition of done implicitly includes this sec
 **Versions and tooling**
 
 - Node **22 LTS**, TypeScript **5.x** with `strict: true` and `noUncheckedIndexedAccess`.
-- Next.js **15** App Router · PostgreSQL **17** · Redis **7** · NGINX **1.27** · MinIO latest.
-- Package manager **pnpm**, one lockfile committed at the repo root.
+- Next.js **16** App Router · React **19** · PostgreSQL **17** · Redis **7** · NGINX **1.27** ·
+  MinIO latest. Next 16 has breaking changes against most training data and most tutorials:
+  read `node_modules/next/dist/docs/` before writing App Router code (see `AGENTS.md`).
+- Package manager **npm**, one `package.json` and one lockfile at the repository root.
 
 **Product rules copied verbatim from the specs**
 
@@ -85,7 +88,7 @@ Project-wide rules. Every task's definition of done implicitly includes this sec
   server-side from documents the requesting user owns; nothing from a document is ever echoed
   into a channel, a thread or a direct message by the system.
 - Secrets live only in `.env` (git-ignored). `.env.example` lists every key with a dummy
-  value and is checked by `pnpm check:env` in CI.
+  value and is checked by `npm run check:env` in CI.
 - Timestamps stored in UTC, rendered in `Europe/Paris`.
 - Every Prisma model carries `createdAt` and `updatedAt`.
 
@@ -120,10 +123,10 @@ that reliable contributors are visible.
 
 | Member | Roles | Focus | Experience |
 |---|---|---|---|
-| Adrien | Product Owner · Technical Lead | Infrastructure, CI, AI extraction + assistant, review | 3 years |
-| Rasiol | Project Manager · Architect | Auth, security, permissions | 1 year |
+| Adrien | Product Owner · Developer | Infrastructure, CI, AI extraction + assistant, review | 3 years |
+| Rasiol | Project Manager · Developer | Auth, security, permissions | 1 year |
 | Alexandre | Developer | Real-time, messaging, notifications, i18n, UI shell | — |
-| Amir | Developer | Database, storage, community data layer, GDPR | — |
+| Amir | Technical Lead · Developer | Database, storage, community data layer, GDPR | — |
 
 ---
 
@@ -138,7 +141,7 @@ that reliable contributors are visible.
 | Community | **Channels are the "organization" module** | A channel is an organisation instance: created, joined, left, moderated, with per-channel roles. |
 | Analytics dashboard | **Dropped** | It was a 2-point major that served the household concept. Its points are replaced by the community modules, which the product actually needs. |
 | Assistant transport | **SSE, not WebSocket** | See the correction below. |
-| File storage | MinIO container (S3-compatible) | Internal network only. Files reach the browser through an authorised route handler — see below. |
+| File storage | **Filesystem adapter on a named volume**, MinIO optional | The `storage/index.ts` interface (§5) names no vendor, so the two are interchangeable behind `putObject` / `getObjectStream` / `deleteObject`. The graded minor lives in the route handler (magic-byte validation, access control, preview, delete), not in the backing store. Start on the filesystem; swap in MinIO only if Week 4 has room. |
 | Languages | FR / EN / ES via `next-intl` | No RTL work. Build with Tailwind logical properties anyway so Arabic stays cheap later. |
 | Auth | Own the session table (Lucia pattern) | See the correction below — this is hand-rolled, not a library install. |
 | AI provider | Anthropic `claude-opus-5` via `@anthropic-ai/sdk` | Structured extraction with `messages.parse()` + Zod; streaming for the assistant. |
@@ -258,8 +261,17 @@ and MinIO bucket initialisation (E3).
 and console noise, and the subject explicitly grades "no warnings or errors in the browser
 console." `mespapiers.local` needs an `/etc/hosts` entry — see R11.
 
-**`worker`** is a separate container from `web` on purpose: Next.js containers may be
-restarted or scaled, and a cron loop inside one would double-fire notifications.
+**`worker` is a separate *process*, not a separate *application*.** It runs the same image as
+`web` with a different command (`tsx src/worker/scan.ts`). Keeping the timer out of the Next.js
+process is what matters — Next 16 may spawn several render workers, module-level side effects
+run once per worker, and every dev rebuild would restart the timer. But it needs no package,
+no tsconfig and no build step of its own.
+
+**No job queue.** BullMQ was scoped and dropped. It buys retries, backoff and repeatable jobs
+for exactly one job that runs daily, is idempotent by `@@unique([documentId, kind])`, and
+re-processes everything on the next tick if it fails. A `while (true) { await scan(); await
+sleep(1h) }` under `restart: unless-stopped` is the whole feature. The database constraint is
+the correctness guarantee, not the queue.
 
 ### Database architecture
 
@@ -354,9 +366,11 @@ display as **Helper** — a badge, not a permission (§ policy).
 
 ### CI/CD (GitHub Actions)
 
-- **`ci.yml`** on every PR: `tsc --noEmit` → ESLint → `prisma validate` + `prisma migrate diff`
-  drift check → `pnpm check:env` → `pnpm i18n:check` → Vitest unit tests → `next build` →
-  `docker compose build`.
+- **`ci.yml`** on every PR: ESLint → `prisma validate` + `prisma migrate diff`
+  drift check → `npm run check:env` → `npm run i18n:check` → Vitest unit tests → `next build`
+  → `tsc --noEmit` → `docker compose build`. **The typecheck must run after `next build`:**
+  Next 16 generates route types (`LayoutProps`, `PageProps`) into `.next/types` during the
+  build, so `tsc --noEmit` on a clean checkout fails before one has happened.
 - **`e2e.yml`** nightly + on `main`: `docker compose up -d`, Playwright smoke suite
   (signup → login → upload → extract → ask the assistant → post in a channel), upload traces
   on failure.
@@ -371,48 +385,66 @@ display as **Helper** — a badge, not a permission (§ policy).
 Decided before any code so that four people building in parallel don't collide. **One owner
 per directory**; edits outside your directories go through that directory's owner in review.
 
+**One npm package, three processes, one image.** A pnpm monorepo with `apps/` and
+`packages/contracts` was scoped and dropped: the only thing the three processes actually need
+to share is a handful of types and the generated Prisma client, and a single package shares
+those through ordinary relative imports. That removes pnpm, workspace protocols, build
+filters, a second lockfile, a second `node_modules` and a second Docker build stage — for four
+developers, two of whom are learning the stack, that simplification is worth more than
+independent scaling nobody will use.
+
 ```text
-mespapiers/
-├─ docker-compose.yml                 # app services, networks, volumes   [Adrien]
-├─ docker-compose.override.yml        # host ports for local dev only     [Amir]
-├─ .env.example                       # every key, dummy values           [Adrien]
-├─ infra/nginx/{nginx.conf,certs/}                                       # [Adrien]
-├─ docs/{architecture.md,demo-script.md,adr/NNNN-*.md,plans/}            # [Adrien]
-├─ packages/
-│  └─ contracts/src/events.ts         # WS/Redis event union, shared by 3 apps [Alexandre]
-├─ apps/
-│  ├─ web/                            # Next.js — UI + HTTP backend + SSE
-│  │  ├─ prisma/{schema.prisma,migrations/,seed.ts}                      # [Amir]
-│  │  ├─ messages/{fr.json,en.json,es.json}                              # [Alexandre]
-│  │  └─ src/
-│  │     ├─ app/[locale]/(auth)/{login,signup}/                          # [Rasiol]
-│  │     ├─ app/[locale]/(app)/{dashboard,documents,assistant,channels,messages,settings}/
-│  │     ├─ app/[locale]/(admin)/                                        # [Rasiol]
-│  │     ├─ app/[locale]/(public)/{privacy,terms}/                       # [Amir]
-│  │     ├─ app/api/                  # file route, assistant SSE, ws-ticket, oauth callbacks
-│  │     ├─ components/ui/            # shared primitives — the design system [Alexandre]
-│  │     ├─ components/{documents,assistant,community,notifications}/
-│  │     ├─ lib/auth/{session.ts,policy.ts,totp.ts,oauth/}               # [Rasiol]
-│  │     ├─ lib/ai/{client.ts,extract.ts,assistant.ts,prompt.ts}         # [Adrien]
-│  │     ├─ lib/storage/index.ts                                         # [Amir]
-│  │     ├─ lib/documents/{queries.ts,status.ts,schemas.ts,subtypes.ts}  # [Amir]
-│  │     ├─ lib/community/{channels.ts,threads.ts,moderation.ts}         # [Amir]
-│  │     └─ lib/events/publish.ts     # thin wrapper over Redis publish
-│  ├─ realtime/src/{server.ts,registry.ts,subscribe.ts,presence.ts}      # [Alexandre]
-│  └─ worker/src/{index.ts,scan.ts,rules.ts,mailer.ts}                   # [Alexandre]
-└─ tests/{e2e/, fixtures/documents/}                                     # [Adrien]
+ft_transcendence/
+├─ docker-compose.yml            # 6 services; web/realtime/worker share one image  [Adrien]
+├─ Dockerfile                    # one build, three commands                        [Adrien]
+├─ .env.example                  # every key, dummy values                          [Adrien]
+├─ .mailmap                      # one line per contributor identity                [Rasiol]
+├─ README.md                     # the graded README — subject chapter VI           [Rasiol]
+├─ infra/nginx/{nginx.conf,certs/}                                                  # [Adrien]
+├─ docs/{architecture.md,demo-script.md,adr/NNNN-*.md,plans/}                       # [Amir]
+├─ prisma/{schema.prisma,migrations/,seed.ts}                                       # [Amir]
+├─ messages/{fr.json,en.json,es.json}                                               # [Alexandre]
+├─ public/
+├─ src/
+│  ├─ app/[locale]/(auth)/{login,signup}/                                           # [Rasiol]
+│  ├─ app/[locale]/(app)/{dashboard,documents,assistant,channels,messages,settings}/
+│  ├─ app/[locale]/(admin)/                                                         # [Rasiol]
+│  ├─ app/[locale]/(public)/{privacy,terms}/                                        # [Amir]
+│  ├─ app/api/                   # file route, assistant SSE, ws-ticket, oauth callbacks
+│  ├─ components/ui/             # shared primitives — the design system             [Alexandre]
+│  ├─ components/{documents,assistant,community,notifications}/
+│  ├─ contracts/events.ts        # WS/Redis event union, imported by all 3 processes [Alexandre]
+│  ├─ lib/auth/{session.ts,policy.ts,totp.ts,oauth/}                                 # [Rasiol]
+│  ├─ lib/ai/{client.ts,extract.ts,assistant.ts,prompt.ts}                           # [Adrien]
+│  ├─ lib/storage/index.ts                                                           # [Amir]
+│  ├─ lib/documents/{queries.ts,status.ts,schemas.ts,subtypes.ts}                     # [Amir]
+│  ├─ lib/community/{channels.ts,threads.ts,moderation.ts}                            # [Amir]
+│  ├─ lib/events/publish.ts      # thin wrapper over Redis publish
+│  ├─ realtime/{server.ts,registry.ts,subscribe.ts,presence.ts}   # process 2         [Alexandre]
+│  └─ worker/{scan.ts,rules.ts,mailer.ts}                         # process 3         [Alexandre]
+└─ tests/{e2e/, fixtures/documents/}                                                  # [Adrien]
 ```
 
-Three structural rules:
+The three processes, all from the same image:
 
-- **`lib/documents/schemas.ts` holds the Zod schemas imported by both the form and the server
-  action.** This is the file that makes "validated on both sides" true rather than claimed.
-- **`lib/documents/subtypes.ts` is the single registry mapping category → subtype model, Zod
-  schema and form fields.** Adding a document category touches this file and nothing else.
-- **`packages/contracts` is the only code shared across apps.** If web, realtime and worker
-  all need a type, it lives there. Nothing else crosses an app boundary.
+| Process | Command | Owns |
+|---|---|---|
+| `web` | `next start` | UI, Server Actions, route handlers, the assistant SSE stream |
+| `realtime` | `tsx src/realtime/server.ts` | WebSocket connections, topic fan-out, presence |
+| `worker` | `tsx src/worker/scan.ts` | the timed deadline scan |
 
----
+Four structural rules:
+
+- **`src/lib/documents/schemas.ts` holds the Zod schemas imported by both the form and the
+  server action.** This is the file that makes "validated on both sides" true rather than
+  claimed.
+- **`src/lib/documents/subtypes.ts` is the single registry mapping category → subtype model,
+  Zod schema and form fields.** Adding a document category touches this file and nothing else.
+- **`src/contracts/` is imported by all three processes and imports nothing back.** It holds
+  types and pure functions only — never a database client, never a React component.
+- **Do not enable `output: 'standalone'`.** It prunes `node_modules` to what the Next.js
+  server traces, and `tsx` would then fail to resolve dependencies for the other two
+  processes. Image size is not graded; a working `docker compose up` is.
 
 ## 5. Published Interfaces
 
@@ -422,9 +454,9 @@ whole-team decision announced at standup.
 
 `Document`, `DocumentCategory`, `DeadlineType`, `ExtractionStatus`, `GlobalRole` and
 `ChannelRole` are imported from `@prisma/client` (generated by E1). `Locale` is
-`'fr' | 'en' | 'es'`, exported from `apps/web/src/i18n/config.ts` (D10).
+`'fr' | 'en' | 'es'`, exported from `src/i18n/config.ts` (D10).
 
-### Auth — `apps/web/src/lib/auth/session.ts` (Rasiol, due W1 D1)
+### Auth — `src/lib/auth/session.ts` (Rasiol, due W1 D1)
 
 ```ts
 export type SessionUser = {
@@ -449,7 +481,7 @@ With `AUTH_STUB=1`, `getCurrentUser()` and `validateSessionToken()` return a see
 `SessionContext` so nobody idles waiting for C1. The stub is deleted in W2 and CI fails if
 `AUTH_STUB` appears outside `.env.example`.
 
-### Permissions — `apps/web/src/lib/auth/policy.ts` (Rasiol, signature due W1 D1)
+### Permissions — `src/lib/auth/policy.ts` (Rasiol, signature due W1 D1)
 
 ```ts
 export type Action =
@@ -479,7 +511,7 @@ that channel only**; otherwise ownership (`ctx.user.id === resource.ownerUserId`
 **Helper is not a tier** — it is a reputation badge and grants nothing, deliberately, so that
 reputation can never be farmed into moderation power.
 
-### Realtime events — `packages/contracts/src/events.ts` (Alexandre, due W1 D2)
+### Realtime events — `src/contracts/events.ts` (Alexandre, due W1 D2)
 
 ```ts
 export type RealtimeEvent =
@@ -501,7 +533,7 @@ Two topic families: **channel topics** fan out to every subscribed member, **use
 private to one account (DMs, notifications, friend changes). Subscription rights are always
 resolved server-side from the session and the membership table, never from the client.
 
-### Storage — `apps/web/src/lib/storage/index.ts` (Amir, due W1 D3)
+### Storage — `src/lib/storage/index.ts` (Amir, due W1 D3)
 
 ```ts
 export type StoredObject = { key: string; sizeBytes: number; checksum: string; mimeType: string };
@@ -516,7 +548,7 @@ export async function deleteObject(key: string): Promise<void>;
 
 No `presignedGet` — see the file-serving decision in §2.
 
-### Extraction — `apps/web/src/lib/ai/extract.ts` (Adrien, due W2 D1)
+### Extraction — `src/lib/ai/extract.ts` (Adrien, due W2 D1)
 
 ```ts
 export const ExtractionSchema = z.object({
@@ -545,7 +577,7 @@ export async function extractDocument(input: {
 before the subtype row is written. A field the schema doesn't know is dropped, never persisted
 into the base `metadata`.
 
-### Assistant — `apps/web/src/lib/ai/assistant.ts` (Adrien, due W2 D3)
+### Assistant — `src/lib/ai/assistant.ts` (Adrien, due W2 D3)
 
 ```ts
 export type AssistantRequest = {
@@ -568,7 +600,7 @@ runs, and only then is its extracted text placed in the prompt. `documentId` arr
 client is a *request*, never a grant. `error.messageKey` is an i18n key — the assistant never
 streams an untranslated English error into a French UI.
 
-### Status derivation — `apps/web/src/lib/documents/status.ts` (Amir, due W1 D3)
+### Status derivation — `src/lib/documents/status.ts` (Amir, due W1 D3)
 
 ```ts
 export type DocumentStatus = 'VALID' | 'EXPIRING_SOON' | 'EXPIRED' | 'ACTION_REQUIRED';
@@ -639,10 +671,10 @@ Every task carries a **Done when** — the observable check that closes it.
 
 | # | Task | Est. | Done when |
 |---|---|---|---|
-| A1 | Repo init, pnpm workspace, Next.js App Router + Tailwind + strict `tsconfig`, ESLint/Prettier | 0.5d | `pnpm i && pnpm build` succeeds from a clean clone; `tsc --noEmit` and ESLint pass with zero warnings |
-| A2 | `docker-compose.yml` — app services (nginx, web, realtime, worker), two networks, healthchecks, named volumes | 1d | `docker compose up` brings all four to healthy; `docker compose ps` shows every healthcheck passing |
+| A1 | Repo init, single npm package, Next.js App Router + Tailwind + strict `tsconfig`, ESLint/Prettier | 0.5d | `npm ci && npm run build` succeeds from a clean clone; `npm run lint` and a post-build `tsc --noEmit` pass with zero warnings |
+| A2 | `docker-compose.yml` — app services (nginx, web, realtime, worker — the last three from one image), two networks, healthchecks, named volumes | 1d | `docker compose up` brings all four to healthy; `docker compose ps` shows every healthcheck passing |
 | A3 | NGINX reverse proxy, `mkcert` TLS for `mespapiers.local` + `localhost`, WS upgrade routing, SSE buffering disabled on `/api/assistant`, security headers | 1d | Chrome shows a padlock with no interstitial; `/ws` returns 101; an SSE response streams token-by-token rather than arriving buffered; `curl -I` shows HSTS, X-Content-Type-Options, Referrer-Policy, CSP |
-| A4 | `.env.example` + secret handling, `pnpm check:env`, `.gitignore` audit | 0.5d | `git log --all -- .env` is empty; `check:env` fails CI when a key used in code is missing from the example |
+| A4 | `.env.example` + secret handling, `npm run check:env`, `.gitignore` audit | 0.5d | `git log --all -- .env` is empty; `check:env` fails CI when a key used in code is missing from the example |
 | A5 | GitHub Actions `ci.yml`, branch protection, PR template | 1d | a PR containing a deliberate type error is blocked and cannot be merged |
 | A6 | Playwright + `e2e.yml` against live compose | 1d | the signup→upload→extract→ask→post spec runs against compose in CI and uploads a trace on failure |
 | A7 | Performance pass: N+1 audit, Next caching, image optimisation | 1d | Prisma query logging shows no per-row query in the dashboard or channel list path; LCP under 2.5s locally |
@@ -658,7 +690,7 @@ Every task carries a **Done when** — the observable check that closes it.
 | B1 | Fixture set: 12–15 redacted real French documents, 2–3 per member, collected W1 | 0.5d | `tests/fixtures/documents/` holds ≥12 files, each with a hand-written `expected.json` ground truth |
 | B2 | Anthropic SDK wiring, `claude-opus-5`, image + PDF content blocks | 0.5d | a fixture image and a fixture PDF both round-trip and their raw responses are logged |
 | B3 | Zod extraction schema + `messages.parse()` structured output + subtype narrowing | 1d | `extractDocument()` returns a value typed `Extraction`; a malformed reply is rejected by Zod and never persisted; `subtypeFields` is narrowed by the category schema before write |
-| B4 | Prompt engineering + fixture-based accuracy eval harness | 1d | `pnpm eval:extraction` prints per-field accuracy; ≥80% exact match on `documentType` and `targetDate` across the fixture set |
+| B4 | Prompt engineering + fixture-based accuracy eval harness | 1d | `npm run eval:extraction` prints per-field accuracy; ≥80% exact match on `documentType` and `targetDate` across the fixture set |
 | B5 | Extraction error handling: refusals, low confidence, timeouts, malformed pages | 1d | refusal, timeout, oversize, empty PDF and a garbage image each map to a distinct `ExtractionStatus` and a translated user message, covered by unit tests with mocked responses |
 | B6 | `DocumentExtraction` audit persistence + token accounting | 0.5d | every call writes a row with token counts; one query reports spend for the month |
 | B7 | Checksum-based caching + per-user daily extraction cap | 0.5d | re-uploading a byte-identical file makes zero API calls (asserted with a spy); the 21st upload in 24h by one user is rejected |
@@ -685,7 +717,7 @@ Every task carries a **Done when** — the observable check that closes it.
 | C10 | Step-up 2FA on sensitive actions (delete, export) | 0.5d | document delete and GDPR export demand a fresh TOTP when `twoFactorVerified` is stale |
 | C11 | Rate limiting on auth endpoints, CSRF, session rotation | 1d | 6 failed logins in 15 min lock the endpoint; the session id rotates on login and on privilege change; a cross-site POST without the token is rejected |
 | C12 | WS ticket endpoint (short-lived, single-use) for Alexandre | 0.5d | a ticket is single-use, expires in 60s, is bound to the user, and a replay is rejected |
-| C13 | Security review: OWASP pass, secrets audit, dependency audit | 1d | the OWASP Top-10 checklist is filled in with per-item evidence; `pnpm audit` reports no high/critical; `gitleaks` finds nothing in history |
+| C13 | Security review: OWASP pass, secrets audit, dependency audit | 1d | the OWASP Top-10 checklist is filled in with per-item evidence; `npm audit` reports no high/critical; `gitleaks` finds nothing in history |
 | **C14** | **Admin surface + role management: user list/CRUD, promote/demote channel moderators, reputation→Helper threshold job** | **1.5d** | an ADMIN promotes a member to MODERATOR in one channel and that user gains hide/mute **only there**; a non-admin hitting the admin route gets 403, not a blank page; crossing the reputation threshold flips the Helper badge without granting any action |
 
 **Domain C total: 15d**
@@ -698,15 +730,15 @@ Every task carries a **Done when** — the observable check that closes it.
 | D1 | WS server package: `ws` + TS, graceful shutdown, structured logging | 1d | the container starts, logs JSON lines, and on SIGTERM closes open sockets and exits 0 |
 | D2 | Ticket handshake + **topic authorisation** (channel membership, own user topic) | 1d | connecting with no ticket, a used ticket, or a subscription to a channel the user hasn't joined is rejected before any subscription is created; a user topic can only ever be their own |
 | D3 | Connection registry, multi-topic subscriptions, presence tracking | 1d | two tabs of the same user count as one presence entry; disconnect clears it within one heartbeat interval |
-| D4 | Redis pub/sub wiring + typed `events.ts` union contract | 1d | `packages/contracts` is imported by web, realtime and worker; a test publishes each variant and a subscriber receives it typed |
+| D4 | Redis pub/sub wiring + typed `events.ts` union contract | 1d | `src/contracts/events.ts` is imported by all three processes; a test publishes each variant and a subscriber receives it typed |
 | D5 | Client `useRealtime` hook, reconnect w/ backoff, heartbeat | 1.5d | killing the realtime container reconnects with backoff and registers no duplicate handlers, proven in a Playwright test |
 | D6 | Optimistic UI + server reconciliation on document and thread mutations | 1d | a rejected optimistic insert rolls back and surfaces an error; an update with a stale `version` shows a conflict prompt rather than overwriting |
-| D7 | `worker` container + BullMQ repeatable deadline scan | 1d | the scan runs on schedule and resumes after a Redis restart without losing the repeatable job |
+| D7 | `worker` compose service (same image, `tsx src/worker/scan.ts`) + timed deadline scan | 0.5d | the scan runs on schedule, and running it twice in a row sends no second notification for any `(document, kind)` |
 | D8 | Deadline rules: hard 90/60/30, soft 60-day anniversary nudge, periodic interval | 1d | seeded rows at T-91/-90/-61/-60/-31/-30, one anniversary and one periodic interval produce exactly the expected notification set; a second run produces none |
 | D9 | Notification centre + WS push + email via Mailpit | 1.5d | a deadline notification and a community notification each appear in the bell, over WS, and (for deadlines) in Mailpit, rendered in the recipient's locale |
 | D10 | `next-intl` setup, locale routing, switcher, persistence | 1d | every route lives under `/[locale]`; switching locale preserves the current path; the choice persists to `User.locale` |
-| D11 | FR/EN/ES message catalogues, FR date/number formatting | 1.5d | `pnpm i18n:check` reports zero missing and zero orphan keys; French renders `31/12/2026` and `1 234,56 €` |
-| D12 | WS resilience testing: reconnect storms, Redis loss, dupes | 1d | 50 simultaneous reconnects plus a Redis restart lose no events and create no duplicate rows |
+| D11 | FR/EN/ES message catalogues, FR date/number formatting | 1.5d | `npm run i18n:check` reports zero missing and zero orphan keys; French renders `31/12/2026` and `1 234,56 €` |
+| D12 | WS resilience testing: reconnect storms, Redis loss, dupes | 1d | 50 simultaneous reconnects plus a Redis restart lose no events and create no duplicate rows; posting a thread still succeeds while the realtime process is down |
 | D13 | Accessibility + responsive QA pass | 1d | axe reports zero violations on every route at 375/768/1440 and the full upload flow is completable by keyboard only |
 | D14 | Profile & settings page: display name, locale, avatar upload, Helper badge, online indicators | 1d | avatar upload replaces the previous object, renders through the authorised file route, and the member list shows live online state |
 | **D15** | **Friends: request / accept / decline / block, friends list, live status changes** | **1d** | a request creates one row, accepting is idempotent under a double-click, blocking hides both directions, and each transition pushes over the recipient's user topic |
@@ -720,7 +752,7 @@ Every task carries a **Done when** — the observable check that closes it.
 | # | Task | Est. | Done when |
 |---|---|---|---|
 | E1 | Full Prisma schema + initial migration — identity, document inheritance, assistant, community | 2d | `prisma migrate dev` from zero reproduces §3; `prisma validate` passes; generated types compile in web, realtime and worker; every subtype's `id` is both PK and FK |
-| E2 | Seed script: 4 users, ~20 documents across every category and status, 3 channels with threads and answers | 0.5d | `pnpm db:seed` produces rows hitting every status, every notification boundary, and a channel with a moderator |
+| E2 | Seed script: 4 users, ~20 documents across every category and status, 3 channels with threads and answers | 0.5d | `npm run db:seed` produces rows hitting every status, every notification boundary, and a channel with a moderator |
 | E3 | `docker-compose.override.yml` + data services (postgres, redis, minio, mailpit), MinIO bucket init and lifecycle policy | 0.5d | all four come up healthy on the internal network; `docker compose port minio 9000` fails on the base file and succeeds with the override |
 | E4 | Storage adapter: `putObject`, `getObjectStream`, `deleteObject`, `objectKey` | 1d | all four are covered by tests against a live MinIO container; keys are produced only by `objectKey()` |
 | E5 | Upload route: multipart, size/MIME validation, magic-byte sniffing | 1.5d | a renamed `.exe` is rejected by magic bytes; >10 MB is rejected before buffering; the happy path writes the object, the base row and the subtype row in one transaction |
@@ -753,9 +785,9 @@ descope candidates if Week 3 runs long (see R6).
 | Member | Tasks |
 |---|---|
 | **Adrien** | A1, A2, A3, A4, A5 · pair with Rasiol on C1 (two half-days) · kick off B1 collection · GitHub Projects backlog, timeboxed (PO) |
-| **Rasiol** | C1, C2, C3 · **publish `session.ts` and `policy.ts` signatures on D1** · project plan, risk log, ceremony calendar (PM) · ADR log (Architect) |
-| **Alexandre** | D0, D1, D4, D10 · **publish `packages/contracts/events.ts` on D2** |
-| **Amir** | E1, E2, E3, E4 · **publish `storage/index.ts` and `documents/status.ts` on D3** |
+| **Rasiol** | C1, C2, C3 · **publish `session.ts` and `policy.ts` signatures on D1** · project plan, risk log, ceremony calendar (PM) |
+| **Alexandre** | D0, D1, D4, D10 · **publish `src/contracts/events.ts` on D2** |
+| **Amir** | E1, E2, E3, E4 · **publish `storage/index.ts` and `documents/status.ts` on D3** · ADR log (TL) |
 
 Adrien's Week 1 has zero slack. **A5 (CI) is the designated slip item** — it is the only W1
 task with no downstream dependents, so if the week runs long it moves to Monday of W2 and
@@ -838,7 +870,7 @@ Monday is a whole-team bug bash against the W4 regression list. Then:
 |---|---|---|---|---|
 | Compose + `.env.example` | Adrien | Everyone's local dev | W1 D2 | Highest priority on day 1; no feature work starts before it. |
 | `session.ts` / `policy.ts` signatures | Rasiol | Alexandre (WS auth), Adrien & Amir (protected routes) | **W1 D1** | **Publish the TypeScript interface before the implementation exists** (§5). Ship `AUTH_STUB=1` returning a seeded context so nobody idles; delete it in W2. |
-| `packages/contracts/events.ts` | Alexandre | Adrien & Amir (both publish events) | **W1 D2** | Typed union committed first; publishers code against the type. |
+| `src/contracts/events.ts` | Alexandre | Adrien & Amir (both publish events) | **W1 D2** | Typed union committed first; publishers code against the type. |
 | `components/ui` primitives + `[locale]` shell (D0, D10) | Alexandre | Every screen anyone builds | W1 D3 | Built in W1 precisely so nobody hardcodes strings or invents a second Button. Retrofitting `[locale]` in W4 would touch every page during the freeze. |
 | Prisma schema + generated types | Amir | All three others | W1 D3 | Whole-team schema review on W1 D1 — the inheritance pattern and the community tables both get read out loud before anyone codes against them. Additive-only migrations after W2. |
 | `storage/index.ts` + `deriveStatus()` | Amir | Adrien (extraction persistence), Alexandre (status badges) | W1 D3 | Signatures in §5; implementations follow in E4. |

@@ -4,7 +4,7 @@
 > vision. MesPapiers is now an **individually-owned** document vault with an AI assistant,
 > surrounded by a **mutual-aid community**. There is no shared family workspace and no
 > analytics dashboard. The execution counterpart of this document is
-> [`project_plan.md`](project_plan.md); where the two disagree, they must be reconciled before
+> [`PROJECT_PLAN.md`](PROJECT_PLAN.md); where the two disagree, they must be reconciled before
 > the week's planning, not during evaluation.
 
 ---
@@ -155,15 +155,16 @@ check that exists on three of four paths is a hole, not a system.
 The platform is 100% TypeScript, containerised end to end.
 
 - **Language:** TypeScript (end-to-end type safety)
-- **Frontend:** Next.js 15 (App Router, React) + Tailwind CSS
+- **Frontend:** Next.js 16 (App Router, React 19) + Tailwind CSS
 - **Backend / API:** Next.js Server Actions & Route Handlers (including the assistant SSE
   stream) + a dedicated Node.js WebSocket engine
 - **Database:** PostgreSQL 17
 - **ORM:** Prisma (type-safe queries and migrations)
-- **Object storage:** MinIO (S3-compatible), internal network only
+- **Object storage:** filesystem adapter on an internal volume (MinIO interchangeable behind
+  the same interface), never addressed by the browser
 - **Real-time broker:** Redis Pub/Sub
-- **Background jobs:** dedicated worker container (BullMQ) for the deadline scan
-- **Infrastructure:** Docker Compose + NGINX (HTTPS reverse proxy)
+- **Background jobs:** deadline scan as a separate process from the same image, on a timer
+- **Infrastructure:** Docker Compose + NGINX (HTTPS reverse proxy); one image, three processes
 - **AI:** Anthropic `claude-opus-5` for both vision extraction and the assistant
 - **i18n:** `next-intl` — French, English, Spanish
 
