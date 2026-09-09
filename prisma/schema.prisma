@@ -8,71 +8,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum DocumentCategory {
-  IDENTITY
-  INSURANCE
-}
-
-enum DeadlineType {
-  HARD
-  SOFT
-}
-
-enum ExtractionStatus {
-  PENDING
-  NEEDS_REVIEW
-  CONFIRMED
-  FAILED
-}
-
 model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  displayName  String
-  passwordHash String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  documents    Document[]
+  id          String     @id @default(cuid())
+  email       String     @unique
+  displayName String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  documents   Document[]
 }
 
 model Document {
-  id               String           @id @default(cuid())
-  ownerId          String
-  owner            User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  category         DocumentCategory
-  deadlineType     DeadlineType
-  title            String
-  issuingAuthority String?
-  issueDate        DateTime?
-  targetDate       DateTime?
-  extractionStatus ExtractionStatus @default(CONFIRMED)
-  version          Int              @default(1)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  fileName  String
+  fileType  String
+  fileSize  Int
+  fileData  Bytes
+  createdAt DateTime @default(now())
 
-  identity  DocumentIdentity?
-  insurance DocumentInsurance?
-
-  @@index([ownerId, targetDate])
-  @@index([ownerId, category])
-}
-
-// Class-table inheritance: shared PK with Document
-model DocumentIdentity {
-  id             String   @id
-  document       Document @relation(fields: [id], references: [id], onDelete: Cascade)
-  holderName     String?
-  documentNumber String?
-  nationality    String?
-}
-
-// Covers both home insurance and car insurance via coverageType
-model DocumentInsurance {
-  id              String    @id
-  document        Document  @relation(fields: [id], references: [id], onDelete: Cascade)
-  insurer         String?
-  policyNumber    String?
-  premiumPerYear  Float?
-  coverageType    String?
-  anniversaryDate DateTime?
+  @@index([ownerId])
 }
