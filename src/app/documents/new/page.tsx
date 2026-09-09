@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { uploadDocument } from "./actions";
+import { Button } from "@/components/ui/Button";
 
 export default function NewDocumentPage() {
   const [fileName, setFileName] = useState<string | null>(null);
@@ -54,13 +55,9 @@ export default function NewDocumentPage() {
           />
         </label>
 
-        <button
-          type="submit"
-          disabled={!fileName}
-          className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+        <Button type="submit" disabled={!fileName} className="w-full">
           Upload
-        </button>
+        </Button>
       </form>
     </div>
   );
