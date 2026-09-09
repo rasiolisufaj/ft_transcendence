@@ -1,0 +1,18 @@
+# Canonical identities for `git shortlog -sne` and `git log`.
+#
+# The subject grades "commits from all team members" and "proper work
+# distribution". One human committing from two machines under two addresses
+# shows up as two contributors and halves their apparent share, so map every
+# alias here — and set a consistent identity on each machine you commit from:
+#
+#   git config user.name "<42 login>"
+#   git config user.email "<the address you want on record>"
+#
+# Format:  Canonical Name <canonical@email>  <alias@email>
+
+amkhelif <amkhelif@f1br8s1.paris.42.school> <amkhelif@f1br8s1.paris.42.school>
+amkhelif <amkhelif@f1br8s1.paris.42.school> <khelif_a@etna-alternance.net>
+
+# TODO(team): add lines here once Adrien, Rasiol and Alexandre have settled on
+# one identity each — and replace the display names below with 42 logins so the
+# shortlog matches the README's author line.

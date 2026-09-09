@@ -1,31 +1,39 @@
 {
-  "name": "last_project",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "name": "mespapiers",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MesPapiers — a personal French paperwork assistant with an AI document assistant and a mutual-aid community. 42 ft_transcendence.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rasiolisufaj/ft_transcendence.git"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/rasiolisufaj/ft_transcendence/issues"
-  },
-  "homepage": "https://github.com/rasiolisufaj/ft_transcendence#readme",
-  "devDependencies": {
-    "@types/express": "^5.0.6",
-    "@types/node": "^26.4.1",
-    "prisma": "^6.19.3",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^7.0.2"
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
-    "express": "^5.2.1"
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "prisma": "^6.19.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
