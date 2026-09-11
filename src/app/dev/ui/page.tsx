@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { Input } from "@/components/ui/Input";
 
 export default function UiGalleryPage() {
   return (
@@ -28,6 +29,14 @@ export default function UiGalleryPage() {
           <Badge tone="success">Success</Badge>
           <Badge tone="warning">Warning</Badge>
           <Badge tone="danger">Danger</Badge>
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-500">Input</h2>
+        <div className="max-w-sm space-y-4">
+          <Input label="Email" type="email" placeholder="you@example.com" />
+          <Input label="Password" type="password" error="Password must be at least 8 characters" />
         </div>
       </section>
     </div>
