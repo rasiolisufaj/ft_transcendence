@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -8,24 +9,196 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          String     @id @default(cuid())
-  email       String     @unique
-  displayName String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  documents   Document[]
+
+enum ChannelRole {
+  MEMBER
+  MODERATOR
 }
 
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+enum NotificationType {
+  DEADLINE
+  REPLY
+  MESSAGE
+  FRIEND_REQUEST
+  OTHER
+}
+
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  displayName String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  documents Document[]
+
+  channelsCreated    Channel[]
+  channelMemberships ChannelMember[]
+  threads            Thread[]        @relation("ThreadAuthor")
+  answers            Answer[]        @relation("AnswerAuthor")
+  votes              Vote[]
+  friendshipsSent     Friendship[] @relation("SentFriendships")
+  friendshipsReceived Friendship[] @relation("ReceivedFriendships")
+  conversationsAsParticipant1 Conversation[] @relation("ConversationParticipant1")
+  conversationsAsParticipant2 Conversation[] @relation("ConversationParticipant2")
+  messages      Message[]      @relation("MessageSender")
+  notifications Notification[]
+}
+
+
 model Document {
-  id        String   @id @default(cuid())
-  ownerId   String
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  ownerId   Int
+  owner     User     @relation(fields: [ownerId], references: [id])
   fileName  String
   fileType  String
   fileSize  Int
   fileData  Bytes
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  identity      DocumentIdentity?
+  insuranceAuto DocumentInsuranceAuto?
 
   @@index([ownerId])
+}
+
+model DocumentIdentity {
+  id         Int      @id @default(autoincrement())
+  documentId Int      @unique
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  fullName       String
+  birthDate      DateTime
+  documentNumber String
+  expiryDate     DateTime
+}
+
+model DocumentInsuranceAuto {
+  id         Int      @id @default(autoincrement())
+  documentId Int      @unique
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  provider     String
+  policyNumber String
+  vehiclePlate String
+  expiryDate   DateTime
+}
+
+
+model Channel {
+  id          Int      @id @default(autoincrement())
+  createdBy   Int      @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  title       String   @db.VarChar(100)
+  description String?  @db.VarChar(250)
+
+  creator User            @relation(fields: [createdBy], references: [id])
+  members ChannelMember[]
+  threads Thread[]
+}
+
+model ChannelMember {
+  channelId Int         @map("channel_id")
+  userId    Int         @map("user_id")
+  role      ChannelRole @default(MEMBER)
+  joinedAt  DateTime    @default(now()) @map("joined_at")
+
+  channel Channel @relation(fields: [channelId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([channelId, userId])
+}
+
+model Thread {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(150)
+  content   String   @db.VarChar(300)
+  channelId Int      @map("channel_id")
+  userId    Int      @map("author_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  channel Channel  @relation(fields: [channelId], references: [id])
+  author  User     @relation("ThreadAuthor", fields: [userId], references: [id])
+  answers Answer[]
+}
+
+model Answer {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.VarChar(300)
+  threadId  Int      @map("thread_id")
+  userId    Int      @map("author_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  thread Thread @relation(fields: [threadId], references: [id])
+  author User   @relation("AnswerAuthor", fields: [userId], references: [id])
+  votes  Vote[]
+}
+
+model Vote {
+  answerId  Int      @map("answer_id")
+  userId    Int      @map("user_id")
+  value     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  answer Answer @relation(fields: [answerId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@id([answerId, userId])
+}
+
+
+model Friendship {
+  id          Int              @id @default(autoincrement())
+  requesterId Int              @map("requester_id")
+  receiverId  Int              @map("receiver_id")
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  requester User @relation("SentFriendships", fields: [requesterId], references: [id])
+  receiver  User @relation("ReceivedFriendships", fields: [receiverId], references: [id])
+
+  @@unique([requesterId, receiverId])
+}
+
+model Conversation {
+  id             Int      @id @default(autoincrement())
+  participant1Id Int      @map("participant1_id")
+  participant2Id Int      @map("participant2_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  participant1 User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id])
+  participant2 User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id])
+  messages     Message[]
+
+  @@unique([participant1Id, participant2Id])
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  content        String   @db.Text
+  conversationId Int      @map("conversation_id")
+  senderId       Int      @map("sender_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id])
+}
+
+model Notification {
+  id          Int              @id @default(autoincrement())
+  recipientId Int              @map("recipient_id")
+  type        NotificationType
+  content     String           @db.VarChar(255)
+  isRead      Boolean          @default(false) @map("is_read")
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  recipient User @relation(fields: [recipientId], references: [id])
 }
