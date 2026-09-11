@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function UiGalleryPage() {
   return (
@@ -38,6 +39,15 @@ export default function UiGalleryPage() {
           <Input label="Email" type="email" placeholder="you@example.com" />
           <Input label="Password" type="password" error="Password must be at least 8 characters" />
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-500">EmptyState</h2>
+        <EmptyState
+          title="No documents yet"
+          description="Upload your first document to get started."
+          action={<Button>Add Document</Button>}
+        />
       </section>
     </div>
   );
