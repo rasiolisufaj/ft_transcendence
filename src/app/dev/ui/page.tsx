@@ -1,10 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Dialog } from "@/components/ui/Dialog";
 
 export default function UiGalleryPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   return (
     <div className="mx-auto max-w-2xl space-y-10">
       <h1 className="text-2xl font-semibold">UI Gallery</h1>
@@ -49,6 +54,23 @@ export default function UiGalleryPage() {
           action={<Button>Add Document</Button>}
         />
       </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-500">Dialog</h2>
+        <Button onClick={() => setDialogOpen(true)}>Open Dialog</Button>
+        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Confirm action">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            Are you sure you want to do this?
+          </p>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setDialogOpen(false)}>Confirm</Button>
+          </div>
+        </Dialog>
+      </section>
+
     </div>
   );
 }
