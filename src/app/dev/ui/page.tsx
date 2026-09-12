@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Dialog } from "@/components/ui/Dialog";
+import { Table, TableHead, TableBody, TableRow, TableHeaderCell, TableCell } from "@/components/ui/Table";
 
 export default function UiGalleryPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -69,6 +70,30 @@ export default function UiGalleryPage() {
             <Button onClick={() => setDialogOpen(false)}>Confirm</Button>
           </div>
         </Dialog>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-500">Table</h2>
+        <Card className="bg-zinc-50 dark:bg-zinc-900/50">
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Document</TableHeaderCell>
+                <TableHeaderCell>Status</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>Titre de séjour</TableCell>
+                <TableCell><Badge tone="warning">Expiring Soon</Badge></TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Assurance auto</TableCell>
+                <TableCell><Badge tone="success">Valid</Badge></TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </Card>
       </section>
 
     </div>
