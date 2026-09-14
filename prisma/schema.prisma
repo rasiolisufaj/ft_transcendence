@@ -56,7 +56,7 @@ model User {
 model Document {
   id        Int      @id @default(autoincrement())
   ownerId   Int
-  owner     User     @relation(fields: [ownerId], references: [id])
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   fileName  String
   fileType  String
   fileSize  Int
@@ -111,8 +111,8 @@ model ChannelMember {
   role      ChannelRole @default(MEMBER)
   joinedAt  DateTime    @default(now()) @map("joined_at")
 
-  channel Channel @relation(fields: [channelId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([channelId, userId])
 }
@@ -125,7 +125,7 @@ model Thread {
   userId    Int      @map("author_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  channel Channel  @relation(fields: [channelId], references: [id])
+  channel Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   author  User     @relation("ThreadAuthor", fields: [userId], references: [id])
   answers Answer[]
 }
@@ -137,7 +137,7 @@ model Answer {
   userId    Int      @map("author_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  thread Thread @relation(fields: [threadId], references: [id])
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
   author User   @relation("AnswerAuthor", fields: [userId], references: [id])
   votes  Vote[]
 }
@@ -148,8 +148,8 @@ model Vote {
   value     Int
   createdAt DateTime @default(now()) @map("created_at")
 
-  answer Answer @relation(fields: [answerId], references: [id])
-  user   User   @relation(fields: [userId], references: [id])
+  answer Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([answerId, userId])
 }
@@ -162,8 +162,8 @@ model Friendship {
   status      FriendshipStatus @default(PENDING)
   createdAt   DateTime         @default(now()) @map("created_at")
 
-  requester User @relation("SentFriendships", fields: [requesterId], references: [id])
-  receiver  User @relation("ReceivedFriendships", fields: [receiverId], references: [id])
+  requester User @relation("SentFriendships", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User @relation("ReceivedFriendships", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@unique([requesterId, receiverId])
 }
@@ -174,8 +174,8 @@ model Conversation {
   participant2Id Int      @map("participant2_id")
   createdAt      DateTime @default(now()) @map("created_at")
 
-  participant1 User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id])
-  participant2 User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id])
+  participant1 User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2 User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
   messages     Message[]
 
   @@unique([participant1Id, participant2Id])
@@ -188,7 +188,7 @@ model Message {
   senderId       Int      @map("sender_id")
   createdAt      DateTime @default(now()) @map("created_at")
 
-  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("MessageSender", fields: [senderId], references: [id])
 }
 
@@ -200,5 +200,5 @@ model Notification {
   isRead      Boolean          @default(false) @map("is_read")
   createdAt   DateTime         @default(now()) @map("created_at")
 
-  recipient User @relation(fields: [recipientId], references: [id])
+  recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 }
