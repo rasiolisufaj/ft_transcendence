@@ -31,12 +31,13 @@ enum NotificationType {
 model User {
   id          Int      @id @default(autoincrement())
   email       String   @unique
+  passwordHash    String?   
   displayName String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   documents Document[]
-
+  sessions Session[]
   channelsCreated             Channel[]
   channelMemberships          ChannelMember[]
   threads                     Thread[]        @relation("ThreadAuthor")
@@ -196,4 +197,15 @@ model Notification {
   createdAt   DateTime         @default(now()) @map("created_at")
 
   recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+}
+
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId]) // deconnecter quelqun de tous ses appareils 
 }
