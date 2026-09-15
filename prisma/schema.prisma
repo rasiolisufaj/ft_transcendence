@@ -9,7 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum ChannelRole {
   MEMBER
   MODERATOR
@@ -29,7 +28,6 @@ enum NotificationType {
   OTHER
 }
 
-
 model User {
   id          Int      @id @default(autoincrement())
   email       String   @unique
@@ -39,19 +37,18 @@ model User {
 
   documents Document[]
 
-  channelsCreated    Channel[]
-  channelMemberships ChannelMember[]
-  threads            Thread[]        @relation("ThreadAuthor")
-  answers            Answer[]        @relation("AnswerAuthor")
-  votes              Vote[]
-  friendshipsSent     Friendship[] @relation("SentFriendships")
-  friendshipsReceived Friendship[] @relation("ReceivedFriendships")
-  conversationsAsParticipant1 Conversation[] @relation("ConversationParticipant1")
-  conversationsAsParticipant2 Conversation[] @relation("ConversationParticipant2")
-  messages      Message[]      @relation("MessageSender")
-  notifications Notification[]
+  channelsCreated             Channel[]
+  channelMemberships          ChannelMember[]
+  threads                     Thread[]        @relation("ThreadAuthor")
+  answers                     Answer[]        @relation("AnswerAuthor")
+  votes                       Vote[]
+  friendshipsSent             Friendship[]    @relation("SentFriendships")
+  friendshipsReceived         Friendship[]    @relation("ReceivedFriendships")
+  conversationsAsParticipant1 Conversation[]  @relation("ConversationParticipant1")
+  conversationsAsParticipant2 Conversation[]  @relation("ConversationParticipant2")
+  messages                    Message[]       @relation("MessageSender")
+  notifications               Notification[]
 }
-
 
 model Document {
   id        Int      @id @default(autoincrement())
@@ -92,19 +89,6 @@ model DocumentInsuranceAuto {
   expiryDate   DateTime
 }
 
-
-model Channel {
-  id          Int      @id @default(autoincrement())
-  createdBy   Int      @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  title       String   @db.VarChar(100)
-  description String?  @db.VarChar(250)
-
-  creator User            @relation(fields: [createdBy], references: [id])
-  members ChannelMember[]
-  threads Thread[]
-}
-
 model ChannelMember {
   channelId Int         @map("channel_id")
   userId    Int         @map("user_id")
@@ -117,16 +101,28 @@ model ChannelMember {
   @@id([channelId, userId])
 }
 
+model Channel {
+  id          Int      @id @default(autoincrement())
+  createdBy   Int?     @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  title       String   @db.VarChar(100)
+  description String?  @db.VarChar(250)
+
+  creator User?           @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  members ChannelMember[]
+  threads Thread[]
+}
+
 model Thread {
   id        Int      @id @default(autoincrement())
   title     String   @db.VarChar(150)
   content   String   @db.VarChar(300)
   channelId Int      @map("channel_id")
-  userId    Int      @map("author_id")
+  userId    Int?     @map("author_id")
   createdAt DateTime @default(now()) @map("created_at")
 
   channel Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  author  User     @relation("ThreadAuthor", fields: [userId], references: [id])
+  author  User?    @relation("ThreadAuthor", fields: [userId], references: [id], onDelete: SetNull)
   answers Answer[]
 }
 
@@ -134,11 +130,11 @@ model Answer {
   id        Int      @id @default(autoincrement())
   content   String   @db.VarChar(300)
   threadId  Int      @map("thread_id")
-  userId    Int      @map("author_id")
+  userId    Int?     @map("author_id")
   createdAt DateTime @default(now()) @map("created_at")
 
   thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  author User   @relation("AnswerAuthor", fields: [userId], references: [id])
+  author User?  @relation("AnswerAuthor", fields: [userId], references: [id], onDelete: SetNull)
   votes  Vote[]
 }
 
@@ -153,7 +149,6 @@ model Vote {
 
   @@id([answerId, userId])
 }
-
 
 model Friendship {
   id          Int              @id @default(autoincrement())
@@ -189,7 +184,7 @@ model Message {
   createdAt      DateTime @default(now()) @map("created_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender       User         @relation("MessageSender", fields: [senderId], references: [id])
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 }
 
 model Notification {
