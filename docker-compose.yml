@@ -1,10 +1,27 @@
 services:
+  # ── NGINX reverse proxy (TLS termination) ──────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: mespapiers_nginx
+    restart: unless-stopped
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/entrypoint.sh:/entrypoint.sh:ro
+      - nginx-certs:/etc/nginx/certs
+    entrypoint: ["/entrypoint.sh"]
+    depends_on:
+      - web
+
+  # ── Next.js application ────────────────────────────────────────────────────
   web:
     build: .
     container_name: mespapiers_web
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
     depends_on:
@@ -15,6 +32,7 @@ services:
       - ./public:/app/public
       - ./prisma:/app/prisma
 
+  # ── PostgreSQL database ────────────────────────────────────────────────────
   db:
     image: postgres:17-alpine
     container_name: mespapiers_db
@@ -35,3 +53,4 @@ services:
 
 volumes:
   postgres-data:
+  nginx-certs:
