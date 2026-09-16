@@ -4,15 +4,17 @@ import { useState } from "react";
 import { uploadDocument } from "./actions";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useTranslations } from "next-intl";
 
 export default function NewDocumentPage() {
+  const t = useTranslations("documentsNew");
   const [fileName, setFileName] = useState<string | null>(null);
 
   return (
     <div className="mx-auto max-w-xl">
-      <h1 className="mb-2 text-2xl font-semibold">Add a Document</h1>
+      <h1 className="mb-2 text-2xl font-semibold">{t("title")}</h1>
       <p className="mb-8 text-sm text-zinc-500 dark:text-zinc-400">
-        Upload a document and our AI will identify it for you.
+        {t("description")}
       </p>
 
       <Card>
@@ -39,10 +41,10 @@ export default function NewDocumentPage() {
             ) : (
               <>
                 <span className="text-sm font-medium">
-                  Click to choose a file
+                  {t("dropzoneCta")}
                 </span>
                 <span className="mt-1 text-xs text-zinc-400">
-                  PDF, image, or scan — max 10 MB
+                  {t("dropzoneHint")}
                 </span>
               </>
             )}
@@ -58,7 +60,7 @@ export default function NewDocumentPage() {
           </label>
 
           <Button type="submit" disabled={!fileName} className="w-full">
-            Upload
+            {t("submit")}
           </Button>
         </form>
       </Card>
