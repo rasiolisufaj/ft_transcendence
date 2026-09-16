@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { text } from "stream/consumers";
 import Link from "next/link";
 
 export default function SubscribePage() {
@@ -14,16 +13,33 @@ export default function SubscribePage() {
   const [confirmationpassword, setconfirmationpassword] = useState("");
   const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
-      return;
-    }
     if (password != confirmationpassword) {
       setError("les mots de passe ne sont pas identique");
       return;
+    }
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          pseudo: pseudo,
+          password: password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'inscription");
+      }
+      const data = await response.json();
+      console.log("Inscription réussie :", data);
+    } catch (err: any) {
+      setError(err.message || " erreur inattendue.");
     }
   }
   return (
@@ -65,7 +81,7 @@ export default function SubscribePage() {
         {error && <p>{error}</p>}
         <Button>Sinscrire</Button>
         <Button>
-          <Link href="/login">déja un compte</Link>
+          <Link href="/subscribe">déja un compte</Link>
         </Button>
       </form>
     </Card>

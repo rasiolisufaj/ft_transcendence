@@ -6,13 +6,34 @@ import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 
 export default function LoginPage() {
-  //  cree une boite qui garde en memoire ce que la personne ecrit dans le champ email
   const [email, setEmail] = useState("");
   const [password, setpassWord] = useState("");
-  // se declenche quand on clique sur le bouton pour envoyer le formulaire
-  function handleSubmit(e: React.FormEvent) {
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Erreur lors de la connexion");
+      }
+      const data = await response.json();
+      console.log("Inscription réussie :", data);
+    } catch (err: any) {
+      setError(err.message || " erreur inattendue.");
+    }
   }
+
   return (
     <Card>
       <h1 className="text-3xl font-semibold mb-6">Connexion</h1>

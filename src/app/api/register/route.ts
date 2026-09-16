@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server"; // fabrique la reponse que on envoie au navigateur
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 // request : request les donne que le navigateur envoie mdp pseudo ..
 export async function POST(request: Request) {
@@ -18,6 +16,11 @@ export async function POST(request: Request) {
   if (!email.includes("@")) {
     return NextResponse.json({ error: "Email invalide" }, { status: 400 });
   }
+  // verife le password
+  if (password.length < 8) {
+    return NextResponse.json({ error: "mots de passe invalide" },{status: 400});
+  }
+  // verifie si le user existe deja
   const existingUser = await prisma.user.findUnique({
     where: { email: email },
   });
@@ -27,13 +30,22 @@ export async function POST(request: Request) {
       { status: 409 },
     );
   }
+
+  // verifie si le pseudo existe deje
+  const existingPseudo = await prisma.user.findFirst({
+    where: { displayName: pseudo },
+  });
+
+  if (existingPseudo) {
+    return NextResponse.json({ error: "pseudo deja existant" },{status: 409});
+  }
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
     data: {
       email: email,
-      displayname: pseudo,
+      displayName: pseudo,
       passwordHash: passwordHash,
     },
   });
-  return NextResponse.json({ message: "ok" });
+  return NextResponse.json({ message: "utilisateur cree" }, { status: 201 });
 }
