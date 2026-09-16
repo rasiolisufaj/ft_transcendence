@@ -10,5 +10,12 @@
     "dropzoneCta": "Click to choose a file",
     "dropzoneHint": "PDF, image, or scan — max 10 MB",
     "submit": "Upload"
+  },
+  "dashboard": {
+    "title": "My Documents",
+    "subtitle": "Upload your French paperwork — our AI will handle the rest.",
+    "upload": "Upload",
+    "emptyTitle": "No documents yet",
+    "emptyDescription": "Upload your first document to get started."
   }
 }

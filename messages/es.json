@@ -10,5 +10,12 @@
     "dropzoneCta": "Haz clic para elegir un archivo",
     "dropzoneHint": "PDF, imagen o escaneo — máx. 10 MB",
     "submit": "Subir"
+  },
+  "dashboard": {
+    "title": "Mis documentos",
+    "subtitle": "Sube tus papeles administrativos franceses — nuestra IA se encarga del resto.",
+    "upload": "Subir",
+    "emptyTitle": "Todavía no hay documentos",
+    "emptyDescription": "Sube tu primer documento para empezar."
   }
 }

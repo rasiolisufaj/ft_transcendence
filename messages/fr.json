@@ -10,5 +10,12 @@
     "dropzoneCta": "Clique pour choisir un fichier",
     "dropzoneHint": "PDF, image ou scan — 10 Mo max",
     "submit": "Envoyer"
+  },
+  "dashboard": {
+    "title": "Mes documents",
+    "subtitle": "Téléverse tes papiers administratifs français — notre IA s'occupe du reste.",
+    "upload": "Téléverser",
+    "emptyTitle": "Aucun document pour l'instant",
+    "emptyDescription": "Téléverse ton premier document pour commencer."
   }
 }
