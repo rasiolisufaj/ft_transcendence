@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "brand": "MesPapiers",
+    "dashboard": "Tableau de bord",
+    "addDocument": "Ajouter un document"
+  },
+  "documentsNew": {
+    "title": "Ajouter un document",
+    "description": "Téléverse un document, notre IA l'identifiera pour toi.",
+    "dropzoneCta": "Clique pour choisir un fichier",
+    "dropzoneHint": "PDF, image ou scan — 10 Mo max",
+    "submit": "Envoyer"
+  }
+}

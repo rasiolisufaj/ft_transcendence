@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "brand": "MesPapiers",
+    "dashboard": "Dashboard",
+    "addDocument": "Add Document"
+  },
+  "documentsNew": {
+    "title": "Add a Document",
+    "description": "Upload a document and our AI will identify it for you.",
+    "dropzoneCta": "Click to choose a file",
+    "dropzoneHint": "PDF, image, or scan — max 10 MB",
+    "submit": "Upload"
+  }
+}

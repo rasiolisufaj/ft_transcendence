@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "brand": "MesPapiers",
+    "dashboard": "Panel",
+    "addDocument": "Añadir documento"
+  },
+  "documentsNew": {
+    "title": "Añadir un documento",
+    "description": "Sube un documento y nuestra IA lo identificará por ti.",
+    "dropzoneCta": "Haz clic para elegir un archivo",
+    "dropzoneHint": "PDF, imagen o escaneo — máx. 10 MB",
+    "submit": "Subir"
+  }
+}

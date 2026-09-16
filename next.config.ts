@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 // Pin the workspace root. Without it, a stray package-lock.json in any parent
 // directory makes Turbopack warn on every single build — and the subject grades
@@ -12,4 +13,6 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['mespapiers.local'],
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default withNextIntl(nextConfig);
