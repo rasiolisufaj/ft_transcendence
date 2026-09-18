@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "darwin"]
 }
 
 datasource db {
@@ -8,17 +9,63 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ChannelRole {
+  MEMBER
+  MODERATOR
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+enum NotificationType {
+  DEADLINE
+  REPLY
+  MESSAGE
+  FRIEND_REQUEST
+  OTHER
+}
+
+enum GlobalRole {
+  USER
+  ADMIN
+}
+
 model User {
-  id          String     @id @default(cuid())
-  email       String     @unique
-  displayName String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  documents   Document[]
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String?
+  displayName  String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
+  avatarKey    String?
+  locale       String     @default("fr")
+  totpSecret   String?
+  totpEnabled  Boolean    @default(false)
+  globalRole   GlobalRole @default(USER)
+  reputation   Int        @default(0)
+
+  documents                   Document[]
+  sessions                    Session[]
+  channelsCreated             Channel[]
+  channelMemberships          ChannelMember[]
+  threads                     Thread[]        @relation("ThreadAuthor")
+  answers                     Answer[]        @relation("AnswerAuthor")
+  votes                       Vote[]
+  friendshipsSent             Friendship[]    @relation("SentFriendships")
+  friendshipsReceived         Friendship[]    @relation("ReceivedFriendships")
+  conversationsAsParticipant1 Conversation[]  @relation("ConversationParticipant1")
+  conversationsAsParticipant2 Conversation[]  @relation("ConversationParticipant2")
+  messages                    Message[]       @relation("MessageSender")
+  notifications               Notification[]
+  oauthAccounts               OAuthAccount[]
+  auditLogs                   AuditLog[]
 }
 
 model Document {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   ownerId   String
   owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   fileName  String
@@ -26,6 +73,193 @@ model Document {
   fileSize  Int
   fileData  Bytes
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  identity      DocumentIdentity?
+  insuranceAuto DocumentInsuranceAuto?
 
   @@index([ownerId])
+}
+
+model DocumentIdentity {
+  id         Int      @id @default(autoincrement())
+  documentId Int      @unique
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  fullName       String
+  birthDate      DateTime
+  documentNumber String
+  expiryDate     DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+}
+
+model DocumentInsuranceAuto {
+  id         Int      @id @default(autoincrement())
+  documentId Int      @unique
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  provider     String
+  policyNumber String
+  vehiclePlate String
+  expiryDate   DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+}
+
+model ChannelMember {
+  channelId Int         @map("channel_id")
+  userId    String      @map("user_id")
+  role      ChannelRole @default(MEMBER)
+  joinedAt  DateTime    @default(now()) @map("joined_at")
+  updatedAt DateTime    @default(now()) @updatedAt @map("updated_at")
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+}
+
+model Channel {
+  id          Int      @id @default(autoincrement())
+  createdBy   String?  @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  title       String   @db.VarChar(100)
+  description String?  @db.VarChar(250)
+
+  creator User?           @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  members ChannelMember[]
+  threads Thread[]
+}
+
+model Thread {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(150)
+  content   String   @db.VarChar(300)
+  channelId Int      @map("channel_id")
+  userId    String?  @map("author_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  channel Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author  User?    @relation("ThreadAuthor", fields: [userId], references: [id], onDelete: SetNull)
+  answers Answer[]
+}
+
+model Answer {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.VarChar(300)
+  threadId  Int      @map("thread_id")
+  userId    String?  @map("author_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author User?  @relation("AnswerAuthor", fields: [userId], references: [id], onDelete: SetNull)
+  votes  Vote[]
+}
+
+model Vote {
+  answerId  Int      @map("answer_id")
+  userId    String   @map("user_id")
+  value     Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  answer Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([answerId, userId])
+}
+
+model Friendship {
+  id          Int              @id @default(autoincrement())
+  requesterId String           @map("requester_id")
+  receiverId  String           @map("receiver_id")
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
+
+  requester User @relation("SentFriendships", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User @relation("ReceivedFriendships", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, receiverId])
+}
+
+model Conversation {
+  id             Int      @id @default(autoincrement())
+  participant1Id String   @map("participant1_id")
+  participant2Id String   @map("participant2_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  participant1 User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2 User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  messages     Message[]
+
+  @@unique([participant1Id, participant2Id])
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  content        String   @db.Text
+  conversationId Int      @map("conversation_id")
+  senderId       String   @map("sender_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id          Int              @id @default(autoincrement())
+  recipientId String           @map("recipient_id")
+  type        NotificationType
+  content     String           @db.VarChar(255)
+  isRead      Boolean          @default(false) @map("is_read")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
+
+  recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id                String   @id
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt         DateTime
+  twoFactorVerified Boolean  @default(false)
+  ipAddress         String?
+  userAgent         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now()) @updatedAt
+
+  @@index([userId]) // déconnecter quelqu'un de tous ses appareils
+}
+
+model OAuthAccount {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       String
+  providerUserId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  @@unique([provider, providerUserId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  action      String
+  targetType  String
+  targetId    String
+  channelId   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }
