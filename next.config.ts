@@ -9,7 +9,12 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   turbopack: { root: projectRoot },
-  allowedDevOrigins: ['mespapiers.local'],
+  experimental: {
+    serverActions: {
+      // augmente la limite par defaut de next js a 10 mo 
+      bodySizeLimit: "10mb",
+    },
+  },
 };
 
 export default nextConfig;
