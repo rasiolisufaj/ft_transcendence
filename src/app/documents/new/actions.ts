@@ -3,40 +3,40 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-
 export async function uploadDocument(formData: FormData) {
-  const file = formData.get("file") as File | null;
-
-  if (!file || file.size === 0) {
-    throw new Error("No file provided");
+  const file = formData.get("file") as File; // stocke le fichier
+  if (!file) // cjeck if file is not empty
+  {
+    throw new Error("fichier vide");
   }
-
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error("File too large (max 10 MB)");
+  if (file.size > 10 * 1024 * 1024) // check if file is not to more
+  {
+    throw new Error("fichier superieur a 10 mo");
   }
-
-  let user = await prisma.user.findFirst();
+  const fileType = file.type; // verifie le type du fichier
+  if (
+    fileType != "image/png" &&
+    fileType != "image/jpeg" &&
+    fileType != "application/pdf"
+  ) {
+    throw new Error("on ne prend pas en chrge ce type de fichier");
+  }
+  const buffer = Buffer.from(await file.arrayBuffer()); // lit les octets du fichier et les range dan la variable buffer
+  // va chercher le user amir dans la db
+  const user = await prisma.user.findFirst({
+    where: { email: "Amir@gmail.com" },
+  });
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email: "demo@mespapiers.local",
-        displayName: "Demo User",
-      },
-    });
+    throw new Error("Utilisateur introuvable");
   }
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-
   await prisma.document.create({
     data: {
       ownerId: user.id,
       fileName: file.name,
-      fileType: file.type || "application/octet-stream",
+      fileType: fileType,
       fileSize: file.size,
       fileData: buffer,
     },
   });
-
   redirect("/");
 }

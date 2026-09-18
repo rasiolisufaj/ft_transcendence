@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { Button } from "@/components/ui/Button";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -10,10 +11,19 @@ function formatSize(bytes: number): string {
 }
 
 export default async function DashboardPage() {
-  const documents = await prisma.document.findMany({
-    select: { id: true, fileName: true, fileType: true, fileSize: true, createdAt: true },
-    orderBy: { createdAt: "desc" },
+  const user = await prisma.user.findFirst({
+    where: { email: "Amir@gmail.com" },
   });
+  if (!user) {
+    throw new Error("utilisateur vide");
+  }
+  const documents = await prisma.document.findMany({
+    where: { ownerId: user.id },
+  });
+
+async function deleteDoc(){
+
+}
 
   return (
     <div>
@@ -57,9 +67,11 @@ export default async function DashboardPage() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{doc.fileName}</p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {formatSize(doc.fileSize)} · {doc.createdAt.toLocaleDateString("fr-FR")}
+                  {formatSize(doc.fileSize)} ·{" "}
+                  {doc.createdAt.toLocaleDateString("fr-FR")}
                 </p>
               </div>
+              <Button onClick={deleteDoc}> delete the document</Button>
             </div>
           ))}
         </div>
