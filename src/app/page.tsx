@@ -88,7 +88,7 @@ export default async function DashboardPage() {
                   </svg>
                 </Button>
               </form>
-              <Button>
+              <a href={`/api/documents/${doc.id}`} target="_blank">
                 {" "}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
                     d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                   />
                 </svg>
-              </Button>
+              </a>
             </div>
           ))}
         </div>
