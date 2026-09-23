@@ -5,19 +5,18 @@ import { prisma } from "@/lib/db";
 import { createHash } from "crypto";
 
 export async function uploadDocument(formData: FormData) {
-  await new Promise((r) => setTimeout(r, 1500));
   //recuperer le fichier envoye par le formulaire
   const file = formData.get("file") as File;
 
   // aucun fichier envoye
   if (!file) {
-    throw new Error("fichier vide");
+    throw new Error("No file provided");
   }
 
   //verifier la taille
   if (file.size > 10 * 1024 * 1024) {
-    throw new Error("fichier superieur a 10 mo");
-  }
+    throw new Error("File is larger than 10 MB");
+  } else if (file.size === 0) throw new Error("File is empty");
 
   // lire les octets du fichier et les ranger dans un Buffer
   const fileBuffer = Buffer.from(await file.arrayBuffer());
@@ -28,7 +27,7 @@ export async function uploadDocument(formData: FormData) {
   const signJpg = fileBuffer.subarray(0, 3).toString("hex"); // 3 octets
 
   if (
-    signPdf !== "25504446" && // %PDF
+    signPdf !== "25504446" &&
     signPng !== "89504e470d0a1a0a" &&
     signJpg !== "ffd8ff"
   ) {
@@ -42,7 +41,7 @@ export async function uploadDocument(formData: FormData) {
   });
 
   if (!user) {
-    throw new Error("Utilisateur introuvable");
+    throw new Error("User not found");
   }
 
   const sameContent = await prisma.document.findFirst({
