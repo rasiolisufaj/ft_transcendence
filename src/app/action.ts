@@ -1,9 +1,6 @@
 "use server";
 
-import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
-import { error } from "console";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function deleteDocument(formData: FormData) {
