@@ -1,4 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import type { ChannelRole, GlobalRole } from "@/generated/prisma/client";
 
@@ -90,4 +92,33 @@ export async function invalidateSession(sessionId: string): Promise<void> {
 
 export async function invalidateAllSessions(userId: string): Promise<void> {
   await prisma.session.deleteMany({ where: { userId } });
+}
+
+/** Reads the session cookie. Returns null when absent or invalid. */
+export async function getCurrentUser(): Promise<SessionContext | null> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+  return validateSessionToken(token);
+}
+
+/** The guard. Redirects to /login when there is no valid session. */
+export async function requireUser(): Promise<SessionContext> {
+  const ctx = await getCurrentUser();
+  if (!ctx) redirect("/login");
+  return ctx;
+}
+
+/** Server Actions and Route Handlers only — Next cannot set cookies while rendering. */
+export async function setSessionCookie(token: string, expiresAt: Date): Promise<void> {
+  (await cookies()).set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: true, // compose runs `next dev` behind nginx TLS; browsers accept Secure on http://localhost
+    sameSite: "lax",
+    path: "/",
+    expires: expiresAt,
+  });
+}
+
+export async function clearSessionCookie(): Promise<void> {
+  (await cookies()).delete(SESSION_COOKIE);
 }
