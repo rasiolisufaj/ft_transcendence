@@ -76,13 +76,16 @@ describe("session lifecycle", () => {
     expect(await prisma.session.findUnique({ where: { id: hashToken(token) } })).toBeNull();
   });
 
-  it("slides the expiry when the session is past its halfway point", async () => {
+  // The cookie's expiry is fixed at login and cannot be re-set while rendering, so the row must not outlive it.
+  it("never extends the expiry set at login", async () => {
     const { token } = await createSession(userId);
     const soon = new Date(Date.now() + 1000 * 60 * 60 * 24); // 1 day left of 30
     await prisma.session.update({ where: { id: hashToken(token) }, data: { expiresAt: soon } });
 
     const ctx = await validateSessionToken(token);
-    expect(ctx!.session.expiresAt.getTime()).toBeGreaterThan(soon.getTime());
+    expect(ctx!.session.expiresAt).toEqual(soon);
+    const row = await prisma.session.findUnique({ where: { id: hashToken(token) } });
+    expect(row!.expiresAt).toEqual(soon);
   });
 
   it("invalidates one session and leaves the others alone", async () => {

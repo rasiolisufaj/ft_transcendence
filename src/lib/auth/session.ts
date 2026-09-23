@@ -6,8 +6,9 @@ import type { ChannelRole, GlobalRole } from "@/generated/prisma/client";
 
 export const SESSION_COOKIE = "mp_session";
 
-const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;      // 30 days
-const RENEW_WHEN_LESS_THAN_MS = SESSION_TTL_MS / 2;   // slide past the halfway point
+// 30 days from login, never extended: the cookie's expiry is fixed at login and
+// Next cannot re-set it while rendering, so a longer row would outlive its cookie.
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 
 export type SessionUser = {
   id: string;
@@ -63,15 +64,9 @@ export async function validateSessionToken(token: string): Promise<SessionContex
     return null;
   }
 
-  let { expiresAt } = row;
-  if (expiresAt.getTime() - Date.now() < RENEW_WHEN_LESS_THAN_MS) {
-    expiresAt = new Date(Date.now() + SESSION_TTL_MS);
-    await prisma.session.update({ where: { id }, data: { expiresAt } });
-  }
-
   const { user } = row;
   return {
-    session: { id: row.id, expiresAt, twoFactorVerified: row.twoFactorVerified },
+    session: { id: row.id, expiresAt: row.expiresAt, twoFactorVerified: row.twoFactorVerified },
     user: {
       id: user.id,
       email: user.email,
