@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {createChannel} from "./action";
+import { createChannel } from "./action";
 
 export default function ChannelForm() {
   return (
@@ -36,6 +36,21 @@ export default function ChannelForm() {
           name="description"
           rows={3}
           placeholder="De quoi parle ce channel ?"
+          className="resize-none rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="question"
+          className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+        >
+          question (obligatoire)
+        </label>
+        <textarea
+          id="question"
+          name="question"
+          rows={3}
+          placeholder="pauser votre question donner le plus de details possible de facon a ce que les reponses soit claire"
           className="resize-none rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
         />
       </div>
