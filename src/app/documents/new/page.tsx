@@ -4,6 +4,23 @@ import { useState } from "react";
 import { uploadDocument } from "./actions";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useFormStatus } from "react-dom";
+// Barre de chargement affichee pendant l'envoi du formulaire.
+export function UploadBar() {
+  const { pending } = useFormStatus();
+  if (!pending) {
+    return null;
+  }
+  return (
+    <div
+      className="h-1 w-full rounded bg-zinc-800"
+      role="progressbar"
+      aria-label="Envoi du fichier en cours"
+    >
+      <div className="h-full w-1/3 animate-pulse rounded bg-blue-600" />
+    </div>
+  );
+}
 
 export default function NewDocumentPage() {
   const [fileName, setFileName] = useState<string | null>(null);
@@ -56,7 +73,7 @@ export default function NewDocumentPage() {
               className="sr-only"
             />
           </label>
-
+          <UploadBar></UploadBar>
           <Button type="submit" disabled={!fileName} className="w-full">
             Upload
           </Button>
