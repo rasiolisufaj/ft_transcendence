@@ -45,6 +45,7 @@ async function main ()
                     fileType: "image/png",
                     fileSize: 204800,
                     fileData: Buffer.from("fake image content"),
+                    fileHash: "seed-hash-1",
                },
     });
 
@@ -55,6 +56,7 @@ async function main ()
       fileType: "application/pdf",
       fileSize: 152400,
       fileData: Buffer.from("fake pdf content"),
+      fileHash: "seed-hash-1",
     },
   });
 
