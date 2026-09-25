@@ -3,5 +3,13 @@
     "brand": "MesPapiers",
     "dashboard": "Dashboard",
     "addDocument": "Add a document"
+  },
+  "localeSwitcher": {
+    "label": "Language",
+    "names": {
+      "fr": "Français",
+      "en": "English",
+      "es": "Español"
+    }
   }
 }

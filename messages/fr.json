@@ -3,5 +3,13 @@
     "brand": "MesPapiers",
     "dashboard": "Tableau de bord",
     "addDocument": "Ajouter un document"
+  },
+  "localeSwitcher": {
+    "label": "Langue",
+    "names": {
+      "fr": "Français",
+      "en": "English",
+      "es": "Español"
+    }
   }
 }
