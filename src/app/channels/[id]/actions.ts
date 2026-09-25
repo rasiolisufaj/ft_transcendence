@@ -93,3 +93,48 @@ export async function deleteAnswer(formData: FormData) {
   });
   revalidatePath(`/channels/${answer.thread.channelId}`);
 }
+
+// fonction pour modifier un user
+export async function modifAnswerUser(formData: FormData) {
+  const idAnswer = formData.get("answerId");
+  const newanswer = formData.get("newanswerId");
+
+  if (typeof idAnswer !== "string" || !idAnswer) {
+    return { error: "Merci d'entrer un nom de Channel." };
+  }
+  
+  if(typeof newanswer !== "STRING" || )
+  const trueId = parseInt(idAnswer, 10);
+  if (Number.isNaN(trueId) || trueId <= 0 || String(trueId) !== idAnswer) {
+    return Response.json({ error: "id invalide" }, { status: 400 });
+  }
+
+  // va recupere le user dans la basse de donnee
+  const user = await prisma.user.findFirst({
+    where: { email: "Amir@gmail.com" },
+  });
+  // si il nexiste pas
+  if (!user) {
+    throw new Error("Utilisateur introuvable");
+  }
+
+  const answer = await prisma.answer.findFirst({
+    where: {
+      id: trueId,
+      userId: user.id,
+    },
+     // recupère aussi id du channel
+     // utile pour revalidatePath a la fin
+    include: { thread: { select: { channelId: true } } },
+  });
+  if (!answer) {
+    throw new Error("Utilisateur introuvable");
+  }
+
+  await prisma.answer.delete({
+    where: {
+      id: trueId,
+    },
+  });
+  revalidatePath(`/channels/${answer.thread.channelId}`);
+}

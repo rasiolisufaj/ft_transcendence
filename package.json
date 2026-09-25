@@ -43,6 +43,12 @@
     "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^5.0.1"
-
-  }
+  },
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/rasiolisufaj/ft_transcendence/issues"
+  },
+  "homepage": "https://github.com/rasiolisufaj/ft_transcendence#readme"
 }

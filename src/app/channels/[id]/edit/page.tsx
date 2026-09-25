@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/Button";
 import { createAnswer, deleteAnswer } from "../actions";
-
+import { editChannel } from "./action";
 export default async function EditChannelPage({
   params,
 }: {
@@ -53,7 +53,7 @@ export default async function EditChannelPage({
           Change le nom, la description ou la question.
         </p>
 
-        <form className="mt-6 flex flex-col gap-4">
+        <form className="mt-6 flex flex-col gap-4" action={editChannel}>
           <input type="hidden" name="channelId" value={channel.id} />
           <input type="hidden" name="questionId" value={question?.id ?? ""} />
 
