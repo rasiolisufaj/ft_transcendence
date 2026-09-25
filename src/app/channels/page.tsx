@@ -3,7 +3,7 @@ import { getUserChannels } from "./create/data";
 import { deleteChannel } from "./create/action";
 
 export default async function ChannelsHomePage() {
-  const channelsMenber = await getUserChannels("Amir@gmail.com");
+  const channelsMember = await getUserChannels("Amir@gmail.com");
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
@@ -55,7 +55,7 @@ export default async function ChannelsHomePage() {
           </Link>
 
           <Link
-            href="/channels/invite"
+            href="/channels/invitations"
             className="flex items-center gap-4 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-500 dark:hover:bg-zinc-800/50"
           >
             <img
@@ -65,7 +65,7 @@ export default async function ChannelsHomePage() {
             />
             <div>
               <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
-                Demander une invitation
+                voir mes invitation
               </h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 Demande l'accès à un channel privé.
@@ -75,9 +75,9 @@ export default async function ChannelsHomePage() {
         </div>
       </div>
 
-      {channelsMenber.length > 0 ? (
+      {channelsMember.length > 0 ? (
         <div className="mt-6 flex flex-col gap-3">
-          {channelsMenber.map((channel) => (
+          {channelsMember.map((channel) => (
             <div
               key={channel.id}
               className="flex items-start justify-between gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700"
@@ -121,6 +121,26 @@ export default async function ChannelsHomePage() {
                 </summary>
 
                 <div className="absolute right-0 z-10 mt-1 w-44 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                  <Link
+                    href={`/channels/${channel.id}/invite`}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
+                      />
+                    </svg>
+                    Inviter
+                  </Link>
                   <Link
                     href={`/channels/${channel.id}/edit`}
                     className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
