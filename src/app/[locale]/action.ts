@@ -1,7 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 
 export async function deleteDocument(formData: FormData) {
   //  Recuperer l'id du document envoye par le formulaire
@@ -34,5 +35,5 @@ export async function deleteDocument(formData: FormData) {
     where: { id: idFile },
   });
 
-  redirect("/");
+  redirect({ href: "/", locale: await getLocale() });
 }

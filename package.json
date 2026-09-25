@@ -26,6 +26,7 @@
     "@node-rs/argon2": "^2.2.1",
     "@prisma/client": "^6.19.3",
     "next": "16.3.4",
+    "next-intl": "^4.14.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "zod": "^4.6.5"
@@ -43,6 +44,5 @@
     "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^5.0.1"
-
   }
 }

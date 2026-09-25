@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/Button";
 import { deleteDocument } from "./action";

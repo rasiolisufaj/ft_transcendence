@@ -1,6 +1,7 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
 import { createHash } from "crypto";
 
@@ -31,7 +32,7 @@ export async function uploadDocument(formData: FormData) {
     signPng !== "89504e470d0a1a0a" &&
     signJpg !== "ffd8ff"
   ) {
-    redirect("/documents/error-file-type");
+    redirect({ href: "/documents/error-file-type", locale: await getLocale() });
   }
 
   const fileHash = createHash("sha256").update(fileBuffer).digest("hex");
@@ -49,7 +50,7 @@ export async function uploadDocument(formData: FormData) {
   });
 
   if (sameContent) {
-    redirect("/documents/error-duplicate-content");
+    redirect({ href: "/documents/error-duplicate-content", locale: await getLocale() });
   }
 
   const sameName = await prisma.document.findFirst({
@@ -57,7 +58,7 @@ export async function uploadDocument(formData: FormData) {
   });
 
   if (sameName) {
-    redirect("/documents/error-duplicate");
+    redirect({ href: "/documents/error-duplicate", locale: await getLocale() });
   }
 
   await prisma.document.create({
@@ -70,5 +71,5 @@ export async function uploadDocument(formData: FormData) {
       fileHash: fileHash,
     },
   });
-  redirect("/");
+  redirect({ href: "/", locale: await getLocale() });
 }
