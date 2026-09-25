@@ -1,19 +1,19 @@
 import { Card } from "@/components/ui/Card";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
-export default async function DocumentFileType({ params }: PageProps<"/[locale]/documents/error-file-type">) {
+export default async function DocumentDuplicateContent({ params }: PageProps<"/[locale]/documents/error-duplicate-content">) {
   const { locale } = await params;
 
   return (
     <div className="mx-auto max-w-xl pt-12">
       <Card className="border border-red-500/40 bg-red-500/5">
         <h1 className="mb-2 text-2xl font-semibold text-red-500">
-          This file type is not accepted
+          This file has already been uploaded
         </h1>
         <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-          Only PDF, PNG and JPG files can be uploaded. We check the contents of
-          the file, not its name: renaming a file is not enough to make it
-          valid.
+          The contents of this file are identical to a document already in your
+          space, even though the name is different. Check your documents before
+          adding a new one.
         </p>
 
         <div className="space-y-3">

@@ -35,6 +35,7 @@ services:
       # figé dans l'image : l'éditer n'a aucun effet sans rebuild. On monte celui-ci
       # parce que `next dev` redémarre tout seul quand il change.
       - ./next.config.ts:/app/next.config.ts
+      - ./messages:/app/messages
 
   # ── PostgreSQL database ────────────────────────────────────────────────────
   db:
