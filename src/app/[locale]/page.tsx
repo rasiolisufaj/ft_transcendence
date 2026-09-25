@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
 import { getSeedUser } from "@/lib/auth/seed-user";
 import { Card } from "@/components/ui/Card";
@@ -11,8 +11,6 @@ export default async function DashboardPage({ params }: PageProps<"/[locale]">) 
   const { locale } = await params;
   const user = await getSeedUser();
 
-  // One round trip for every card. A query per card would be the N+1 that A7
-  // forbids, and its cost would grow with every category we add.
   const grouped = await prisma.document.groupBy({
     by: ["category"],
     where: { ownerId: user.id },
@@ -24,9 +22,6 @@ export default async function DashboardPage({ params }: PageProps<"/[locale]">) 
   );
   const total = grouped.reduce((sum, row) => sum + row._count._all, 0);
 
-  // Documents the AI has not sorted yet. While classification is unwired that is
-  // the whole stock — showing it avoids suggesting that "Other" is a filing
-  // decision rather than a document still waiting.
   const pending = await prisma.document.count({
     where: { ownerId: user.id, extractionStatus: "PENDING" },
   });
@@ -45,15 +40,13 @@ export default async function DashboardPage({ params }: PageProps<"/[locale]">) 
           </p>
         </div>
         <Link
-          href={`/${locale}/documents/new`}
+          href="/documents/new"
           className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
           Add a document
         </Link>
       </div>
 
-      {/* One card per registry entry: adding a category makes it show up here
-          without anyone editing this file. */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => {
           const count = countByCategory.get(card.category) ?? 0;

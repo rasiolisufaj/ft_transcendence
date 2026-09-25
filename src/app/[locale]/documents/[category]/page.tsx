@@ -19,15 +19,12 @@ function formatSize(bytes: number): string {
 export default async function CategoryPage({ params }: PageProps<"/[locale]/documents/[category]">) {
   const { locale, category: slug } = await params;
 
-  // The slug comes from the URL. The registry is the only judge: an unknown slug
-  // is a 404, never an empty list that would suggest the category exists.
   const category = categoryFromSlug(slug);
   if (category === null) notFound();
 
   const def = CATEGORIES[category];
   const user = await getSeedUser();
 
-  // Filtered in the query, not in the component — E6 requires it.
   const documents = await prisma.document.findMany({
     where: { ownerId: user.id, category },
     orderBy: { createdAt: "desc" },
