@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+// repasser sur les commentaires plus tard
 
 export async function createAnswer(formData: FormData) {
   const answer = formData.get("content");
@@ -96,45 +98,68 @@ export async function deleteAnswer(formData: FormData) {
 
 // fonction pour modifier un user
 export async function modifAnswerUser(formData: FormData) {
-  const idAnswer = formData.get("answerId");
-  const newanswer = formData.get("newanswerId");
+  // recupere les info donc id de la reponse
+  // recupere aisso la nouvelle reponse
+  const answerId = formData.get("answerId");
+  const newanswer = formData.get("content");
+  const channelId = formData.get("channelId");
 
-  if (typeof idAnswer !== "string" || !idAnswer) {
-    return { error: "Merci d'entrer un nom de Channel." };
-  }
-  
-  if(typeof newanswer !== "STRING" || )
-  const trueId = parseInt(idAnswer, 10);
-  if (Number.isNaN(trueId) || trueId <= 0 || String(trueId) !== idAnswer) {
-    return Response.json({ error: "id invalide" }, { status: 400 });
+  // verifie que c'est les bon types
+  if (
+    typeof channelId !== "string" ||
+    typeof answerId !== "string" ||
+    typeof newanswer !== "string" ||
+    !answerId ||
+    !newanswer
+  ) {
+    return;
   }
 
-  // va recupere le user dans la basse de donnee
+  // surpime les espace
+  const answerIdTrim = answerId.trim();
+  const newanswerTrim = newanswer.trim();
+  const channelIdTrim = channelId.trim();
+  // verifie la taille
+  if (
+    answerIdTrim.length === 0 ||
+    newanswerTrim.length === 0 ||
+    channelIdTrim.length === 0
+  ) {
+    return;
+  } else if (newanswerTrim.length > 300) {
+    return;
+  }
+  const intAnswerId = parseInt(answerIdTrim, 10);
+  const intChannelId = parseInt(channelIdTrim, 10);
+
+  // convertie lid de la reponse en int
+  if (Number.isNaN(intAnswerId) || intAnswerId <= 0) {
+    return;
+  }
+  // reucupere le user
   const user = await prisma.user.findFirst({
     where: { email: "Amir@gmail.com" },
   });
-  // si il nexiste pas
   if (!user) {
-    throw new Error("Utilisateur introuvable");
+    return;
   }
 
   const answer = await prisma.answer.findFirst({
-    where: {
-      id: trueId,
-      userId: user.id,
-    },
-     // recupère aussi id du channel
-     // utile pour revalidatePath a la fin
-    include: { thread: { select: { channelId: true } } },
+    where: { id: intAnswerId },
   });
+
+  // vérifie que la réponse existe
   if (!answer) {
-    throw new Error("Utilisateur introuvable");
+    return;
   }
 
-  await prisma.answer.delete({
-    where: {
-      id: trueId,
-    },
+  // vérifie que l'utilisateur est l'auteur de la réponse
+  if (answer.userId !== user.id) {
+    return;
+  }
+  await prisma.answer.update({
+    where: { id: intAnswerId },
+    data: { content: newanswerTrim },
   });
-  revalidatePath(`/channels/${answer.thread.channelId}`);
+  redirect(`/channels/${intChannelId}`);
 }
