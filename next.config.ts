@@ -10,6 +10,9 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   turbopack: { root: projectRoot },
+  // nginx serves the dev server as https://mespapiers.local; without this, Next 16
+  // blocks its dev assets and HMR as cross-origin and client components stay inert.
+  allowedDevOrigins: ["mespapiers.local"],
   experimental: {
     serverActions: {
       // augmente la limite par defaut de next js a 10 mo 
