@@ -33,6 +33,25 @@ enum GlobalRole {
   ADMIN
 }
 
+// Une categorie = une carte du dashboard + une entree du registre
+// src/lib/documents/subtypes.ts. Ajouter une categorie ici et la-bas suffit :
+// carte, URL et prompt de classification en derivent. Cf. PROJECT_PLAN §3/§4.
+enum DocumentCategory {
+  IDENTITY
+  INSURANCE_AUTO
+  OTHER
+}
+
+// Etat de la classification IA. PENDING = pas encore analyse, NEEDS_REVIEW =
+// confiance trop basse, un humain tranche (PROJECT_PLAN §5, regle 1 de
+// deriveStatus : un document que l'IA n'a pas su lire n'est pas "valide").
+enum ExtractionStatus {
+  PENDING
+  NEEDS_REVIEW
+  CONFIRMED
+  FAILED
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -76,10 +95,15 @@ model Document {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  // @default(OTHER) backfille les lignes deja en base sans script separe.
+  category         DocumentCategory @default(OTHER)
+  extractionStatus ExtractionStatus @default(PENDING)
+
   identity      DocumentIdentity?
   insuranceAuto DocumentInsuranceAuto?
 
   @@index([ownerId])
+  @@index([ownerId, category]) // dashboard (groupBy) et liste d'une categorie
 }
 
 model DocumentIdentity {

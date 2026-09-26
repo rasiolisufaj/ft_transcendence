@@ -31,6 +31,10 @@ services:
       - ./src:/app/src
       - ./public:/app/public
       - ./prisma:/app/prisma
+      # Le Dockerfile fait `COPY . .`, donc tout fichier de config a la racine est
+      # figé dans l'image : l'éditer n'a aucun effet sans rebuild. On monte celui-ci
+      # parce que `next dev` redémarre tout seul quand il change.
+      - ./next.config.ts:/app/next.config.ts
 
   # ── PostgreSQL database ────────────────────────────────────────────────────
   db:

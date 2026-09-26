@@ -3,6 +3,10 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { createHash } from "crypto";
+import { getSeedUser } from "@/lib/auth/seed-user";
+import { classifyDocument, extractionStatusFor } from "@/lib/documents/classify";
+import { narrowSubtypeFields } from "@/lib/documents/subtypes";
+import { ExtractionStatus } from "@/generated/prisma/enums";
 
 export async function uploadDocument(formData: FormData) {
   //recuperer le fichier envoye par le formulaire
@@ -36,13 +40,7 @@ export async function uploadDocument(formData: FormData) {
 
   const fileHash = createHash("sha256").update(fileBuffer).digest("hex");
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
+  const user = await getSeedUser();
 
   const sameContent = await prisma.document.findFirst({
     where: { ownerId: user.id, fileHash: fileHash },
@@ -60,6 +58,23 @@ export async function uploadDocument(formData: FormData) {
     redirect("/documents/error-duplicate");
   }
 
+  // Classement du document. Aucun modèle ne tourne encore : la couture renvoie
+  // OTHER / PENDING, et l'UI l'affiche comme « en attente de classement ».
+  // Brancher B3 ne changera que le corps de classifyDocument().
+  const classification = await classifyDocument({
+    buffer: fileBuffer,
+    mimeType: file.type,
+    fileName: file.name,
+  });
+
+  // Les champs proposés passent par le schéma de leur catégorie avant tout
+  // contact avec la base (PROJECT_PLAN B3). Une catégorie devinée dont les
+  // champs ne valident pas reste la catégorie, mais attend un humain.
+  const narrowed = narrowSubtypeFields(classification.category, classification.subtypeFields);
+  const extractionStatus = narrowed.ok
+    ? extractionStatusFor(classification)
+    : ExtractionStatus.NEEDS_REVIEW;
+
   await prisma.document.create({
     data: {
       ownerId: user.id,
@@ -68,7 +83,15 @@ export async function uploadDocument(formData: FormData) {
       fileSize: file.size,
       fileData: fileBuffer,
       fileHash: fileHash,
+      category: classification.category,
+      extractionStatus,
     },
   });
+
+  // TODO(B3) : quand classifyDocument() renverra des champs, écrire la ligne
+  // typée dans la même transaction que la ligne de base. Le switch sur
+  // `narrowed.model` appartient à subtypes.ts, pour qu'ajouter une catégorie
+  // continue de ne toucher qu'un seul fichier.
+
   redirect("/");
 }
