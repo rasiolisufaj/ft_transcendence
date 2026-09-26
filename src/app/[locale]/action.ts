@@ -2,22 +2,17 @@
 
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
+import { getSeedUser } from "@/lib/auth/seed-user";
 
 export async function deleteDocument(formData: FormData) {
-  //  Recuperer l'id du document envoye par le formulaire
+  // Read the document id sent by the form
   const idFile = Number(formData.get("id"));
 
   if (!idFile) {
-    throw new Error("id invalide");
+    throw new Error("invalid id");
   }
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-
-  if (!user) {
-    throw new Error("Utilisateur introuvable");
-  }
+  const user = await getSeedUser();
 
   const doc = await prisma.document.findFirst({
     where: {
@@ -27,12 +22,14 @@ export async function deleteDocument(formData: FormData) {
   });
 
   if (!doc) {
-    throw new Error("ce document n'existe pas ou ne t'appartient pas");
+    throw new Error("this document does not exist, or is not yours");
   }
 
   await prisma.document.delete({
     where: { id: idFile },
   });
 
+  // No locale prefix: the middleware normalises to the default locale. D10 will
+  // make this locale-aware with next-intl's own `redirect`.
   redirect("/");
 }
