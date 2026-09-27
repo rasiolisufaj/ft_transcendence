@@ -11,5 +11,44 @@
       "en": "English",
       "es": "Español"
     }
+  },
+  "metadata": {
+    "description": "Votre assistant pour les démarches administratives françaises : suivez vos documents, échéances et renouvellements."
+  },
+  "dashboard": {
+    "title": "Mes documents",
+    "subtitle": "Importez vos papiers administratifs français, notre IA s'occupe du reste.",
+    "upload": "Importer",
+    "empty": "Aucun document pour l'instant. Importez votre premier document pour commencer.",
+    "fileKind": {
+      "pdf": "PDF",
+      "image": "IMG"
+    },
+    "delete": "Supprimer {fileName}",
+    "view": "Ouvrir {fileName}"
+  },
+  "documentsNew": {
+    "title": "Ajouter un document",
+    "description": "Importez un document, notre IA l'identifiera pour vous.",
+    "dropzoneCta": "Cliquez pour choisir un fichier",
+    "dropzoneHint": "PDF, image ou scan, 10 Mo maximum",
+    "submit": "Importer",
+    "uploading": "Envoi du fichier en cours"
+  },
+  "documentErrors": {
+    "duplicateName": {
+      "title": "Ce document existe déjà",
+      "description": "Un fichier du même nom est déjà enregistré dans votre espace. Renommez votre fichier avant de l'envoyer, ou supprimez l'ancien document."
+    },
+    "duplicateContent": {
+      "title": "Ce fichier a déjà été importé",
+      "description": "Le contenu de ce fichier est identique à un document déjà présent dans votre espace, même si le nom est différent. Vérifiez vos documents avant d'en ajouter un nouveau."
+    },
+    "fileType": {
+      "title": "Ce type de fichier n'est pas accepté",
+      "description": "Seuls les fichiers PDF, PNG et JPG peuvent être importés. Le contenu du fichier est vérifié, pas son nom : renommer un fichier ne suffit pas à le rendre valide."
+    },
+    "chooseAnother": "Choisir un autre fichier",
+    "backToDocuments": "Voir mes documents"
   }
 }
