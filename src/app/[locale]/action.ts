@@ -1,11 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import { getSeedUser } from "@/lib/auth/seed-user";
 
 export async function deleteDocument(formData: FormData) {
-  // Read the document id sent by the form
   const idFile = Number(formData.get("id"));
 
   if (!idFile) {
@@ -29,7 +29,5 @@ export async function deleteDocument(formData: FormData) {
     where: { id: idFile },
   });
 
-  // No locale prefix: the middleware normalises to the default locale. D10 will
-  // make this locale-aware with next-intl's own `redirect`.
-  redirect("/");
+  redirect({ href: "/", locale: await getLocale() });
 }
