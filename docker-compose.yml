@@ -24,6 +24,9 @@ services:
       - "3000"
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
+      # Document classification on upload. Absent = documents stay PENDING
+      # instead of the upload failing, so the app runs without a key.
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
     depends_on:
       db:
         condition: service_healthy

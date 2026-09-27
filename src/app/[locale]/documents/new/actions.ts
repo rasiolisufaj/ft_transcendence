@@ -5,8 +5,14 @@ import { prisma } from "@/lib/db";
 import { createHash } from "crypto";
 import { getSeedUser } from "@/lib/auth/seed-user";
 import { classifyDocument, extractionStatusFor } from "@/lib/documents/classify";
-import { narrowSubtypeFields } from "@/lib/documents/subtypes";
+import { narrowSubtypeFields, writeSubtypeRow } from "@/lib/documents/subtypes";
 import { ExtractionStatus } from "@/generated/prisma/enums";
+
+/**
+ * Extractions per user per 24h. The assistant is metered separately (B11); this
+ * one only guards the classification cost of uploads.
+ */
+const DAILY_EXTRACTION_CAP = 20;
 
 export async function uploadDocument(formData: FormData) {
   // Read the file sent by the form
@@ -58,39 +64,64 @@ export async function uploadDocument(formData: FormData) {
     redirect("/documents/error-duplicate");
   }
 
-  // Sort the document. No model runs yet: the seam returns OTHER / PENDING and
-  // the UI shows it as awaiting classification. Wiring B3 will only change the
-  // body of classifyDocument().
-  const classification = await classifyDocument({
-    buffer: fileBuffer,
-    mimeType: file.type,
-    fileName: file.name,
+  // Cost guard (PROJECT_PLAN B7 / R7). Past the cap we still keep the document —
+  // it simply stays unclassified, rather than being refused outright — so a busy
+  // day never loses a user's paperwork.
+  const uploadsToday = await prisma.document.count({
+    where: { ownerId: user.id, createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
   });
+  const overDailyCap = uploadsToday >= DAILY_EXTRACTION_CAP;
+
+  // Ask the model where this document belongs. The call is awaited, so the user
+  // waits a few seconds and lands on a dashboard that is already sorted.
+  const classification = overDailyCap
+    ? null
+    : await classifyDocument({
+        buffer: fileBuffer,
+        mimeType: file.type,
+        fileName: file.name,
+      });
 
   // Proposed fields go through their category's schema before touching the
   // database (PROJECT_PLAN B3). A guessed category whose fields fail validation
   // keeps the category but waits for a human.
-  const narrowed = narrowSubtypeFields(classification.category, classification.subtypeFields);
-  const extractionStatus = narrowed.ok
-    ? extractionStatusFor(classification)
-    : ExtractionStatus.NEEDS_REVIEW;
+  const narrowed = classification
+    ? narrowSubtypeFields(classification.category, classification.subtypeFields)
+    : null;
 
-  await prisma.document.create({
-    data: {
-      ownerId: user.id,
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      fileData: fileBuffer,
-      fileHash: fileHash,
-      category: classification.category,
-      extractionStatus,
-    },
+  const category = classification?.category ?? "OTHER";
+  const extractionStatus = !classification
+    ? ExtractionStatus.PENDING
+    : narrowed?.ok
+      ? extractionStatusFor(classification)
+      : ExtractionStatus.NEEDS_REVIEW;
+
+  // Base row and typed row in one transaction: a document must never exist with
+  // half its data. The switch that picks the table lives in subtypes.ts.
+  await prisma.$transaction(async (tx) => {
+    const document = await tx.document.create({
+      data: {
+        ownerId: user.id,
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        fileData: fileBuffer,
+        fileHash: fileHash,
+        category,
+        extractionStatus,
+        deadlineType: classification?.deadlineType ?? null,
+        // A date-only string from the model: pinned to UTC midnight so the same
+        // document never lands on a different day depending on the server.
+        targetDate: classification?.targetDate
+          ? new Date(`${classification.targetDate}T00:00:00Z`)
+          : null,
+      },
+    });
+
+    if (narrowed?.ok && narrowed.model && narrowed.data) {
+      await writeSubtypeRow(tx, narrowed.model, document.id, narrowed.data);
+    }
   });
-
-  // TODO(B3): once classifyDocument() returns fields, write the typed row in the
-  // same transaction as the base row. The switch on `narrowed.model` belongs in
-  // subtypes.ts, so that adding a category still touches only one file.
 
   redirect("/");
 }

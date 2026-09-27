@@ -23,6 +23,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@node-rs/argon2": "^2.2.1",
     "@prisma/client": "^6.19.3",
     "next": "16.3.4",
@@ -43,6 +44,5 @@
     "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^5.0.1"
-
   }
 }
