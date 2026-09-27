@@ -1,0 +1,191 @@
+import { z } from "zod";
+import { DocumentCategory } from "@/generated/prisma/enums";
+
+/**
+ * The document category registry — the single source of truth.
+ *
+ * Three things are derived from it, which is what makes adding a category cheap
+ * (PROJECT_PLAN §4: "Adding a document category touches this file and nothing
+ * else"):
+ *
+ *   - the dashboard cards          → `categoryCards()`
+ *   - the AI classification prompt → `classificationHints()`
+ *   - writing the typed row        → `narrowSubtypeFields()`
+ *
+ * To add a category: one value in the Prisma `DocumentCategory` enum, its
+ * `Document<Name>` table if it has fields of its own, and one entry here. The
+ * `satisfies Record<DocumentCategory, …>` below fails the build if either is
+ * missing.
+ */
+
+// ── Subtype schemas ──────────────────────────────────────────────────────────
+// One schema per category, imported both by the AI narrowing and (later, E8) by
+// the edit form — never two schemas that "look the same", which §0 of the plan
+// calls a defect rather than an implementation.
+
+export const IdentitySchema = z.object({
+  fullName: z.string().min(1),
+  birthDate: z.iso.date(),
+  documentNumber: z.string().min(1),
+  expiryDate: z.iso.date(),
+});
+
+export const InsuranceAutoSchema = z.object({
+  provider: z.string().min(1),
+  policyNumber: z.string().min(1),
+  vehiclePlate: z.string().min(1),
+  expiryDate: z.iso.date(),
+});
+
+// ── Registry types ───────────────────────────────────────────────────────────
+
+/** The Prisma delegate name, as we call it: `prisma[model].create(…)`. */
+export type SubtypeModel = "documentIdentity" | "documentInsuranceAuto";
+
+export type SubtypeDef = {
+  model: SubtypeModel;
+  schema: z.ZodObject<z.ZodRawShape>;
+};
+
+export type CategoryDef = {
+  /** URL segment, kept stable: /fr/documents/<slug>. */
+  slug: string;
+  /** Card title. Becomes an i18n key once D10 ships next-intl. */
+  label: string;
+  description: string;
+  /** null = no typed table. Only the case for OTHER (PROJECT_PLAN §3). */
+  subtype: SubtypeDef | null;
+  /** Injected into the classification prompt. Describes what belongs here. */
+  aiHint: string;
+};
+
+// ── The registry ─────────────────────────────────────────────────────────────
+
+export const CATEGORIES = {
+  IDENTITY: {
+    slug: "identity",
+    label: "My ID documents",
+    description: "ID card, passport, residence permit, driving licence",
+    subtype: { model: "documentIdentity", schema: IdentitySchema },
+    aiHint:
+      "national ID card, passport, residence permit, driving licence — " +
+      "an official document that identifies a person and carries an expiry date",
+  },
+  INSURANCE_AUTO: {
+    slug: "insurance",
+    label: "My insurance",
+    description: "Insurance certificates and contracts",
+    subtype: { model: "documentInsuranceAuto", schema: InsuranceAutoSchema },
+    aiHint:
+      "car insurance certificate, green card, contract or renewal notice from an " +
+      "insurer — carries a policy number and an insured vehicle",
+  },
+  OTHER: {
+    slug: "other",
+    label: "Other",
+    description: "Documents not yet sorted",
+    // No typed table: this is the catch-all, and a document the AI could not
+    // classify lands here with extractionStatus = PENDING / NEEDS_REVIEW.
+    subtype: null,
+    aiHint:
+      "any document that clearly belongs to none of the categories above — " +
+      "pick it only as a fallback, never to settle a doubt between two categories",
+  },
+} as const satisfies Record<DocumentCategory, CategoryDef>;
+
+export type CategoryKey = keyof typeof CATEGORIES;
+
+export const CATEGORY_KEYS = Object.keys(CATEGORIES) as readonly CategoryKey[];
+
+// ── URL resolution ───────────────────────────────────────────────────────────
+
+/** The slug comes from the URL, so from the user: never a cast, always a lookup. */
+export function categoryFromSlug(slug: string): CategoryKey | null {
+  for (const key of CATEGORY_KEYS) {
+    if (CATEGORIES[key].slug === slug) return key;
+  }
+  return null;
+}
+
+// ── Derived views ────────────────────────────────────────────────────────────
+
+export type CategoryCard = {
+  category: CategoryKey;
+  slug: string;
+  label: string;
+  description: string;
+  href: string;
+};
+
+/**
+ * The dashboard cards. Derived from the registry, never hand-maintained: a new
+ * category gets its card without anyone touching the dashboard.
+ *
+ * `locale` is optional so the registry stays testable without knowing about
+ * routing; pages pass the locale from their segment.
+ */
+export function categoryCards(locale?: string): CategoryCard[] {
+  const prefix = locale ? `/${locale}` : "";
+  return CATEGORY_KEYS.map((category) => {
+    const def = CATEGORIES[category];
+    return {
+      category,
+      slug: def.slug,
+      label: def.label,
+      description: def.description,
+      href: `${prefix}/documents/${def.slug}`,
+    };
+  });
+}
+
+export type ClassificationHint = { category: CategoryKey; hint: string };
+
+/** The categories as we will present them to the model. See `classify.ts`. */
+export function classificationHints(): ClassificationHint[] {
+  return CATEGORY_KEYS.map((category) => ({
+    category,
+    hint: CATEGORIES[category].aiHint,
+  }));
+}
+
+// ── Narrowing before a write ─────────────────────────────────────────────────
+
+export type NarrowResult =
+  | {
+      ok: true;
+      /** null for OTHER: nothing to write into a typed table. */
+      model: SubtypeModel | null;
+      data: Record<string, unknown> | null;
+    }
+  | {
+      ok: false;
+      issues: { path: readonly PropertyKey[]; message: string }[];
+    };
+
+/**
+ * Runs `fields` through the category's schema before any write.
+ *
+ * PROJECT_PLAN B3: "A field the schema doesn't know is dropped, never persisted
+ * into the base metadata." Stripping unknown keys is Zod's default on an object
+ * schema — that is what protects the database from a field the model made up.
+ */
+export function narrowSubtypeFields(category: CategoryKey, fields: unknown): NarrowResult {
+  const { subtype } = CATEGORIES[category];
+  if (subtype === null) return { ok: true, model: null, data: null };
+
+  const parsed = subtype.schema.safeParse(fields);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      issues: parsed.error.issues.map((issue) => ({
+        path: [...issue.path],
+        message: issue.message,
+      })),
+    };
+  }
+
+  // The schema is generic here (ZodRawShape), so its output is too. The keys are
+  // the schema's own; precise narrowing happens at write time, where the typed
+  // Prisma delegate takes over.
+  return { ok: true, model: subtype.model, data: parsed.data as Record<string, unknown> };
+}
