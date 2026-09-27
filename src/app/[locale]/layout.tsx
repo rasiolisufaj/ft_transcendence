@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { routing } from "@/i18n/routing";
+import { enableStaticRendering } from "@/i18n/static";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -38,7 +39,7 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  setRequestLocale(locale);
+  enableStaticRendering(locale);
 
   return (
     <html
