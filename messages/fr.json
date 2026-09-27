@@ -15,14 +15,48 @@
   "metadata": {
     "description": "Votre assistant pour les démarches administratives françaises : suivez vos documents, échéances et renouvellements."
   },
+  "categories": {
+    "identity": {
+      "label": "Mes papiers d'identité",
+      "description": "Carte d'identité, passeport, titre de séjour, permis de conduire"
+    },
+    "insurance": {
+      "label": "Mes assurances",
+      "description": "Attestations et contrats d'assurance"
+    },
+    "other": {
+      "label": "Autres",
+      "description": "Documents pas encore triés"
+    }
+  },
   "dashboard": {
     "title": "Mes documents",
     "subtitle": "Importez vos papiers administratifs français, notre IA s'occupe du reste.",
+    "addDocument": "Ajouter un document",
     "upload": "Importer",
     "empty": "Aucun document pour l'instant. Importez votre premier document pour commencer.",
+    "countByCategory": "{count, plural, one {# document, trié par catégorie.} other {# documents, triés par catégorie.}}",
+    "pendingClassification": "{count, plural, one {# document en attente de classement automatique.} other {# documents en attente de classement automatique.}}"
+  },
+  "documentCategory": {
+    "back": "Mes documents",
+    "addDocument": "Ajouter un document",
+    "empty": {
+      "title": "Aucun document dans cette catégorie",
+      "description": "Les documents importés seront classés ici automatiquement dès que le classement sera actif."
+    },
     "fileKind": {
       "pdf": "PDF",
       "image": "IMG"
+    },
+    "size": {
+      "b": "o",
+      "kb": "Ko",
+      "mb": "Mo"
+    },
+    "status": {
+      "pending": "En attente de classement",
+      "needsReview": "À vérifier"
     },
     "delete": "Supprimer {fileName}",
     "view": "Ouvrir {fileName}"

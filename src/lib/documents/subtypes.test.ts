@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { DocumentCategory } from "@/generated/prisma/enums";
+import en from "../../../messages/en.json";
+import es from "../../../messages/es.json";
+import fr from "../../../messages/fr.json";
 import {
   CATEGORIES,
   CATEGORY_KEYS,
@@ -9,6 +12,13 @@ import {
   narrowSubtypeFields,
   type CategoryKey,
 } from "@/lib/documents/subtypes";
+
+/** Indexed by slug, so a category missing from a catalogue reads as undefined. */
+type Catalogue = {
+  categories: Record<string, { label: string; description: string } | undefined>;
+};
+
+const catalogues: Record<string, Catalogue> = { fr, en, es };
 
 describe("the category registry", () => {
   it("assigns every category a unique slug", () => {
@@ -29,12 +39,20 @@ describe("the category registry", () => {
     expect([...CATEGORY_KEYS].sort()).toEqual(Object.values(DocumentCategory).sort());
   });
 
-  it("gives every category a non-empty label, description and AI hint", () => {
+  it("gives every category a non-empty AI hint", () => {
     for (const key of CATEGORY_KEYS) {
-      const def = CATEGORIES[key];
-      expect(def.label.length).toBeGreaterThan(0);
-      expect(def.description.length).toBeGreaterThan(0);
-      expect(def.aiHint.length).toBeGreaterThan(0);
+      expect(CATEGORIES[key].aiHint.length).toBeGreaterThan(0);
+    }
+  });
+
+  // The registry holds no display text: the label and the description live under
+  // `categories.<slug>` in every catalogue. This is what keeps "adding a category
+  // is cheap" from meaning "adding a category ships an untranslated card".
+  it.each(Object.entries(catalogues))("translates every category in %s", (_locale, messages) => {
+    for (const key of CATEGORY_KEYS) {
+      const entry = messages.categories[CATEGORIES[key].slug];
+      expect(entry?.label.length).toBeGreaterThan(0);
+      expect(entry?.description.length).toBeGreaterThan(0);
     }
   });
 

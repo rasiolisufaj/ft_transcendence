@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
 import { getSeedUser } from "@/lib/auth/seed-user";
@@ -7,8 +8,9 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { categoryCards, type CategoryKey } from "@/lib/documents/subtypes";
 
-export default async function DashboardPage({ params }: PageProps<"/[locale]">) {
-  const { locale } = await params;
+export default async function DashboardPage() {
+  const t = await getTranslations("dashboard");
+  const tCategory = await getTranslations("categories");
   const user = await getSeedUser();
 
   const grouped = await prisma.document.groupBy({
@@ -26,24 +28,22 @@ export default async function DashboardPage({ params }: PageProps<"/[locale]">) 
     where: { ownerId: user.id, extractionStatus: "PENDING" },
   });
 
-  const cards = categoryCards(locale);
+  const cards = categoryCards();
 
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">My documents</h1>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            {total === 0
-              ? "No documents yet."
-              : `${total} document${total > 1 ? "s" : ""}, sorted by category.`}
+            {total === 0 ? t("empty") : t("countByCategory", { count: total })}
           </p>
         </div>
         <Link
           href="/documents/new"
           className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
-          Add a document
+          {t("addDocument")}
         </Link>
       </div>
 
@@ -54,11 +54,11 @@ export default async function DashboardPage({ params }: PageProps<"/[locale]">) 
             <Link key={card.category} href={card.href} className="group block">
               <Card className="h-full transition group-hover:border-zinc-400 dark:group-hover:border-zinc-600">
                 <div className="flex items-start justify-between gap-3">
-                  <h2 className="font-medium">{card.label}</h2>
+                  <h2 className="font-medium">{tCategory(`${card.slug}.label`)}</h2>
                   <Badge tone={count === 0 ? "neutral" : "success"}>{count}</Badge>
                 </div>
                 <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                  {card.description}
+                  {tCategory(`${card.slug}.description`)}
                 </p>
               </Card>
             </Link>
@@ -68,7 +68,7 @@ export default async function DashboardPage({ params }: PageProps<"/[locale]">) 
 
       {pending > 0 && (
         <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
-          {pending} document{pending > 1 ? "s" : ""} awaiting automatic classification.
+          {t("pendingClassification", { count: pending })}
         </p>
       )}
     </div>

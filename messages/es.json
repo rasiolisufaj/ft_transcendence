@@ -15,14 +15,48 @@
   "metadata": {
     "description": "Su asistente para los trámites administrativos franceses: siga sus documentos, plazos y renovaciones."
   },
+  "categories": {
+    "identity": {
+      "label": "Mis documentos de identidad",
+      "description": "DNI, pasaporte, permiso de residencia, permiso de conducir"
+    },
+    "insurance": {
+      "label": "Mis seguros",
+      "description": "Certificados y contratos de seguro"
+    },
+    "other": {
+      "label": "Otros",
+      "description": "Documentos aún sin clasificar"
+    }
+  },
   "dashboard": {
     "title": "Mis documentos",
     "subtitle": "Suba sus documentos administrativos franceses, nuestra IA se encarga del resto.",
+    "addDocument": "Añadir un documento",
     "upload": "Subir",
     "empty": "Todavía no hay documentos. Suba su primer documento para empezar.",
+    "countByCategory": "{count, plural, one {# documento, ordenado por categoría.} other {# documentos, ordenados por categoría.}}",
+    "pendingClassification": "{count, plural, one {# documento pendiente de clasificación automática.} other {# documentos pendientes de clasificación automática.}}"
+  },
+  "documentCategory": {
+    "back": "Mis documentos",
+    "addDocument": "Añadir un documento",
+    "empty": {
+      "title": "No hay documentos en esta categoría",
+      "description": "Los documentos subidos se clasificarán aquí automáticamente cuando la clasificación esté activa."
+    },
     "fileKind": {
       "pdf": "PDF",
       "image": "IMG"
+    },
+    "size": {
+      "b": "B",
+      "kb": "KB",
+      "mb": "MB"
+    },
+    "status": {
+      "pending": "Pendiente de clasificación",
+      "needsReview": "Requiere revisión"
     },
     "delete": "Eliminar {fileName}",
     "view": "Abrir {fileName}"
