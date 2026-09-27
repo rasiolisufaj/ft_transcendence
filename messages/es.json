@@ -11,5 +11,44 @@
       "en": "English",
       "es": "Español"
     }
+  },
+  "metadata": {
+    "description": "Su asistente para los trámites administrativos franceses: siga sus documentos, plazos y renovaciones."
+  },
+  "dashboard": {
+    "title": "Mis documentos",
+    "subtitle": "Suba sus documentos administrativos franceses, nuestra IA se encarga del resto.",
+    "upload": "Subir",
+    "empty": "Todavía no hay documentos. Suba su primer documento para empezar.",
+    "fileKind": {
+      "pdf": "PDF",
+      "image": "IMG"
+    },
+    "delete": "Eliminar {fileName}",
+    "view": "Abrir {fileName}"
+  },
+  "documentsNew": {
+    "title": "Añadir un documento",
+    "description": "Suba un documento y nuestra IA lo identificará por usted.",
+    "dropzoneCta": "Haga clic para elegir un archivo",
+    "dropzoneHint": "PDF, imagen o escaneo, 10 MB como máximo",
+    "submit": "Subir",
+    "uploading": "Subiendo el archivo"
+  },
+  "documentErrors": {
+    "duplicateName": {
+      "title": "Este documento ya existe",
+      "description": "Ya hay un archivo con el mismo nombre en su espacio. Cambie el nombre del archivo antes de enviarlo o elimine el documento anterior."
+    },
+    "duplicateContent": {
+      "title": "Este archivo ya se ha subido",
+      "description": "El contenido de este archivo es idéntico al de un documento que ya está en su espacio, aunque el nombre sea diferente. Revise sus documentos antes de añadir uno nuevo."
+    },
+    "fileType": {
+      "title": "Este tipo de archivo no se acepta",
+      "description": "Solo se pueden subir archivos PDF, PNG y JPG. Se comprueba el contenido del archivo, no su nombre: cambiarle el nombre no basta para que sea válido."
+    },
+    "chooseAnother": "Elegir otro archivo",
+    "backToDocuments": "Ver mis documentos"
   }
 }

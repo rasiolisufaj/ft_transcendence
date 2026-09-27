@@ -11,5 +11,44 @@
       "en": "English",
       "es": "Español"
     }
+  },
+  "metadata": {
+    "description": "Your assistant for French paperwork: track your documents, deadlines and renewals."
+  },
+  "dashboard": {
+    "title": "My documents",
+    "subtitle": "Upload your French paperwork, our AI will handle the rest.",
+    "upload": "Upload",
+    "empty": "No documents yet. Upload your first document to get started.",
+    "fileKind": {
+      "pdf": "PDF",
+      "image": "IMG"
+    },
+    "delete": "Delete {fileName}",
+    "view": "Open {fileName}"
+  },
+  "documentsNew": {
+    "title": "Add a document",
+    "description": "Upload a document and our AI will identify it for you.",
+    "dropzoneCta": "Click to choose a file",
+    "dropzoneHint": "PDF, image or scan, 10 MB max",
+    "submit": "Upload",
+    "uploading": "Uploading the file"
+  },
+  "documentErrors": {
+    "duplicateName": {
+      "title": "This document already exists",
+      "description": "A file with the same name is already saved in your space. Rename your file before sending it, or delete the old document."
+    },
+    "duplicateContent": {
+      "title": "This file has already been uploaded",
+      "description": "This file's content is identical to a document already in your space, even though the name is different. Check your documents before adding a new one."
+    },
+    "fileType": {
+      "title": "This file type is not accepted",
+      "description": "Only PDF, PNG and JPG files can be uploaded. The file's content is checked, not its name: renaming a file is not enough to make it valid."
+    },
+    "chooseAnother": "Choose another file",
+    "backToDocuments": "View my documents"
   }
 }
