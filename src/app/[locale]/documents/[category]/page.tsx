@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getFormatter, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
 import { getSeedUser } from "@/lib/auth/seed-user";
 import { Badge } from "@/components/ui/Badge";
@@ -10,24 +11,28 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { CATEGORIES, categoryFromSlug } from "@/lib/documents/subtypes";
 import { deleteDocument } from "@/app/[locale]/action";
 
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+/**
+ * Splits a byte count into the number to display and the unit's message key.
+ * The unit is translated rather than hardcoded: French writes o / Ko / Mo.
+ */
+function splitSize(bytes: number): { value: number; unit: "b" | "kb" | "mb" } {
+  if (bytes < 1024) return { value: bytes, unit: "b" };
+  if (bytes < 1024 * 1024) return { value: bytes / 1024, unit: "kb" };
+  return { value: bytes / (1024 * 1024), unit: "mb" };
 }
 
 export default async function CategoryPage({ params }: PageProps<"/[locale]/documents/[category]">) {
-  const { locale, category: slug } = await params;
+  const { category: slug } = await params;
 
-  // The slug comes from the URL. The registry is the only judge: an unknown slug
-  // is a 404, never an empty list that would suggest the category exists.
   const category = categoryFromSlug(slug);
   if (category === null) notFound();
 
   const def = CATEGORIES[category];
+  const t = await getTranslations("documentCategory");
+  const tCategory = await getTranslations("categories");
+  const format = await getFormatter();
   const user = await getSeedUser();
 
-  // Filtered in the query, not in the component — E6 requires it.
   const documents = await prisma.document.findMany({
     where: { ownerId: user.id, category },
     orderBy: { createdAt: "desc" },
@@ -37,57 +42,63 @@ export default async function CategoryPage({ params }: PageProps<"/[locale]/docu
     <div>
       <div className="mb-8">
         <Link
-          href={`/${locale}`}
+          href="/"
           className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
         >
-          ← My documents
+          ← {t("back")}
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold">{def.label}</h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{def.description}</p>
+        <h1 className="mt-2 text-2xl font-semibold">{tCategory(`${def.slug}.label`)}</h1>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          {tCategory(`${def.slug}.description`)}
+        </p>
       </div>
 
       {documents.length === 0 ? (
         <EmptyState
-          title="No documents in this category"
-          description="Uploaded documents will be sorted in here automatically once classification is wired."
+          title={t("empty.title")}
+          description={t("empty.description")}
           action={
             <Link
-              href={`/${locale}/documents/new`}
+              href="/documents/new"
               className="inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
-              Add a document
+              {t("addDocument")}
             </Link>
           }
         />
       ) : (
         <div className="space-y-3">
-          {documents.map((doc) => (
+          {documents.map((doc) => {
+            const size = splitSize(doc.fileSize);
+            return (
             <div
               key={doc.id}
               className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-xs font-medium uppercase text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                {doc.fileType.includes("pdf") ? "PDF" : "IMG"}
+                {doc.fileType.includes("pdf") ? t("fileKind.pdf") : t("fileKind.image")}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{doc.fileName}</p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {formatSize(doc.fileSize)} · {doc.createdAt.toLocaleDateString("fr-FR")}
+                  {format.number(size.value, { maximumFractionDigits: 1 })}{" "}
+                  {t(`size.${size.unit}`)} ·{" "}
+                  {format.dateTime(doc.createdAt, { dateStyle: "short" })}
                 </p>
               </div>
 
               {doc.extractionStatus === "PENDING" && (
-                <Badge tone="warning">Awaiting classification</Badge>
+                <Badge tone="warning">{t("status.pending")}</Badge>
               )}
               {doc.extractionStatus === "NEEDS_REVIEW" && (
-                <Badge tone="warning">Needs review</Badge>
+                <Badge tone="warning">{t("status.needsReview")}</Badge>
               )}
 
               <a
                 href={`/api/documents/${doc.id}`}
                 target="_blank"
                 rel="noreferrer"
-                aria-label={`Open ${doc.fileName}`}
+                aria-label={t("view", { fileName: doc.fileName })}
                 className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
               >
                 <svg
@@ -113,7 +124,7 @@ export default async function CategoryPage({ params }: PageProps<"/[locale]/docu
 
               <form action={deleteDocument}>
                 <input type="hidden" name="id" value={doc.id} />
-                <Button variant="secondary" aria-label={`Delete ${doc.fileName}`}>
+                <Button variant="secondary" aria-label={t("delete", { fileName: doc.fileName })}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -131,7 +142,8 @@ export default async function CategoryPage({ params }: PageProps<"/[locale]/docu
                 </Button>
               </form>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

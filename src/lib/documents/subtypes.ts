@@ -48,14 +48,18 @@ export type SubtypeDef = {
 };
 
 export type CategoryDef = {
-  /** URL segment, kept stable: /fr/documents/<slug>. */
+  /**
+   * URL segment, kept stable: /fr/documents/<slug>. Doubles as the i18n key:
+   * the card title and the description live in `categories.<slug>` in
+   * messages/*.json, never here — this registry holds no display text.
+   */
   slug: string;
-  /** Card title. Becomes an i18n key once D10 ships next-intl. */
-  label: string;
-  description: string;
   /** null = no typed table. Only the case for OTHER (PROJECT_PLAN §3). */
   subtype: SubtypeDef | null;
-  /** Injected into the classification prompt. Describes what belongs here. */
+  /**
+   * Injected into the classification prompt. Describes what belongs here.
+   * Stays English on purpose: it is read by the model, not by the user.
+   */
   aiHint: string;
 };
 
@@ -64,8 +68,6 @@ export type CategoryDef = {
 export const CATEGORIES = {
   IDENTITY: {
     slug: "identity",
-    label: "My ID documents",
-    description: "ID card, passport, residence permit, driving licence",
     subtype: { model: "documentIdentity", schema: IdentitySchema },
     aiHint:
       "national ID card, passport, residence permit, driving licence — " +
@@ -73,8 +75,6 @@ export const CATEGORIES = {
   },
   INSURANCE_AUTO: {
     slug: "insurance",
-    label: "My insurance",
-    description: "Insurance certificates and contracts",
     subtype: { model: "documentInsuranceAuto", schema: InsuranceAutoSchema },
     aiHint:
       "car insurance certificate, green card, contract or renewal notice from an " +
@@ -82,8 +82,6 @@ export const CATEGORIES = {
   },
   OTHER: {
     slug: "other",
-    label: "Other",
-    description: "Documents not yet sorted",
     // No typed table: this is the catch-all, and a document the AI could not
     // classify lands here with extractionStatus = PENDING / NEEDS_REVIEW.
     subtype: null,
@@ -94,6 +92,12 @@ export const CATEGORIES = {
 } as const satisfies Record<DocumentCategory, CategoryDef>;
 
 export type CategoryKey = keyof typeof CATEGORIES;
+
+/**
+ * The slugs as literals, so `t(`${slug}.label`)` is checked against the message
+ * catalogue: a category whose translations are missing fails the typecheck.
+ */
+export type CategorySlug = (typeof CATEGORIES)[CategoryKey]["slug"];
 
 export const CATEGORY_KEYS = Object.keys(CATEGORIES) as readonly CategoryKey[];
 
@@ -111,9 +115,8 @@ export function categoryFromSlug(slug: string): CategoryKey | null {
 
 export type CategoryCard = {
   category: CategoryKey;
-  slug: string;
-  label: string;
-  description: string;
+  /** Also the i18n key: the dashboard reads `categories.<slug>.label`. */
+  slug: CategorySlug;
   href: string;
 };
 
@@ -121,19 +124,17 @@ export type CategoryCard = {
  * The dashboard cards. Derived from the registry, never hand-maintained: a new
  * category gets its card without anyone touching the dashboard.
  *
- * `locale` is optional so the registry stays testable without knowing about
- * routing; pages pass the locale from their segment.
+ * `href` is locale-relative on purpose: the registry knows nothing about
+ * routing, and the `Link` from `@/i18n/navigation` prepends the active locale.
+ * Baking `/<locale>` in here would prefix it twice (/fr/fr/documents/…).
  */
-export function categoryCards(locale?: string): CategoryCard[] {
-  const prefix = locale ? `/${locale}` : "";
+export function categoryCards(): CategoryCard[] {
   return CATEGORY_KEYS.map((category) => {
     const def = CATEGORIES[category];
     return {
       category,
       slug: def.slug,
-      label: def.label,
-      description: def.description,
-      href: `${prefix}/documents/${def.slug}`,
+      href: `/documents/${def.slug}`,
     };
   });
 }

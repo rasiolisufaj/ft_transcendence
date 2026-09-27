@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "brand": "MesPapiers",
+    "dashboard": "Dashboard",
+    "addDocument": "Add a document"
+  },
+  "localeSwitcher": {
+    "label": "Language",
+    "names": {
+      "fr": "Français",
+      "en": "English",
+      "es": "Español"
+    }
+  },
+  "metadata": {
+    "description": "Your assistant for French paperwork: track your documents, deadlines and renewals."
+  },
+  "categories": {
+    "identity": {
+      "label": "My ID documents",
+      "description": "ID card, passport, residence permit, driving licence"
+    },
+    "insurance": {
+      "label": "My insurance",
+      "description": "Insurance certificates and contracts"
+    },
+    "other": {
+      "label": "Other",
+      "description": "Documents not yet sorted"
+    }
+  },
+  "dashboard": {
+    "title": "My documents",
+    "subtitle": "Upload your French paperwork, our AI will handle the rest.",
+    "addDocument": "Add a document",
+    "upload": "Upload",
+    "empty": "No documents yet. Upload your first document to get started.",
+    "countByCategory": "{count, plural, one {# document, sorted by category.} other {# documents, sorted by category.}}",
+    "pendingClassification": "{count, plural, one {# document awaiting automatic classification.} other {# documents awaiting automatic classification.}}"
+  },
+  "documentCategory": {
+    "back": "My documents",
+    "addDocument": "Add a document",
+    "empty": {
+      "title": "No documents in this category",
+      "description": "Uploaded documents will be sorted in here automatically once classification is wired."
+    },
+    "fileKind": {
+      "pdf": "PDF",
+      "image": "IMG"
+    },
+    "size": {
+      "b": "B",
+      "kb": "KB",
+      "mb": "MB"
+    },
+    "status": {
+      "pending": "Awaiting classification",
+      "needsReview": "Needs review"
+    },
+    "delete": "Delete {fileName}",
+    "view": "Open {fileName}"
+  },
+  "documentsNew": {
+    "title": "Add a document",
+    "description": "Upload a document and our AI will identify it for you.",
+    "dropzoneCta": "Click to choose a file",
+    "dropzoneHint": "PDF, image or scan, 10 MB max",
+    "submit": "Upload",
+    "uploading": "Uploading the file"
+  },
+  "documentErrors": {
+    "duplicateName": {
+      "title": "This document already exists",
+      "description": "A file with the same name is already saved in your space. Rename your file before sending it, or delete the old document."
+    },
+    "duplicateContent": {
+      "title": "This file has already been uploaded",
+      "description": "This file's content is identical to a document already in your space, even though the name is different. Check your documents before adding a new one."
+    },
+    "fileType": {
+      "title": "This file type is not accepted",
+      "description": "Only PDF, PNG and JPG files can be uploaded. The file's content is checked, not its name: renaming a file is not enough to make it valid."
+    },
+    "chooseAnother": "Choose another file",
+    "backToDocuments": "View my documents"
+  }
+}
