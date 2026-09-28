@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/Button";
-import { createAnswer, deleteAnswer } from "./actions";
+import { createAnswer, deleteAnswer, kickMember, leaveChannel } from "./actions";
 
 export default async function ChannelPage({
   params,
@@ -30,6 +30,10 @@ export default async function ChannelPage({
       members: { some: { userId: user.id } },
     },
     include: {
+      members: {
+        orderBy: { joinedAt: "asc" },
+        include: { user: { select: { displayName: true } } },
+      },
       threads: {
         orderBy: { createdAt: "desc" },
         include: {
@@ -49,6 +53,10 @@ export default async function ChannelPage({
     notFound();
   }
   const question = channel.threads[0];
+  // seul un moderateur voit le bouton pour virer les membres
+  const isModerator = channel.members.some(
+    (member) => member.userId === user.id && member.role === "MODERATOR",
+  );
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <Link
@@ -66,7 +74,61 @@ export default async function ChannelPage({
           {channel.description}
         </p>
       )}
+   <form action={leaveChannel} className="mt-4">
+    <input type="hidden" name="channelId" value={channel.id} />
+    <button
+      type="submit"
+      className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="size-4"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+        />
+      </svg>
+      Quitter le channel
+    </button>
+  </form>
 
+      <h2 className="mt-6 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+        {channel.members.length} membre(s)
+      </h2>
+      <ul className="mt-2 flex flex-col gap-2">
+        {channel.members.map((member) => (
+          <li
+            key={member.userId}
+            className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700"
+          >
+            <span className="text-zinc-700 dark:text-zinc-300">
+              {member.user.displayName}
+              {member.role === "MODERATOR" && (
+                <span className="ml-2 text-xs text-zinc-400">modérateur</span>
+              )}
+            </span>
+
+            {isModerator && member.role !== "MODERATOR" && (
+              <form action={kickMember}>
+                <input type="hidden" name="channelId" value={channel.id} />
+                <input type="hidden" name="userId" value={member.userId} />
+                <button
+                  type="submit"
+                  className="rounded-md px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                >
+                  Retirer
+                </button>
+              </form>
+            )}
+          </li>
+        ))}
+      </ul>
       {question ? (
         <>
           <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
@@ -99,6 +161,7 @@ export default async function ChannelPage({
                     <p className="mt-1 text-xs text-zinc-400">
                       {answer.author?.displayName ?? "Utilisateur supprimé"}
                     </p>
+                    <p>{answer.createdAt.toLocaleDateString("fr-FR")}</p>
                   </div>
 
                   {answer.userId === user.id && (
