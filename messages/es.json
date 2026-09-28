@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "brand": "MesPapiers",
+    "dashboard": "Panel",
+    "addDocument": "Añadir un documento"
+  },
+  "localeSwitcher": {
+    "label": "Idioma",
+    "names": {
+      "fr": "Français",
+      "en": "English",
+      "es": "Español"
+    }
+  },
+  "metadata": {
+    "description": "Su asistente para los trámites administrativos franceses: siga sus documentos, plazos y renovaciones."
+  },
+  "categories": {
+    "identity": {
+      "label": "Mis documentos de identidad",
+      "description": "DNI, pasaporte, permiso de residencia, permiso de conducir"
+    },
+    "insurance": {
+      "label": "Mis seguros",
+      "description": "Certificados y contratos de seguro"
+    },
+    "other": {
+      "label": "Otros",
+      "description": "Documentos aún sin clasificar"
+    }
+  },
+  "dashboard": {
+    "title": "Mis documentos",
+    "subtitle": "Suba sus documentos administrativos franceses, nuestra IA se encarga del resto.",
+    "addDocument": "Añadir un documento",
+    "upload": "Subir",
+    "empty": "Todavía no hay documentos. Suba su primer documento para empezar.",
+    "countByCategory": "{count, plural, one {# documento, ordenado por categoría.} other {# documentos, ordenados por categoría.}}",
+    "pendingClassification": "{count, plural, one {# documento pendiente de clasificación automática.} other {# documentos pendientes de clasificación automática.}}"
+  },
+  "documentCategory": {
+    "back": "Mis documentos",
+    "addDocument": "Añadir un documento",
+    "empty": {
+      "title": "No hay documentos en esta categoría",
+      "description": "Los documentos subidos se clasificarán aquí automáticamente cuando la clasificación esté activa."
+    },
+    "fileKind": {
+      "pdf": "PDF",
+      "image": "IMG"
+    },
+    "size": {
+      "b": "B",
+      "kb": "KB",
+      "mb": "MB"
+    },
+    "status": {
+      "pending": "Pendiente de clasificación",
+      "needsReview": "Requiere revisión"
+    },
+    "delete": "Eliminar {fileName}",
+    "view": "Abrir {fileName}"
+  },
+  "documentsNew": {
+    "title": "Añadir un documento",
+    "description": "Suba un documento y nuestra IA lo identificará por usted.",
+    "dropzoneCta": "Haga clic para elegir un archivo",
+    "dropzoneHint": "PDF, imagen o escaneo, 10 MB como máximo",
+    "submit": "Subir",
+    "uploading": "Subiendo el archivo"
+  },
+  "documentErrors": {
+    "duplicateName": {
+      "title": "Este documento ya existe",
+      "description": "Ya hay un archivo con el mismo nombre en su espacio. Cambie el nombre del archivo antes de enviarlo o elimine el documento anterior."
+    },
+    "duplicateContent": {
+      "title": "Este archivo ya se ha subido",
+      "description": "El contenido de este archivo es idéntico al de un documento que ya está en su espacio, aunque el nombre sea diferente. Revise sus documentos antes de añadir uno nuevo."
+    },
+    "fileType": {
+      "title": "Este tipo de archivo no se acepta",
+      "description": "Solo se pueden subir archivos PDF, PNG y JPG. Se comprueba el contenido del archivo, no su nombre: cambiarle el nombre no basta para que sea válido."
+    },
+    "chooseAnother": "Elegir otro archivo",
+    "backToDocuments": "Ver mis documentos"
+  }
+}
