@@ -1,18 +1,19 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 import { getUserChannels } from "./create/data";
 import { deleteChannel } from "./create/action";
 
 export default async function ChannelsHomePage() {
+  const t = await getTranslations("channels.home");
   const channelsMember = await getUserChannels("Amir@gmail.com");
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          Channels
+          {t("title")}
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Pose des questions, partage tes astuces et aide les autres avec leurs
-          papiers.
+          {t("subtitle")}
         </p>
 
         <div className="mt-6 flex flex-col gap-3">
@@ -27,10 +28,10 @@ export default async function ChannelsHomePage() {
             />
             <div>
               <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
-                Créer un channel
+                {t("createTitle")}
               </h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Crée un espace pour parler d'un sujet.
+                {t("createDesc")}
               </p>
             </div>
           </Link>
@@ -46,10 +47,10 @@ export default async function ChannelsHomePage() {
             />
             <div>
               <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
-                Rejoindre un channel
+                {t("joinTitle")}
               </h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Parcours les channels publics et rejoins-en un.
+                {t("joinDesc")}
               </p>
             </div>
           </Link>
@@ -65,10 +66,10 @@ export default async function ChannelsHomePage() {
             />
             <div>
               <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
-                voir mes invitation
+                {t("invitationsTitle")}
               </h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Demande l'accès à un channel privé.
+                {t("invitationsDesc")}
               </p>
             </div>
           </Link>
@@ -95,13 +96,13 @@ export default async function ChannelsHomePage() {
                   </p>
                 )}
                 <p className="mt-1 text-xs text-zinc-400">
-                  {channel._count.members} membre(s)
+                  {t("membersCount", { count: channel._count.members })}
                 </p>
               </Link>
 
               <details className="relative">
                 <summary
-                  aria-label="Options du channel"
+                  aria-label={t("optionsAria")}
                   className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 [&::-webkit-details-marker]:hidden"
                 >
                   <svg
@@ -139,7 +140,7 @@ export default async function ChannelsHomePage() {
                         d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
                       />
                     </svg>
-                    Inviter
+                    {t("invite")}
                   </Link>
                   <Link
                     href={`/channels/${channel.id}/edit`}
@@ -159,7 +160,7 @@ export default async function ChannelsHomePage() {
                         d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
                       />
                     </svg>
-                    Modifier
+                    {t("edit")}
                   </Link>
 
                   <form action={deleteChannel}>
@@ -186,7 +187,7 @@ export default async function ChannelsHomePage() {
                           d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
                         />
                       </svg>
-                      Supprimer
+                      {t("delete")}
                     </button>
                   </form>
                 </div>
@@ -196,7 +197,7 @@ export default async function ChannelsHomePage() {
         </div>
       ) : (
         <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
-          Tu n'appartiens à aucun channel.
+          {t("empty")}
         </p>
       )}
     </main>

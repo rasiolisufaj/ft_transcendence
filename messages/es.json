@@ -84,5 +84,86 @@
     },
     "chooseAnother": "Elegir otro archivo",
     "backToDocuments": "Ver mis documentos"
+  },
+  "channels": {
+    "home": {
+      "title": "Canales",
+      "subtitle": "Haz preguntas, comparte consejos y ayuda a los demás con sus trámites.",
+      "createTitle": "Crear un canal",
+      "createDesc": "Crea un espacio para hablar de un tema.",
+      "joinTitle": "Unirse a un canal",
+      "joinDesc": "Explora los canales públicos y únete a uno.",
+      "invitationsTitle": "Ver mis invitaciones",
+      "invitationsDesc": "Solicita acceso a un canal privado.",
+      "empty": "No perteneces a ningún canal.",
+      "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
+      "optionsAria": "Opciones del canal",
+      "invite": "Invitar",
+      "edit": "Modificar",
+      "delete": "Eliminar"
+    },
+    "create": {
+      "title": "Crear un canal",
+      "subtitle": "Crea un espacio donde la gente pueda hacer preguntas y ayudarse mutuamente sobre un tema.",
+      "nameLabel": "Nombre del canal",
+      "namePlaceholder": "p. ej.: Seguro de coche",
+      "descriptionLabel": "Descripción (opcional)",
+      "descriptionPlaceholder": "¿De qué trata este canal?",
+      "questionLabel": "Pregunta (obligatoria)",
+      "questionPlaceholder": "Haz tu pregunta con el mayor detalle posible para obtener respuestas claras.",
+      "cancel": "Cancelar",
+      "submit": "Crear el canal"
+    },
+    "detail": {
+      "back": "← Volver a los canales",
+      "leave": "Salir del canal",
+      "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
+      "moderator": "moderador",
+      "kick": "Expulsar",
+      "authoredBy": "por {name} · {date}",
+      "deletedUser": "Usuario eliminado",
+      "repliesCount": "{count, plural, one {# respuesta} other {# respuestas}}",
+      "noReplies": "Nadie ha respondido todavía.",
+      "editReplyAria": "Modificar la respuesta",
+      "deleteReplyAria": "Eliminar la respuesta",
+      "replyPlaceholder": "Escribe una respuesta…",
+      "replyAria": "Tu respuesta",
+      "send": "Enviar",
+      "noQuestion": "No hay pregunta en este canal."
+    },
+    "edit": {
+      "title": "Modificar el canal",
+      "subtitle": "Cambia el nombre, la descripción o la pregunta.",
+      "nameLabel": "Nombre del canal",
+      "descriptionLabel": "Descripción (opcional)",
+      "questionLabel": "Pregunta",
+      "cancel": "Cancelar",
+      "save": "Guardar"
+    },
+    "invite": {
+      "back": "← Volver a los canales",
+      "title": "Invitar a {channel}",
+      "subtitle": "Elige a alguien para invitar.",
+      "userAria": "Usuario a invitar",
+      "chooseUser": "Elegir un usuario…",
+      "submit": "Invitar"
+    },
+    "answerEdit": {
+      "title": "Modificar mi respuesta",
+      "cancel": "Cancelar",
+      "save": "Guardar"
+    },
+    "invitations": {
+      "back": "← Volver a los canales",
+      "title": "Mis invitaciones",
+      "empty": "No tienes invitaciones pendientes por ahora.",
+      "pending": "{count, plural, one {Tienes # invitación pendiente.} other {Tienes # invitaciones pendientes.}}",
+      "intro": "Un moderador te ha invitado a unirte a su canal. Acepta para convertirte en miembro o rechaza para eliminar la invitación.",
+      "description": "descripción: {description}",
+      "noDescription": "Este canal no tiene descripción.",
+      "membersCount": "Número de miembros del canal: {count}",
+      "accept": "Aceptar",
+      "decline": "Rechazar"
+    }
   }
 }

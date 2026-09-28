@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getAllUsers } from "../../create/data";
-import Link            from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 import { inviteUser } from "./action";
 
 // revoir les commentaires plus tard
@@ -9,6 +10,7 @@ export default async function InviteUserPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = await getTranslations("channels.invite");
   // recupere
   const promise = await params;
   const idChannel = promise.id;
@@ -54,15 +56,15 @@ export default async function InviteUserPage({
         href="/channels"
         className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
       >
-        ← Retour aux channels
+        {t("back")}
       </Link>
 
       <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          Inviter dans {channel.title}
+          {t("title", { channel: channel.title })}
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Choisis une personne à inviter.
+          {t("subtitle")}
         </p>
 
         <form className="mt-6 flex flex-col gap-3" action={inviteUser}>
@@ -72,11 +74,11 @@ export default async function InviteUserPage({
             name="userId"
             required
             defaultValue=""
-            aria-label="Utilisateur à inviter"
+            aria-label={t("userAria")}
             className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
           >
             <option value="" disabled>
-              Choisir un utilisateur…
+              {t("chooseUser")}
             </option>
             {users.map((person) => (
               <option key={person.id} value={person.id}>
@@ -89,7 +91,7 @@ export default async function InviteUserPage({
             type="submit"
             className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
-            Inviter
+            {t("submit")}
           </button>
         </form>
       </div>

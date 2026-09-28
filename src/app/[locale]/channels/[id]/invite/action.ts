@@ -1,6 +1,7 @@
 "use server";
 import { prisma } from "@/lib/db";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 export async function inviteUser(formData: FormData) {
   const channelId = formData.get("channelId");
   const userId = formData.get("userId");
@@ -79,5 +80,5 @@ export async function inviteUser(formData: FormData) {
       userId: trueUserId,
     },
   });
-  redirect("/channels");
+  redirect({ href: "/channels", locale: await getLocale() });
 }

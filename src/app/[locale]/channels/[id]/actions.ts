@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { channel } from "diagnostics_channel";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 // repasser sur les commentaires plus tard
 
 export async function createAnswer(formData: FormData) {

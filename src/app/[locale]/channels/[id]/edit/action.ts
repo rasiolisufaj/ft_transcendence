@@ -3,7 +3,8 @@
 import { prisma } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 
 // plus tard il va falloir faire en sorte que la personne ne soit pas obligée de modifier tous les champs
 export async function editChannel(formData: FormData) {
@@ -86,5 +87,5 @@ export async function editChannel(formData: FormData) {
   }
 
   revalidatePath(`/channels/${intId}`);
-  redirect(`/channels/${intId}`);
+  redirect({ href: `/channels/${intId}`, locale: await getLocale() });
 }

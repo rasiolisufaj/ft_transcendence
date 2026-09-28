@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { int } from "zod";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { modifAnswerUser } from "../../../actions";
 // page edit message recupere lid du channel
@@ -10,6 +11,7 @@ export default async function EditAnswerPage({
 }: {
   params: Promise<{ id: string; answerId: string }>;
 }) {
+  const t = await getTranslations("channels.answerEdit");
   const promise = await params;
   const idChannel = promise.id;
   const answerId = promise.answerId;
@@ -69,7 +71,7 @@ export default async function EditAnswerPage({
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-xl font-semibold">Modifier ma réponse</h1>
+      <h1 className="mb-4 text-xl font-semibold">{t("title")}</h1>
 
       <form className="flex flex-col gap-3" action={modifAnswerUser}>
         <input type="hidden" name="answerId" value={answer.id} />
@@ -88,13 +90,13 @@ export default async function EditAnswerPage({
             href={`/channels/${channel.id}`}
             className="rounded-lg px-4 py-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
-            Annuler
+            {t("cancel")}
           </Link>
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
-            Enregistrer
+            {t("save")}
           </button>
         </div>
       </form>

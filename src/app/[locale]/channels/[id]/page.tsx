@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/Button";
 import { createAnswer, deleteAnswer, kickMember, leaveChannel } from "./actions";
@@ -9,6 +10,8 @@ export default async function ChannelPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = await getTranslations("channels.detail");
+  const format = await getFormatter();
   const p = await params;
   const idChannel = p.id;
 
@@ -53,7 +56,6 @@ export default async function ChannelPage({
     notFound();
   }
   const question = channel.threads[0];
-  // seul un moderateur voit le bouton pour virer les membres
   const isModerator = channel.members.some(
     (member) => member.userId === user.id && member.role === "MODERATOR",
   );
@@ -63,7 +65,7 @@ export default async function ChannelPage({
         href="/channels"
         className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
       >
-        ← Retour aux channels
+        {t("back")}
       </Link>
 
       <h1 className="mt-4 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -74,32 +76,32 @@ export default async function ChannelPage({
           {channel.description}
         </p>
       )}
-   <form action={leaveChannel} className="mt-4">
-    <input type="hidden" name="channelId" value={channel.id} />
-    <button
-      type="submit"
-      className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="size-4"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
-        />
-      </svg>
-      Quitter le channel
-    </button>
-  </form>
+      <form action={leaveChannel} className="mt-4">
+        <input type="hidden" name="channelId" value={channel.id} />
+        <button
+          type="submit"
+          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="size-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+            />
+          </svg>
+          {t("leave")}
+        </button>
+      </form>
 
       <h2 className="mt-6 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-        {channel.members.length} membre(s)
+        {t("membersCount", { count: channel.members.length })}
       </h2>
       <ul className="mt-2 flex flex-col gap-2">
         {channel.members.map((member) => (
@@ -110,7 +112,9 @@ export default async function ChannelPage({
             <span className="text-zinc-700 dark:text-zinc-300">
               {member.user.displayName}
               {member.role === "MODERATOR" && (
-                <span className="ml-2 text-xs text-zinc-400">modérateur</span>
+                <span className="ml-2 text-xs text-zinc-400">
+                  {t("moderator")}
+                </span>
               )}
             </span>
 
@@ -122,7 +126,7 @@ export default async function ChannelPage({
                   type="submit"
                   className="rounded-md px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                 >
-                  Retirer
+                  {t("kick")}
                 </button>
               </form>
             )}
@@ -136,16 +140,20 @@ export default async function ChannelPage({
               {question.content}
             </p>
             <p className="mt-2 text-xs text-zinc-400">
-              par {question.author?.displayName ?? "Utilisateur supprimé"} ·{" "}
-              {question.createdAt.toLocaleDateString("fr-FR")}
+              {t("authoredBy", {
+                name: question.author?.displayName ?? t("deletedUser"),
+                date: format.dateTime(question.createdAt, {
+                  dateStyle: "short",
+                }),
+              })}
             </p>
           </div>
           <h2 className="mt-8 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-            {question.answers.length} réponse(s)
+            {t("repliesCount", { count: question.answers.length })}
           </h2>
           {question.answers.length === 0 ? (
             <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
-              Personne n&apos;a encore répondu.
+              {t("noReplies")}
             </p>
           ) : (
             <ul className="mt-3 flex flex-col gap-3">
@@ -159,16 +167,20 @@ export default async function ChannelPage({
                       {answer.content}
                     </p>
                     <p className="mt-1 text-xs text-zinc-400">
-                      {answer.author?.displayName ?? "Utilisateur supprimé"}
+                      {answer.author?.displayName ?? t("deletedUser")}
                     </p>
-                    <p>{answer.createdAt.toLocaleDateString("fr-FR")}</p>
+                    <p>
+                      {format.dateTime(answer.createdAt, {
+                        dateStyle: "short",
+                      })}
+                    </p>
                   </div>
 
                   {answer.userId === user.id && (
                     <div className="flex shrink-0 gap-1">
                       <Link
                         href={`/channels/${channel.id}/answers/${answer.id}/edit`}
-                        aria-label="Modifier la réponse"
+                        aria-label={t("editReplyAria")}
                         className="rounded-lg p-1.5 text-zinc-400 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950"
                       >
                         <svg
@@ -195,7 +207,7 @@ export default async function ChannelPage({
                         />
                         <button
                           type="submit"
-                          aria-label="Supprimer la réponse"
+                          aria-label={t("deleteReplyAria")}
                           className="rounded-lg p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
                         >
                           <svg
@@ -231,18 +243,18 @@ export default async function ChannelPage({
               name="content"
               required
               maxLength={300}
-              placeholder="Écrire une réponse…"
-              aria-label="Votre réponse"
+              placeholder={t("replyPlaceholder")}
+              aria-label={t("replyAria")}
               autoComplete="off"
               className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
             />
 
-            <Button type="submit">Envoyer</Button>
-          </form>{" "}
+            <Button type="submit">{t("send")}</Button>
+          </form>
         </>
       ) : (
         <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
-          Pas de question pour ce channel.
+          {t("noQuestion")}
         </p>
       )}
     </main>
