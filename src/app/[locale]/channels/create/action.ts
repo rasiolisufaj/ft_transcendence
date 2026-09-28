@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { channel } from "diagnostics_channel";
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function createChannel(formData: FormData) {

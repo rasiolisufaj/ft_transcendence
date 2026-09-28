@@ -1,7 +1,7 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
-import { Button } from "@/components/ui/Button";
 import { createAnswer, deleteAnswer } from "../actions";
 import { editChannel } from "./action";
 export default async function EditChannelPage({
@@ -9,6 +9,7 @@ export default async function EditChannelPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = await getTranslations("channels.edit");
   const promise = await params;
   const idChannel = promise.id;
 
@@ -47,10 +48,10 @@ export default async function EditChannelPage({
     <main className="mx-auto max-w-xl px-4 py-16">
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          Modifier le channel
+          {t("title")}
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Change le nom, la description ou la question.
+          {t("subtitle")}
         </p>
 
         <form className="mt-6 flex flex-col gap-4" action={editChannel}>
@@ -62,7 +63,7 @@ export default async function EditChannelPage({
               htmlFor="name"
               className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
             >
-              Nom du channel
+              {t("nameLabel")}
             </label>
             <input
               id="name"
@@ -80,7 +81,7 @@ export default async function EditChannelPage({
               htmlFor="description"
               className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
             >
-              Description (optionnelle)
+              {t("descriptionLabel")}
             </label>
             <textarea
               id="description"
@@ -97,7 +98,7 @@ export default async function EditChannelPage({
               htmlFor="question"
               className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
             >
-              Question
+              {t("questionLabel")}
             </label>
             <textarea
               id="question"
@@ -115,13 +116,13 @@ export default async function EditChannelPage({
               href="/channels"
               className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
             >
-              Annuler
+              {t("cancel")}
             </Link>
             <button
               type="submit"
               className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
-              Enregistrer
+              {t("save")}
             </button>
           </div>
         </form>
