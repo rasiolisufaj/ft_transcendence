@@ -13,10 +13,6 @@ export async function getUserChannels(email: string) {
   });
 }
 
-export async function getAllChannels()
-{
-    
-}
 
 // renvoie tous les utilisateurs du site
 export async function getAllUsers() {
@@ -26,4 +22,14 @@ export async function getAllUsers() {
   });
 
   return users;
+}
+
+
+export async function getInvitationsChannel (email : string)
+{
+  return prisma.channelInvite.findMany({
+   
+      where: { user: { email: email } },
+    include: { channel: { select: { title: true, description: true, members: true} } },
+  });
 }

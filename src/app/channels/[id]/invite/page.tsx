@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import { getAllUsers } from "../../create/data";
 import Link            from "next/link";
+import { inviteUser } from "./action";
+
 // revoir les commentaires plus tard
 export default async function InviteUserPage({
   params,
@@ -63,7 +65,7 @@ export default async function InviteUserPage({
           Choisis une personne à inviter.
         </p>
 
-        <form className="mt-6 flex flex-col gap-3">
+        <form className="mt-6 flex flex-col gap-3" action={inviteUser}>
           <input type="hidden" name="channelId" value={channel.id} />
 
           <select

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { channel } from "diagnostics_channel";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 // repasser sur les commentaires plus tard
@@ -162,4 +163,98 @@ export async function modifAnswerUser(formData: FormData) {
     data: { content: newanswerTrim },
   });
   redirect(`/channels/${intChannelId}`);
+}
+
+
+export async function leaveChannel(formData: FormData)
+{
+  const channelId = formData.get("channelId");
+
+  if (typeof channelId !== "string" || !channelId)
+    return;
+
+  const channelIdtrim = channelId.trim();
+  if (channelIdtrim.length === 0)
+    return;
+
+  const intChannelId = parseInt(channelIdtrim, 10);
+  if (Number.isNaN(intChannelId) || intChannelId <= 0 || String(intChannelId) !== channelIdtrim)
+    return;
+
+  const channel = await prisma.channel.findFirst({
+    where: { id: intChannelId },
+  });
+  if (!channel)
+    return;
+
+  const user = await prisma.user.findFirst({
+    where: { email: "Amir@gmail.com" },
+  });
+  if (!user)
+    return;
+
+  const membership = await prisma.channelMember.findFirst({
+    where: { channelId: channel.id, userId: user.id },
+  });
+
+  if (!membership)
+    return;
+
+  if (membership.role === "MODERATOR")
+    return;
+
+  await prisma.channelMember.deleteMany({
+    where: { channelId: channel.id, userId: user.id },
+  });
+
+  revalidatePath("/channels");
+  redirect("/channels");
+}
+
+export async function kickMember(formData: FormData)
+{
+  const channelId = formData.get("channelId");
+  const targetUserId = formData.get("userId");
+
+  if (typeof channelId !== "string" || typeof targetUserId !== "string" || !channelId || !targetUserId)
+    return;
+
+  const channelIdtrim = channelId.trim();
+  const targetUserIdTrim = targetUserId.trim();
+  if (channelIdtrim.length === 0 || targetUserIdTrim.length === 0)
+    return;
+
+  const intChannelId = parseInt(channelIdtrim, 10);
+  if (Number.isNaN(intChannelId) || intChannelId <= 0 || String(intChannelId) !== channelIdtrim)
+    return;
+
+  const user = await prisma.user.findFirst({
+    where: { email: "Amir@gmail.com" },
+  });
+  if (!user)
+    return;
+
+  if (targetUserIdTrim === user.id)
+    return;
+
+  const moderator = await prisma.channelMember.findFirst({
+    where: { channelId: intChannelId, userId: user.id, role: "MODERATOR" },
+  });
+  if (!moderator)
+    return;
+
+  const target = await prisma.channelMember.findFirst({
+    where: { channelId: intChannelId, userId: targetUserIdTrim },
+  });
+  if (!target)
+    return;
+
+  if (target.role === "MODERATOR")
+    return;
+
+  await prisma.channelMember.deleteMany({
+    where: { channelId: intChannelId, userId: targetUserIdTrim },
+  });
+
+  revalidatePath(`/channels/${intChannelId}`);
 }
