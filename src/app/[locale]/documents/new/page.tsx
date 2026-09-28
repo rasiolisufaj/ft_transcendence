@@ -5,8 +5,10 @@ import { uploadDocument } from "./actions";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useFormStatus } from "react-dom";
+import { useTranslations } from "next-intl";
 // Barre de chargement affichee pendant l'envoi du formulaire.
 export function UploadBar() {
+  const t = useTranslations("documentsNew");
   const { pending } = useFormStatus();
   if (!pending) {
     return null;
@@ -15,7 +17,7 @@ export function UploadBar() {
     <div
       className="h-1 w-full rounded bg-zinc-800"
       role="progressbar"
-      aria-label="Envoi du fichier en cours"
+      aria-label={t("uploading")}
     >
       <div className="h-full w-1/3 animate-pulse rounded bg-blue-600" />
     </div>
@@ -23,13 +25,14 @@ export function UploadBar() {
 }
 
 export default function NewDocumentPage() {
+  const t = useTranslations("documentsNew");
   const [fileName, setFileName] = useState<string | null>(null);
 
   return (
     <div className="mx-auto max-w-xl">
-      <h1 className="mb-2 text-2xl font-semibold">Add a Document</h1>
+      <h1 className="mb-2 text-2xl font-semibold">{t("title")}</h1>
       <p className="mb-8 text-sm text-zinc-500 dark:text-zinc-400">
-        Upload a document and our AI will identify it for you.
+        {t("description")}
       </p>
 
       <Card>
@@ -56,10 +59,10 @@ export default function NewDocumentPage() {
             ) : (
               <>
                 <span className="text-sm font-medium">
-                  Click to choose a file
+                  {t("dropzoneCta")}
                 </span>
                 <span className="mt-1 text-xs text-zinc-400">
-                  PDF, image, or scan — max 10 MB
+                  {t("dropzoneHint")}
                 </span>
               </>
             )}
@@ -75,7 +78,7 @@ export default function NewDocumentPage() {
           </label>
           <UploadBar></UploadBar>
           <Button type="submit" disabled={!fileName} className="w-full">
-            Upload
+            {t("submit")}
           </Button>
         </form>
       </Card>

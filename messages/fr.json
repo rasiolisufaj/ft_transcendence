@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "brand": "MesPapiers",
+    "dashboard": "Tableau de bord",
+    "addDocument": "Ajouter un document"
+  },
+  "localeSwitcher": {
+    "label": "Langue",
+    "names": {
+      "fr": "Français",
+      "en": "English",
+      "es": "Español"
+    }
+  },
+  "metadata": {
+    "description": "Votre assistant pour les démarches administratives françaises : suivez vos documents, échéances et renouvellements."
+  },
+  "categories": {
+    "identity": {
+      "label": "Mes papiers d'identité",
+      "description": "Carte d'identité, passeport, titre de séjour, permis de conduire"
+    },
+    "insurance": {
+      "label": "Mes assurances",
+      "description": "Attestations et contrats d'assurance"
+    },
+    "other": {
+      "label": "Autres",
+      "description": "Documents pas encore triés"
+    }
+  },
+  "dashboard": {
+    "title": "Mes documents",
+    "subtitle": "Importez vos papiers administratifs français, notre IA s'occupe du reste.",
+    "addDocument": "Ajouter un document",
+    "upload": "Importer",
+    "empty": "Aucun document pour l'instant. Importez votre premier document pour commencer.",
+    "countByCategory": "{count, plural, one {# document, trié par catégorie.} other {# documents, triés par catégorie.}}",
+    "pendingClassification": "{count, plural, one {# document en attente de classement automatique.} other {# documents en attente de classement automatique.}}"
+  },
+  "documentCategory": {
+    "back": "Mes documents",
+    "addDocument": "Ajouter un document",
+    "empty": {
+      "title": "Aucun document dans cette catégorie",
+      "description": "Les documents importés seront classés ici automatiquement dès que le classement sera actif."
+    },
+    "fileKind": {
+      "pdf": "PDF",
+      "image": "IMG"
+    },
+    "size": {
+      "b": "o",
+      "kb": "Ko",
+      "mb": "Mo"
+    },
+    "status": {
+      "pending": "En attente de classement",
+      "needsReview": "À vérifier"
+    },
+    "delete": "Supprimer {fileName}",
+    "view": "Ouvrir {fileName}"
+  },
+  "documentsNew": {
+    "title": "Ajouter un document",
+    "description": "Importez un document, notre IA l'identifiera pour vous.",
+    "dropzoneCta": "Cliquez pour choisir un fichier",
+    "dropzoneHint": "PDF, image ou scan, 10 Mo maximum",
+    "submit": "Importer",
+    "uploading": "Envoi du fichier en cours"
+  },
+  "documentErrors": {
+    "duplicateName": {
+      "title": "Ce document existe déjà",
+      "description": "Un fichier du même nom est déjà enregistré dans votre espace. Renommez votre fichier avant de l'envoyer, ou supprimez l'ancien document."
+    },
+    "duplicateContent": {
+      "title": "Ce fichier a déjà été importé",
+      "description": "Le contenu de ce fichier est identique à un document déjà présent dans votre espace, même si le nom est différent. Vérifiez vos documents avant d'en ajouter un nouveau."
+    },
+    "fileType": {
+      "title": "Ce type de fichier n'est pas accepté",
+      "description": "Seuls les fichiers PDF, PNG et JPG peuvent être importés. Le contenu du fichier est vérifié, pas son nom : renommer un fichier ne suffit pas à le rendre valide."
+    },
+    "chooseAnother": "Choisir un autre fichier",
+    "backToDocuments": "Voir mes documents"
+  }
+}
