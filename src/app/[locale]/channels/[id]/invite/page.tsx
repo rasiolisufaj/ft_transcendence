@@ -3,6 +3,7 @@ import { getAllUsers } from "../../create/data";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { inviteUser } from "./action";
+import { getSeedUser } from "@/lib/auth/seed-user";
 
 // revoir les commentaires plus tard
 export default async function InviteUserPage({
@@ -16,7 +17,6 @@ export default async function InviteUserPage({
   const idChannel = promise.id;
   const trueIdChannel = parseInt(idChannel, 10);
 
-  // verifie lid du channel
   if (
     Number.isNaN(trueIdChannel) ||
     trueIdChannel <= 0 ||
@@ -24,20 +24,13 @@ export default async function InviteUserPage({
   ) {
     return;
   }
-  // cherche le user
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user) {
-    throw new Error("Utilisateur introuvable");
-  }
+  const user = await getSeedUser();
 
   const channel = await prisma.channel.findFirst({
     where: { id: trueIdChannel },
   });
 
   if (!channel) return;
-  // vérifie que l'utilisateur est modérateur de ce channel
   const moderator = await prisma.channelMember.findFirst({
     where: {
       channelId: channel.id,
@@ -48,7 +41,6 @@ export default async function InviteUserPage({
   if (!moderator) {
     return;
   }
-  // recupere tout les user du site
   const users = await getAllUsers();
   return (
     <main className="mx-auto max-w-xl px-4 py-16">

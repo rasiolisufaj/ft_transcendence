@@ -9,10 +9,13 @@ export async function getUserChannels(email: string) {
     orderBy: { createdAt: "desc" },
     include: {
       _count: { select: { members: true } },
+      members: {
+        where: { user: { email: email } },
+        select: { role: true },
+      },
     },
   });
 }
-
 
 // renvoie tous les utilisateurs du site
 export async function getAllUsers() {

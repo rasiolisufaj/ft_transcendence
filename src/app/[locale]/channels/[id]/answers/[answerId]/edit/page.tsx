@@ -4,8 +4,8 @@ import { int } from "zod";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { modifAnswerUser } from "../../../actions";
-// page edit message recupere lid du channel
-// recupre lid du message
+import { getSeedUser } from "@/lib/auth/seed-user";
+
 export default async function EditAnswerPage({
   params,
 }: {
@@ -16,7 +16,6 @@ export default async function EditAnswerPage({
   const idChannel = promise.id;
   const answerId = promise.answerId;
 
-  // si les donnes que lon recoit ne sont pas des chaine de char ou quil sont visz
   if (
     typeof idChannel !== "string" ||
     typeof answerId !== "string" ||
@@ -36,14 +35,8 @@ export default async function EditAnswerPage({
   )
     return;
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user) {
-    return;
-  }
+  const user = await getSeedUser();
 
-  // verifie que ce channel existe bien
   const channel = await prisma.channel.findFirst({
     where: { id: trueIdChannel },
   });
@@ -51,7 +44,6 @@ export default async function EditAnswerPage({
     return;
   }
 
-  // vérifie que l'utilisateur est membre du channel
   const member = await prisma.channelMember.findFirst({
     where: { channelId: channel.id, userId: user.id },
   });
@@ -59,12 +51,10 @@ export default async function EditAnswerPage({
     return;
   }
 
-  // va cherche en basse de donne le commentaire
   const answer = await prisma.answer.findFirst({
     where: { id: trueAnswerId },
   });
 
-  // verifie que le commentaire exxiste est quil appartien bien au user
   if (!answer || answer.userId !== user.id) {
     return;
   }

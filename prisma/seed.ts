@@ -31,22 +31,25 @@ async function createChannel(
     return { channel, thread };
 }
 
+async function createUser(name: string)
+{
+    return prisma.user.create({
+        data: { email: `${name}@gmail.com`, displayName: name },
+    });
+}
+
 async function main()
 {
-    // 1. Les 10 utilisateurs
-    // Amir garde "Amir@gmail.com" : le code utilise cet email en dur pour l'instant
-    const names = ["Amir", "Adrien", "Rasiol", "Syu", "Alexandre", "Lina", "Yanis", "Sarah", "Karim", "Emma"];
-    const users: User[] = [];
-
-    for (const name of names)
-    {
-        const user = await prisma.user.create({
-            data: { email: `${name}@gmail.com`, displayName: name },
-        });
-        users.push(user);
-    }
-
-    const [Amir, Adrien, Rasiol, Syu, Alexandre, Lina, Yanis, Sarah, Karim, Emma] = users;
+    const Amir = await createUser("Amir");
+    const Adrien = await createUser("Adrien");
+    const Rasiol = await createUser("Rasiol");
+    const Syu = await createUser("Syu");
+    const Alexandre = await createUser("Alexandre");
+    const Lina = await createUser("Lina");
+    const Yanis = await createUser("Yanis");
+    const Sarah = await createUser("Sarah");
+    const Karim = await createUser("Karim");
+    const Emma = await createUser("Emma");
 
     // 2. Les 5 channels (chaque utilisateur est dans au moins un channel)
     const auto = await createChannel(

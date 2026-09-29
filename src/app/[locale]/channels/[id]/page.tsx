@@ -4,6 +4,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/Button";
 import { createAnswer, deleteAnswer, kickMember, leaveChannel } from "./actions";
+import { getSeedUser } from "@/lib/auth/seed-user";
 
 export default async function ChannelPage({
   params,
@@ -20,12 +21,7 @@ export default async function ChannelPage({
     notFound();
   }
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user) {
-    throw new Error("Utilisateur introuvable");
-  }
+  const user = await getSeedUser();
 
   const channel = await prisma.channel.findFirst({
     where: {
@@ -56,9 +52,6 @@ export default async function ChannelPage({
     notFound();
   }
   const question = channel.threads[0];
-  const isModerator = channel.members.some(
-    (member) => member.userId === user.id && member.role === "MODERATOR",
-  );
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <Link
@@ -99,40 +92,6 @@ export default async function ChannelPage({
           {t("leave")}
         </button>
       </form>
-
-      <h2 className="mt-6 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-        {t("membersCount", { count: channel.members.length })}
-      </h2>
-      <ul className="mt-2 flex flex-col gap-2">
-        {channel.members.map((member) => (
-          <li
-            key={member.userId}
-            className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700"
-          >
-            <span className="text-zinc-700 dark:text-zinc-300">
-              {member.user.displayName}
-              {member.role === "MODERATOR" && (
-                <span className="ml-2 text-xs text-zinc-400">
-                  {t("moderator")}
-                </span>
-              )}
-            </span>
-
-            {isModerator && member.role !== "MODERATOR" && (
-              <form action={kickMember}>
-                <input type="hidden" name="channelId" value={channel.id} />
-                <input type="hidden" name="userId" value={member.userId} />
-                <button
-                  type="submit"
-                  className="rounded-md px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-                >
-                  {t("kick")}
-                </button>
-              </form>
-            )}
-          </li>
-        ))}
-      </ul>
       {question ? (
         <>
           <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
