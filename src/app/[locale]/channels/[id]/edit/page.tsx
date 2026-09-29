@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { createAnswer, deleteAnswer } from "../actions";
 import { editChannel } from "./action";
+import { getSeedUser } from "@/lib/auth/seed-user";
+
 export default async function EditChannelPage({
   params,
 }: {
@@ -18,12 +20,7 @@ export default async function EditChannelPage({
     notFound();
   }
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user) {
-    throw new Error("Utilisateur introuvable");
-  }
+  const user = await getSeedUser();
 
   const channel = await prisma.channel.findFirst({
     where: {

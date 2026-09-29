@@ -1,9 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { channel } from "diagnostics_channel";
 import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { getSeedUser } from "@/lib/auth/seed-user";
 
 export async function createChannel(formData: FormData) {
   const nameChannel = formData.get("name");
@@ -12,25 +13,25 @@ export async function createChannel(formData: FormData) {
   // Check that the channel name is not empty
   // and does not contain only spaces.
   if (typeof nameChannel !== "string" || !nameChannel) {
-    return { error: "Merci d'entrer un nom de Channel." };
+    return;
   }
 
   const trueNameChannel: string = nameChannel.trim();
   if (trueNameChannel.length === 0) {
-    return { error: "Merci d'entrer un nom de Channel." };
+    return;
   } else if (trueNameChannel.length >= 100) {
-    return { error: "Merci d'entrer un nom de Channel moin grand" };
+    return;
   }
 
   if (typeof answer !== "string" || !answer) {
-    return { error: "Merci d'entrer un question." };
+    return;
   }
 
   const trueQuestion: string = answer.trim();
   if (trueQuestion.length === 0) {
-    return { error: "Merci d'écrire ta question." };
+    return;
   } else if (trueQuestion.length > 300) {
-    return { error: "Ta question est trop longue (300 caractères max)." };
+    return;
   }
 
   // Check that the description is a string.
@@ -45,24 +46,19 @@ export async function createChannel(formData: FormData) {
     if (truedescriptionChannel.length === 0) {
       cleanDescription = null;
     } else if (truedescriptionChannel.length >= 251) {
-      return { error: "La description est trop longue (250 caractères max)." };
+      return;
     } else {
       cleanDescription = truedescriptionChannel;
     }
   }
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user) {
-    return { error: "user not found" };
-  }
+  const user = await getSeedUser();
 
   const existingChannel = await prisma.channel.findFirst({
     where: { title: { equals: trueNameChannel, mode: "insensitive" } },
   });
   if (existingChannel) {
-    return { error: "Un channel avec ce nom existe déjà." };
+    return;
   }
 
   const newChannel = await prisma.channel.create({
@@ -82,7 +78,7 @@ export async function createChannel(formData: FormData) {
       },
     },
   });
-  redirect("/channels");
+  redirect({ href: "/channels", locale: await getLocale() });
 }
 
 export async function deleteChannel(formData: FormData) {
@@ -98,12 +94,7 @@ export async function deleteChannel(formData: FormData) {
     return;
   }
   // trouve le user
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user) {
-    return;
-  }
+  const user = await getSeedUser();
 
   // verifie que le user est bien membre du channel
   // et qu'il est bien moderateur

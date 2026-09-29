@@ -2,10 +2,12 @@ import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { getInvitationsChannel } from "../create/data";
 import { acceptInvite, declineInvite } from "./action";
+import { getSeedUser } from "@/lib/auth/seed-user";
 
 export default async function InvitationsPage() {
   const t = await getTranslations("channels.invitations");
-  const invitationChannels = await getInvitationsChannel("Amir@gmail.com");
+  const user = await getSeedUser();
+  const invitationChannels = await getInvitationsChannel(user.email);
   const count = invitationChannels.length;
 
   return (

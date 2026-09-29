@@ -1,22 +1,23 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { channel } from "diagnostics_channel";
 import { revalidatePath } from "next/cache";
 import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
+import { getSeedUser } from "@/lib/auth/seed-user";
 // repasser sur les commentaires plus tard
 
 export async function createAnswer(formData: FormData) {
   const answer = formData.get("content");
   if (typeof answer !== "string" || !answer) {
-    return { error: "Merci d'écrire une réponse." };
+    return
   }
 
   let trueAnswer = answer.trim();
   if (trueAnswer.length === 0) {
-    return { error: "Merci d'écrire une réponse." };
+    return;
   } else if (trueAnswer.length >= 301) {
-    return { error: "Ta réponse est trop longue (300 caractères max)." };
+    return;
   }
 
   const threadIdText = formData.get("threadId");
@@ -28,12 +29,7 @@ export async function createAnswer(formData: FormData) {
     return;
   }
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user) {
-    return;
-  }
+  const user = await getSeedUser();
 
   // verifie que la question existe et le user est menbre du channel
   const thread = await prisma.thread.findFirst({
@@ -61,22 +57,16 @@ export async function deleteAnswer(formData: FormData) {
   const idAnswer = formData.get("answerId");
 
   if (typeof idAnswer !== "string" || !idAnswer) {
-    return { error: "Merci d'entrer un nom de Channel." };
+    return ;
   }
 
   const trueId = parseInt(idAnswer, 10);
   if (Number.isNaN(trueId) || trueId <= 0 || String(trueId) !== idAnswer) {
-    return Response.json({ error: "id invalide" }, { status: 400 });
+    return;
   }
 
   // va recupere le user dans la basse de donnee
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  // si il nexiste pas
-  if (!user) {
-    throw new Error("Utilisateur introuvable");
-  }
+  const user = await getSeedUser();
 
   const answer = await prisma.answer.findFirst({
     where: {
@@ -138,12 +128,7 @@ export async function modifAnswerUser(formData: FormData) {
     return;
   }
   // reucupere le user
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user) {
-    return;
-  }
+  const user = await getSeedUser();
 
   const answer = await prisma.answer.findFirst({
     where: { id: intAnswerId },
@@ -162,7 +147,7 @@ export async function modifAnswerUser(formData: FormData) {
     where: { id: intAnswerId },
     data: { content: newanswerTrim },
   });
-  redirect(`/channels/${intChannelId}`);
+redirect({ href: `/channels/${intChannelId}`, locale: await getLocale() });
 }
 
 
@@ -187,11 +172,7 @@ export async function leaveChannel(formData: FormData)
   if (!channel)
     return;
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user)
-    return;
+  const user = await getSeedUser();
 
   const membership = await prisma.channelMember.findFirst({
     where: { channelId: channel.id, userId: user.id },
@@ -208,7 +189,7 @@ export async function leaveChannel(formData: FormData)
   });
 
   revalidatePath("/channels");
-  redirect("/channels");
+  redirect({ href: "/channels", locale: await getLocale() });
 }
 
 export async function kickMember(formData: FormData)
@@ -228,11 +209,7 @@ export async function kickMember(formData: FormData)
   if (Number.isNaN(intChannelId) || intChannelId <= 0 || String(intChannelId) !== channelIdtrim)
     return;
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user)
-    return;
+  const user = await getSeedUser();
 
   if (targetUserIdTrim === user.id)
     return;

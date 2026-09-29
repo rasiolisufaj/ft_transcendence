@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { id } from "zod/locales";
 import { tr } from "zod/v4/locales";
+import { getSeedUser } from "@/lib/auth/seed-user";
 
 
 
@@ -24,11 +25,7 @@ export async function acceptInvite(formData:FormData) {
     if(!channel)
         return;
 
-    const user = await prisma.user.findFirst({
-        where : {email: "Amir@gmail.com"},
-    });
-    if(!user)
-        return;
+    const user = await getSeedUser();
     const checkInvitations = await prisma.channelInvite.findFirst({
      where : {channelId : channel.id,userId : user.id},
     });
@@ -68,11 +65,7 @@ export async function declineInvite(formData: FormData) {
   if (Number.isNaN(intIdChannel) || intIdChannel <= 0 || String(intIdChannel) !== trueIdChannel)
     return;
 
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  if (!user)
-    return;
+  const user = await getSeedUser();
 
   const invitation = await prisma.channelInvite.findFirst({
     where: { channelId: intIdChannel, userId: user.id },

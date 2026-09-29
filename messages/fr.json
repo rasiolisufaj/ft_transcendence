@@ -164,6 +164,11 @@
       "membersCount": "Nombre de membres du channel : {count}",
       "accept": "Accepter",
       "decline": "Refuser"
+    },
+    "kick": {
+      "back": "← Retour aux channels",
+      "membersCount": "{count, plural, one {# membre} other {# membres}}",
+      "kick": "Retirer"
     }
   }
 }
