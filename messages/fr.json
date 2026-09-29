@@ -92,7 +92,10 @@
       "displayNameTooLong": "Votre nom d'affichage ne peut pas dépasser 50 caractères.",
       "passwordTooShort": "Votre mot de passe doit contenir au moins 8 caractères.",
       "passwordTooLong": "Votre mot de passe ne peut pas dépasser 200 caractères.",
-      "passwordRequired": "Saisissez votre mot de passe."
+      "passwordRequired": "Saisissez votre mot de passe.",
+      "emailTaken": "Cette adresse e-mail est déjà associée à un compte.",
+      "invalidCredentials": "Adresse e-mail ou mot de passe incorrect.",
+      "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes."
     }
   }
 }

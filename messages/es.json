@@ -92,7 +92,10 @@
       "displayNameTooLong": "Su nombre visible no puede superar los 50 caracteres.",
       "passwordTooShort": "Su contraseña debe tener al menos 8 caracteres.",
       "passwordTooLong": "Su contraseña no puede superar los 200 caracteres.",
-      "passwordRequired": "Introduzca su contraseña."
+      "passwordRequired": "Introduzca su contraseña.",
+      "emailTaken": "Esta dirección de correo electrónico ya está registrada.",
+      "invalidCredentials": "Correo electrónico o contraseña incorrectos.",
+      "tooManyAttempts": "Demasiados intentos fallidos. Vuelva a intentarlo dentro de 15 minutos."
     }
   }
 }

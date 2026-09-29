@@ -92,7 +92,10 @@
       "displayNameTooLong": "Your display name cannot be longer than 50 characters.",
       "passwordTooShort": "Your password must be at least 8 characters long.",
       "passwordTooLong": "Your password cannot be longer than 200 characters.",
-      "passwordRequired": "Enter your password."
+      "passwordRequired": "Enter your password.",
+      "emailTaken": "That email address is already registered.",
+      "invalidCredentials": "Incorrect email or password.",
+      "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes."
     }
   }
 }

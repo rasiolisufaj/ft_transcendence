@@ -50,9 +50,16 @@ describe("loginSchema", () => {
   });
 });
 
-it("emits only messages that are auth.errors keys in every locale", () => {
-  // Trip every rule once: each message is rendered with t(), so a missing key
-  // would show the raw key and log a console error (graded).
+// Each message is rendered with t(): a missing key shows the raw key and logs a
+// console error (graded).
+it("translates every auth error in en and es", () => {
+  const keys = Object.keys(fr.auth.errors).sort();
+  expect(Object.keys(en.auth.errors).sort()).toEqual(keys);
+  expect(Object.keys(es.auth.errors).sort()).toEqual(keys);
+});
+
+it("emits only messages that are auth.errors keys", () => {
+  // Trip every rule once.
   const issues = [
     signupSchema.safeParse({ email: "nope", displayName: "R", password: "short" }),
     signupSchema.safeParse({
@@ -62,9 +69,5 @@ it("emits only messages that are auth.errors keys in every locale", () => {
   ].flatMap((r) => r.error?.issues ?? []);
 
   expect(issues).toHaveLength(7);
-  for (const { message } of issues) {
-    for (const catalogue of [fr, en, es]) {
-      expect(catalogue.auth.errors).toHaveProperty(message);
-    }
-  }
+  for (const { message } of issues) expect(fr.auth.errors).toHaveProperty(message);
 });
