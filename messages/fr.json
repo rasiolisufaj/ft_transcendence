@@ -2,7 +2,10 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Tableau de bord",
-    "addDocument": "Ajouter un document"
+    "addDocument": "Ajouter un document",
+    "login": "Se connecter",
+    "signup": "Créer un compte",
+    "logout": "Se déconnecter"
   },
   "localeSwitcher": {
     "label": "Langue",
