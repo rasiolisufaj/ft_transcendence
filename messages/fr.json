@@ -169,6 +169,14 @@
       "back": "← Retour aux channels",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "kick": "Retirer"
+    },
+    "delete": {
+      "back": "← Retour aux channels",
+      "title": "Supprimer le channel « {channel} » ?",
+      "warning": "{count, plural, one {Ce channel compte # membre. La suppression est définitive et effacera tous les messages.} other {Ce channel compte # membres. La suppression est définitive et effacera tous les messages.}}",
+      "reminder": "Cette action est irréversible.",
+      "cancel": "Annuler",
+      "submit": "Supprimer le channel"
     }
   }
 }
