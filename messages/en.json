@@ -96,6 +96,25 @@
       "emailTaken": "That email address is already registered.",
       "invalidCredentials": "Incorrect email or password.",
       "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes."
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "displayName": "Display name"
+    },
+    "login": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "pending": "Signing in…",
+      "noAccount": "No account yet?",
+      "signupLink": "Create one"
+    },
+    "signup": {
+      "title": "Create your account",
+      "submit": "Create account",
+      "pending": "Creating account…",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in"
     }
   }
 }
