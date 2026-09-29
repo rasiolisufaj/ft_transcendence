@@ -84,5 +84,15 @@
     },
     "chooseAnother": "Choisir un autre fichier",
     "backToDocuments": "Voir mes documents"
+  },
+  "auth": {
+    "errors": {
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "displayNameTooShort": "Votre nom d'affichage doit contenir au moins 2 caractères.",
+      "displayNameTooLong": "Votre nom d'affichage ne peut pas dépasser 50 caractères.",
+      "passwordTooShort": "Votre mot de passe doit contenir au moins 8 caractères.",
+      "passwordTooLong": "Votre mot de passe ne peut pas dépasser 200 caractères.",
+      "passwordRequired": "Saisissez votre mot de passe."
+    }
   }
 }
