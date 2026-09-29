@@ -169,6 +169,14 @@
       "back": "← Back to channels",
       "membersCount": "{count, plural, one {# member} other {# members}}",
       "kick": "Remove"
+    },
+    "delete": {
+      "back": "← Back to channels",
+      "title": "Delete channel \"{channel}\"?",
+      "warning": "{count, plural, one {This channel has # member. Deleting it is permanent and will remove all messages.} other {This channel has # members. Deleting it is permanent and will remove all messages.}}",
+      "reminder": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "submit": "Delete channel"
     }
   }
 }

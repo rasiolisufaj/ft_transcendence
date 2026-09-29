@@ -169,6 +169,14 @@
       "back": "← Volver a los canales",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
       "kick": "Expulsar"
+    },
+    "delete": {
+      "back": "← Volver a los canales",
+      "title": "¿Eliminar el canal «{channel}»?",
+      "warning": "{count, plural, one {Este canal tiene # miembro. Eliminarlo es permanente y borrará todos los mensajes.} other {Este canal tiene # miembros. Eliminarlo es permanente y borrará todos los mensajes.}}",
+      "reminder": "Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "submit": "Eliminar el canal"
     }
   }
 }
