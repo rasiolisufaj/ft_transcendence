@@ -84,5 +84,15 @@
     },
     "chooseAnother": "Choose another file",
     "backToDocuments": "View my documents"
+  },
+  "auth": {
+    "errors": {
+      "emailInvalid": "Enter a valid email address.",
+      "displayNameTooShort": "Your display name must be at least 2 characters long.",
+      "displayNameTooLong": "Your display name cannot be longer than 50 characters.",
+      "passwordTooShort": "Your password must be at least 8 characters long.",
+      "passwordTooLong": "Your password cannot be longer than 200 characters.",
+      "passwordRequired": "Enter your password."
+    }
   }
 }
