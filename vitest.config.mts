@@ -11,6 +11,9 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     // DB tests share one Postgres; running files in parallel makes cleanup racy.
     fileParallelism: false,
+    // next-intl's ESM imports "next/navigation" with no extension, which Node's
+    // resolver rejects (next has no exports map). Inlined, Vite resolves it.
+    server: { deps: { inline: ["next-intl"] } },
   },
   resolve: {
     alias: { "@": path.join(root, "src") },

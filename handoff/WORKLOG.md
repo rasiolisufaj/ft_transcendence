@@ -16,13 +16,15 @@ Start **roadmap phase 2**: signup/login/logout, the `(app)` guard and the WS tic
   * Claude memory `feedback-maintain-worklog.md`: same path update
 
 ## 🛑 Where We Stopped
-**Phase 2, task 2.1 written, not committed** (waiting for Rasiol's go-ahead). Task 2.2 (signup/login/logout actions) is next. Rasiol writes the front-end (2.3 forms, nav).
+**Phase 2: task 2.1 committed (`f07b382`, by Rasiol); task 2.2 written, not committed** (waiting for Rasiol's go-ahead). Next is task 2.3, the forms; Rasiol writes those. Then 2.4 (guard) and 2.5 (WS ticket).
 
+* **Task 2.2 files:** `src/app/[locale]/(auth)/{signup,login,logout}/actions.ts` and `login/actions.test.ts`. It also adds 3 keys to `auth.errors`, a key-parity test in `schemas.test.ts`, and `server.deps.inline: ["next-intl"]` in `vitest.config.mts` (next-intl's extensionless `next/navigation` import breaks Node ESM).
+  * Actions redirect with `return redirect({ href, locale: await getLocale() })` from `@/i18n/navigation`. The `return` is needed because the destructured `redirect` has no explicit type, so TS doesn't treat it as `never`.
+  * The login rate limit is 6 failures per email per 15 min, in memory, and it prunes expired entries.
+  * Evidence: RED → GREEN; both mutants are caught; `npm test` 57/57; eslint, build and typecheck clean.
+  * **Seed caveat:** the seeded users have no `passwordHash` and use mixed-case emails, so they can't log in. Sign up a fresh account for the walkthrough.
+* **Docs decision made:** `f07b382` also commits `.gitignore`, `CLAUDE.md`, `MEETING_DISCUSSION.md`, the roadmap and this worklog, so they are no longer local-only. CLAUDE.md's Workflow bullet that says they are git-ignored is now stale.
 * **Branch:** `feat/auth-login`, cut from `origin/main` @ `767ef90`, no upstream set (so a bare `git push` can't land on `main`). `feat/auth-session-core` is spent and can be deleted locally and on the remote.
-* **Task 2.1 files:** `src/lib/auth/schemas.ts`, `src/lib/auth/schemas.test.ts`, plus an `auth.errors` block in `messages/{fr,en,es}.json`.
-  * **Departure from the roadmap:** Zod messages are **i18n keys** (`"passwordTooShort"`), not English sentences, because next-intl shipped and hardcoded strings fail review. `AuthFormState.error` / `fieldErrors` are typed `AuthErrorKey`, so a form renders them with `useTranslations("auth.errors")(key)` and needs no cast.
-  * Evidence: RED (module not found) → GREEN 7/7; `npm test` 54/54; eslint, build and typecheck all clean.
-* **Working tree:** `.gitignore` is still modified (the docs/ un-ignore decision is still open). `CLAUDE.md`, `MEETING_DISCUSSION.md`, `docs/` and `handoff/` are untracked.
 * **Tooling state:**
   * `docker` works now and the stack is up.
   * `node_modules` was stale (no `next-intl`); fixed with `npm ci`.
