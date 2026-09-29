@@ -96,6 +96,25 @@
       "emailTaken": "Esta dirección de correo electrónico ya está registrada.",
       "invalidCredentials": "Correo electrónico o contraseña incorrectos.",
       "tooManyAttempts": "Demasiados intentos fallidos. Vuelva a intentarlo dentro de 15 minutos."
+    },
+    "fields": {
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "displayName": "Nombre visible"
+    },
+    "login": {
+      "title": "Iniciar sesión",
+      "submit": "Iniciar sesión",
+      "pending": "Iniciando sesión…",
+      "noAccount": "¿Todavía no tiene cuenta?",
+      "signupLink": "Cree una"
+    },
+    "signup": {
+      "title": "Cree su cuenta",
+      "submit": "Crear cuenta",
+      "pending": "Creando la cuenta…",
+      "hasAccount": "¿Ya tiene una cuenta?",
+      "loginLink": "Iniciar sesión"
     }
   }
 }

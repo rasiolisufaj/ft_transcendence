@@ -96,6 +96,25 @@
       "emailTaken": "Cette adresse e-mail est déjà associée à un compte.",
       "invalidCredentials": "Adresse e-mail ou mot de passe incorrect.",
       "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes."
+    },
+    "fields": {
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "displayName": "Nom d'affichage"
+    },
+    "login": {
+      "title": "Connexion",
+      "submit": "Se connecter",
+      "pending": "Connexion…",
+      "noAccount": "Pas encore de compte ?",
+      "signupLink": "Créer un compte"
+    },
+    "signup": {
+      "title": "Créer votre compte",
+      "submit": "Créer mon compte",
+      "pending": "Création du compte…",
+      "hasAccount": "Déjà un compte ?",
+      "loginLink": "Se connecter"
     }
   }
 }
