@@ -6,7 +6,7 @@ _Last updated: 2026-09-29 (evening). Owner: Rasiol (auth, permissions, OAuth, 2F
 Start **roadmap phase 2**: signup/login/logout, the `(app)` guard and the WS ticket (C2, C3, C11p, C12). Phase 1 (session core) is merged. Phase 2 now has to sit inside the team's new `app/[locale]/` + `next-intl` routing instead of the flat English routes the roadmap assumed.
 
 ## 📝 Recent Commits & Changes
-* `f07b382`, `b1cc507`, `f6aa994` (2026-09-29, `feat/auth-login`, not pushed): phase 2 tasks 2.1–2.3: shared Zod schemas, signup/login/logout actions, the forms.
+* `f07b382`, `b1cc507`, `f6aa994`, `3dfd3cc` (2026-09-29, `feat/auth-login`, not pushed): phase 2 tasks 2.1–2.4: shared Zod schemas, signup/login/logout actions, the forms, the route guard.
 * `0dcdb38` (2026-09-25): **PR #10 merged, phase 1 is on `main`.** It contains `37be36b` (token + SHA-256), `7f1ff0c` (create/validate/invalidate sessions), `ee18f4a` (`getCurrentUser`, `requireUser`, cookie helpers) and `b1dc30f` (sliding expiry removed).
 * `9b4c3c4` (2026-09-27, Reaven23): **PR #11 merged.** New migration `20260926124225_add_document_category_and_extraction_status`, which adds the `DocumentCategory` and `ExtractionStatus` enums, `Document.category` / `extractionStatus` and `@@index([ownerId, category])`. It also adds `src/lib/documents/{classify,subtypes}.ts` with tests, and **`src/lib/auth/seed-user.ts`** (`getSeedUser()`, the temporary hardcoded `Amir@gmail.com` owner), which is in my directory.
 * `767ef90` (2026-09-27, sku/Reaven23): **PR #12 merged.** `next-intl` ^4 routing under `src/app/[locale]/` (fr/en/es), `messages/{fr,en,es}.json`, `src/i18n/`, a language switcher, and **`src/middleware.ts`** (the next-intl middleware; matcher excludes `api`, `_next` and files).
@@ -17,7 +17,7 @@ Start **roadmap phase 2**: signup/login/logout, the `(app)` guard and the WS tic
   * Claude memory `feedback-maintain-worklog.md`: same path update
 
 ## 🛑 Where We Stopped
-**Phase 2: 2.1 (`f07b382`), 2.2 (`b1cc507`) and 2.3 (`f6aa994`) committed. Task 2.4 (the route guard) written and staged, not committed** (waiting for Rasiol's go-ahead). Next: 2.5 (WS ticket), only when Alexandre starts D2.
+**Phase 2: 2.1 (`f07b382`), 2.2 (`b1cc507`) and 2.3 (`f6aa994`) committed. Task 2.4 (the route guard) committed as `3dfd3cc`** (`feat/auth-login`, not pushed). Next: 2.5 (WS ticket), only when Alexandre starts D2.
 
 * **Task 2.4 files:** `git mv` of the dashboard and `documents/` into `src/app/[locale]/(app)/`, plus a new `(app)/layout.tsx` (`await requireUser()`). `getSeedUser()` is replaced by `requireUser()` in the dashboard, the category page, `uploadDocument` (first line) and `deleteDocument`, and `seed-user.ts` is deleted. `/api/documents/[id]` answers 401 with no session and 404 for a foreign document (it threw a 500 before). `Nav.tsx` is async and shows Sign in/Sign up or name + Sign out, with `flex-wrap`. `nav.login|signup|logout` added in fr/en/es. CLAUDE.md updated.
   * ⚠ **Other people's files, flag in the PR and tag them:** the moved pages, `new/actions.ts`, `action.ts` and `api/documents/[id]/route.ts` (Amir); `Nav.tsx` (sku/Alex). Teammates now have to sign up locally, since the seeded `Amir@gmail.com` can't log in.
@@ -25,6 +25,7 @@ Start **roadmap phase 2**: signup/login/logout, the `(app)` guard and the WS tic
   * The layout is not the security boundary: in Next 16 a layout doesn't stop its page from rendering. Each page, action and route checks the session itself.
   * Evidence: RED with no session gave `/api/documents/1` → 200 image/png (Amir's file, served to anyone). GREEN: 307 → `/login`, 401, and `/es/…` → `/es/login` (so `requireUser()` needed no locale fix). Playwright walkthrough: uploads are owned by the signed-in user, Amir's file is 404, logout deletes the Session row, 0 px overflow at 375/768/1440, console 0 on fr/en/es. `npm test` 57/57, build and typecheck clean, lint has 0 errors.
   * **CSRF evidence for the PR (C11):** a real login request replayed with `Origin: https://evil.example` gets `HTTP/1.1 500` and the server logs ``x-forwarded-host` header with value `localhost` does not match `origin` header with value `evil.example` from a forwarded Server Actions request. Aborting the action.`` No Session row is created. The same replay with its own Origin creates one (control).
+  * **`docs/testing-auth.md`** (new, not committed): a guide to testing phases 0–2.4 by hand, for reviewers. Part A covers the automated tests and mutation checks; Part B is a browser walkthrough with SQL/curl checks, including the CSRF replay. Link it from the PR.
   * Dev-only noise, not bugs: an action POST from outside the browser makes an idle dev tab log `Cannot write to a CLOSED writable stream` (React debug channel). The build's `PrismaClientInitializationError` lines come from the musl-only client; there are 0 after a host `db:generate`.
 
 * **Task 2.3 files:** `src/app/[locale]/(auth)/{login,signup}/page.tsx` (client pages, `useActionState`, statically prerendered for fr/en/es), plus `auth.fields`, `auth.login` and `auth.signup` in `messages/*.json`.
