@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export async function GET(
   _request: Request,
@@ -13,24 +14,22 @@ export async function GET(
   if (Number.isNaN(id) || id <= 0 || String(id) !== idFile) {
     return Response.json({ error: "id invalide" }, { status: 400 });
   }
-  // va recupere le user dans la basse de donnee
-  const user = await prisma.user.findFirst({
-    where: { email: "Amir@gmail.com" },
-  });
-  // si il nexiste pas
-  if (!user) {
-    throw new Error("Utilisateur introuvable");
+  // un route handler renvoie 401 au lieu de rediriger vers /login
+  const ctx = await getCurrentUser();
+  if (!ctx) {
+    return new Response(null, { status: 401 });
   }
 
   // verifie si le document apartien au user
   const doc = await prisma.document.findFirst({
     where: {
       id: id,
-      ownerId: user.id,
+      ownerId: ctx.user.id,
     },
   });
+  // 404 aussi pour le document d'un autre : on ne revele pas qu'il existe
   if (!doc) {
-    throw new Error("ce document n'existe pas ou ne t'appartient pas");
+    return new Response(null, { status: 404 });
   }
   return new Response(new Uint8Array(doc.fileData), {
     status: 200,

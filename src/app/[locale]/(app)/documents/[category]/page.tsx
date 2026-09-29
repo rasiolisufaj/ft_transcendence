@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
-import { getSeedUser } from "@/lib/auth/seed-user";
+import { requireUser } from "@/lib/auth/session";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -31,7 +31,7 @@ export default async function CategoryPage({ params }: PageProps<"/[locale]/docu
   const t = await getTranslations("documentCategory");
   const tCategory = await getTranslations("categories");
   const format = await getFormatter();
-  const user = await getSeedUser();
+  const { user } = await requireUser();
 
   const documents = await prisma.document.findMany({
     where: { ownerId: user.id, category },
