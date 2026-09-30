@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { getSeedUser } from "@/lib/auth/seed-user";
+import { requireUser } from "@/lib/auth/session";
 
 export async function deleteDocument(formData: FormData) {
   const idFile = Number(formData.get("id"));
@@ -12,7 +12,7 @@ export async function deleteDocument(formData: FormData) {
     throw new Error("invalid id");
   }
 
-  const user = await getSeedUser();
+  const { user } = await requireUser();
 
   const doc = await prisma.document.findFirst({
     where: {
