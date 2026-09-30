@@ -2,7 +2,10 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Panel",
-    "addDocument": "Añadir un documento"
+    "addDocument": "Añadir un documento",
+    "login": "Iniciar sesión",
+    "signup": "Crear cuenta",
+    "logout": "Cerrar sesión"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -84,5 +87,37 @@
     },
     "chooseAnother": "Elegir otro archivo",
     "backToDocuments": "Ver mis documentos"
+  },
+  "auth": {
+    "errors": {
+      "emailInvalid": "Introduzca una dirección de correo electrónico válida.",
+      "displayNameTooShort": "Su nombre visible debe tener al menos 2 caracteres.",
+      "displayNameTooLong": "Su nombre visible no puede superar los 50 caracteres.",
+      "passwordTooShort": "Su contraseña debe tener al menos 8 caracteres.",
+      "passwordTooLong": "Su contraseña no puede superar los 200 caracteres.",
+      "passwordRequired": "Introduzca su contraseña.",
+      "emailTaken": "Esta dirección de correo electrónico ya está registrada.",
+      "invalidCredentials": "Correo electrónico o contraseña incorrectos.",
+      "tooManyAttempts": "Demasiados intentos fallidos. Vuelva a intentarlo dentro de 15 minutos."
+    },
+    "fields": {
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "displayName": "Nombre visible"
+    },
+    "login": {
+      "title": "Iniciar sesión",
+      "submit": "Iniciar sesión",
+      "pending": "Iniciando sesión…",
+      "noAccount": "¿Todavía no tiene cuenta?",
+      "signupLink": "Cree una"
+    },
+    "signup": {
+      "title": "Cree su cuenta",
+      "submit": "Crear cuenta",
+      "pending": "Creando la cuenta…",
+      "hasAccount": "¿Ya tiene una cuenta?",
+      "loginLink": "Iniciar sesión"
+    }
   }
 }

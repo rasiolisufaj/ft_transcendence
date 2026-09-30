@@ -4,12 +4,14 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
 import { createHash } from "crypto";
-import { getSeedUser } from "@/lib/auth/seed-user";
+import { requireUser } from "@/lib/auth/session";
 import { classifyDocument, extractionStatusFor } from "@/lib/documents/classify";
 import { narrowSubtypeFields } from "@/lib/documents/subtypes";
 import { ExtractionStatus } from "@/generated/prisma/enums";
 
 export async function uploadDocument(formData: FormData) {
+  const { user } = await requireUser();
+
   const file = formData.get("file") as File;
 
   if (!file) {
@@ -35,8 +37,6 @@ export async function uploadDocument(formData: FormData) {
   }
 
   const fileHash = createHash("sha256").update(fileBuffer).digest("hex");
-
-  const user = await getSeedUser();
 
   const sameContent = await prisma.document.findFirst({
     where: { ownerId: user.id, fileHash: fileHash },
