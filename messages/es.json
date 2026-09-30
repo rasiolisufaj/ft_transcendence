@@ -100,7 +100,11 @@
       "optionsAria": "Opciones del canal",
       "invite": "Invitar",
       "edit": "Modificar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "kick": "Expulsar a un miembro",
+      "leave": "Salir",
+      "public": "canal público",
+      "private": "canal privado"
     },
     "create": {
       "title": "Crear un canal",
@@ -113,6 +117,15 @@
       "questionPlaceholder": "Haz tu pregunta con el mayor detalle posible para obtener respuestas claras.",
       "cancel": "Cancelar",
       "submit": "Crear el canal"
+    },
+    "join": {
+      "back": "← Volver a los canales",
+      "title": "Unirse a un canal",
+      "subtitle": "Explora los canales públicos y únete a uno.",
+      "empty": "No hay ningún canal público al que unirse por ahora.",
+      "noDescription": "Este canal no tiene descripción.",
+      "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
+      "join": "Unirse"
     },
     "detail": {
       "back": "← Volver a los canales",
@@ -129,7 +142,9 @@
       "replyPlaceholder": "Escribe una respuesta…",
       "replyAria": "Tu respuesta",
       "send": "Enviar",
-      "noQuestion": "No hay pregunta en este canal."
+      "noQuestion": "No hay pregunta en este canal.",
+      "editedAt": "editado a las {time}",
+      "sentAt": "enviado a las {time}"
     },
     "edit": {
       "title": "Modificar el canal",

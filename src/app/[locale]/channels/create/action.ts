@@ -8,20 +8,30 @@ import { getSeedUser } from "@/lib/auth/seed-user";
 
 export async function createChannel(formData: FormData) {
   const nameChannel = formData.get("name");
-  let descriptionChannel = formData.get("description");
-  let answer = formData.get("question");
+  const descriptionChannel = formData.get("description");
+  const answer = formData.get("question");
+  const visibilityChannel = formData.get("visibility");
+  let boolvisibility : boolean= false;
   // Check that the channel name is not empty
   // and does not contain only spaces.
-  if (typeof nameChannel !== "string" || !nameChannel) {
+  if (typeof nameChannel !== "string" || typeof visibilityChannel !== "string" || !nameChannel || !visibilityChannel) {
     return;
   }
 
+  const trueVisibilityChannel : string = visibilityChannel.trim();
   const trueNameChannel: string = nameChannel.trim();
-  if (trueNameChannel.length === 0) {
+  if (trueNameChannel.length === 0 || visibilityChannel.length === 0) {
     return;
-  } else if (trueNameChannel.length >= 100) {
+  } else if (trueNameChannel.length >= 100 || trueVisibilityChannel.length >= 8) {
     return;
   }
+
+  if(trueVisibilityChannel === "public")
+    boolvisibility = false;
+  else if (trueVisibilityChannel === "private")
+    boolvisibility = true;
+  else
+    return;
 
   if (typeof answer !== "string" || !answer) {
     return;
@@ -34,11 +44,6 @@ export async function createChannel(formData: FormData) {
     return;
   }
 
-  // Check that the description is a string.
-  // Remove spaces at the start and the end.
-  // Check if the description is empty.
-  // Check that its length is correct.
-  // Set hasDescription to true.
   let cleanDescription: string | null = null;
 
   if (typeof descriptionChannel === "string" && descriptionChannel) {
@@ -66,6 +71,7 @@ export async function createChannel(formData: FormData) {
       createdBy: user.id,
       title: trueNameChannel,
       description: cleanDescription,
+      isPrivate: boolvisibility,
       members: {
         create: { userId: user.id, role: "MODERATOR" },
       },

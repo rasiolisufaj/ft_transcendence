@@ -56,7 +56,17 @@ export default function ChannelForm() {
           className="resize-none rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
         />
       </div>
+      <legend>prive/public</legend>
 
+      <label>
+        <input type="radio" name="visibility" value="public" />
+        <p>public</p>
+      </label>
+
+      <label>
+        <input type="radio" name="visibility" value="private" />
+        <p>privée</p>
+      </label>
       <div className="mt-2 flex gap-3">
         <Link
           href="/channels"

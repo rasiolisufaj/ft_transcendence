@@ -13,7 +13,7 @@ export async function createAnswer(formData: FormData) {
     return
   }
 
-  let trueAnswer = answer.trim();
+  const trueAnswer = answer.trim();
   if (trueAnswer.length === 0) {
     return;
   } else if (trueAnswer.length >= 301) {

@@ -18,11 +18,11 @@ export async function editChannel(formData: FormData) {
   if (typeof strId !== "string" || !strId)
     return;
 
-  let strTrueId = strId.trim();
+  const strTrueId = strId.trim();
   if (strTrueId.length === 0)
     return;
 
-  let intId = parseInt(strTrueId, 10);
+  const intId = parseInt(strTrueId, 10);
   if (Number.isNaN(intId) || intId <= 0)
     return;
 

@@ -100,7 +100,11 @@
       "optionsAria": "Channel options",
       "invite": "Invite",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "kick": "Remove a member",
+      "leave": "Leave",
+      "public": "public channel",
+      "private": "private channel"
     },
     "create": {
       "title": "Create a channel",
@@ -113,6 +117,15 @@
       "questionPlaceholder": "Ask your question with as much detail as possible so answers can be clear.",
       "cancel": "Cancel",
       "submit": "Create channel"
+    },
+    "join": {
+      "back": "← Back to channels",
+      "title": "Join a channel",
+      "subtitle": "Browse public channels and join one.",
+      "empty": "No public channel to join for now.",
+      "noDescription": "This channel has no description.",
+      "membersCount": "{count, plural, one {# member} other {# members}}",
+      "join": "Join"
     },
     "detail": {
       "back": "← Back to channels",
@@ -129,7 +142,9 @@
       "replyPlaceholder": "Write a reply…",
       "replyAria": "Your reply",
       "send": "Send",
-      "noQuestion": "No question in this channel."
+      "noQuestion": "No question in this channel.",
+      "editedAt": "edited at {time}",
+      "sentAt": "sent at {time}"
     },
     "edit": {
       "title": "Edit channel",
@@ -178,5 +193,7 @@
       "cancel": "Cancel",
       "submit": "Delete channel"
     }
+    
   }
+  
 }
