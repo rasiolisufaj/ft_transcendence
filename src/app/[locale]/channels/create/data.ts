@@ -36,3 +36,5 @@ export async function getInvitationsChannel (email : string)
     include: { channel: { select: { title: true, description: true, members: true} } },
   });
 }
+
+

@@ -100,7 +100,11 @@
       "optionsAria": "Options du channel",
       "invite": "Inviter",
       "edit": "Modifier",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "kick": "Retirer un membre",
+      "leave": "Quitter",
+      "public": "channel public",
+      "private": "channel privé"
     },
     "create": {
       "title": "Créer un channel",
@@ -113,6 +117,15 @@
       "questionPlaceholder": "Pose ta question en donnant le plus de détails possible pour obtenir des réponses claires.",
       "cancel": "Annuler",
       "submit": "Créer le channel"
+    },
+    "join": {
+      "back": "← Retour aux channels",
+      "title": "Rejoindre un channel",
+      "subtitle": "Parcours les channels publics et rejoins-en un.",
+      "empty": "Aucun channel public à rejoindre pour le moment.",
+      "noDescription": "Ce channel n'a pas de description.",
+      "membersCount": "{count, plural, one {# membre} other {# membres}}",
+      "join": "Rejoindre"
     },
     "detail": {
       "back": "← Retour aux channels",
@@ -129,7 +142,9 @@
       "replyPlaceholder": "Écrire une réponse…",
       "replyAria": "Votre réponse",
       "send": "Envoyer",
-      "noQuestion": "Pas de question pour ce channel."
+      "noQuestion": "Pas de question pour ce channel.",
+      "editedAt": "modifié à {time}",
+      "sentAt": "envoyé à {time}"
     },
     "edit": {
       "title": "Modifier le channel",

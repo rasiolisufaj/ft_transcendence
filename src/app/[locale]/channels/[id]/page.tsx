@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/Button";
-import { createAnswer, deleteAnswer, kickMember, leaveChannel } from "./actions";
+import {
+  createAnswer,
+  deleteAnswer,
+  kickMember,
+  leaveChannel,
+} from "./actions";
 import { getSeedUser } from "@/lib/auth/seed-user";
 
 export default async function ChannelPage({
@@ -128,11 +133,27 @@ export default async function ChannelPage({
                     <p className="mt-1 text-xs text-zinc-400">
                       {answer.author?.displayName ?? t("deletedUser")}
                     </p>
-                    <p>
-                      {format.dateTime(answer.createdAt, {
-                        dateStyle: "short",
-                      })}
-                    </p>
+                    {new Date(answer.updatedAt).getTime() -
+                      new Date(answer.createdAt).getTime() >
+                    1000 ? (
+                      <p>
+                        {t("editedAt", {
+                          time: format.dateTime(new Date(answer.updatedAt), {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }),
+                        })}
+                      </p>
+                    ) : (
+                      <p>
+                        {t("sentAt", {
+                          time: format.dateTime(new Date(answer.createdAt), {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }),
+                        })}
+                      </p>
+                    )}
                   </div>
 
                   {answer.userId === user.id && (
