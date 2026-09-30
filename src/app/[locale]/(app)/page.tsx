@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
-import { getSeedUser } from "@/lib/auth/seed-user";
+import { requireUser } from "@/lib/auth/session";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { categoryCards, type CategoryKey } from "@/lib/documents/subtypes";
@@ -11,7 +11,7 @@ import { categoryCards, type CategoryKey } from "@/lib/documents/subtypes";
 export default async function DashboardPage() {
   const t = await getTranslations("dashboard");
   const tCategory = await getTranslations("categories");
-  const user = await getSeedUser();
+  const { user } = await requireUser();
 
   const grouped = await prisma.document.groupBy({
     by: ["category"],

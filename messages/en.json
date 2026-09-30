@@ -2,7 +2,10 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Dashboard",
-    "addDocument": "Add a document"
+    "addDocument": "Add a document",
+    "login": "Sign in",
+    "signup": "Sign up",
+    "logout": "Sign out"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -84,5 +87,37 @@
     },
     "chooseAnother": "Choose another file",
     "backToDocuments": "View my documents"
+  },
+  "auth": {
+    "errors": {
+      "emailInvalid": "Enter a valid email address.",
+      "displayNameTooShort": "Your display name must be at least 2 characters long.",
+      "displayNameTooLong": "Your display name cannot be longer than 50 characters.",
+      "passwordTooShort": "Your password must be at least 8 characters long.",
+      "passwordTooLong": "Your password cannot be longer than 200 characters.",
+      "passwordRequired": "Enter your password.",
+      "emailTaken": "That email address is already registered.",
+      "invalidCredentials": "Incorrect email or password.",
+      "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes."
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "displayName": "Display name"
+    },
+    "login": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "pending": "Signing in…",
+      "noAccount": "No account yet?",
+      "signupLink": "Create one"
+    },
+    "signup": {
+      "title": "Create your account",
+      "submit": "Create account",
+      "pending": "Creating account…",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    }
   }
 }

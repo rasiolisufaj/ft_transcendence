@@ -2,7 +2,10 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Tableau de bord",
-    "addDocument": "Ajouter un document"
+    "addDocument": "Ajouter un document",
+    "login": "Se connecter",
+    "signup": "Créer un compte",
+    "logout": "Se déconnecter"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -84,5 +87,37 @@
     },
     "chooseAnother": "Choisir un autre fichier",
     "backToDocuments": "Voir mes documents"
+  },
+  "auth": {
+    "errors": {
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "displayNameTooShort": "Votre nom d'affichage doit contenir au moins 2 caractères.",
+      "displayNameTooLong": "Votre nom d'affichage ne peut pas dépasser 50 caractères.",
+      "passwordTooShort": "Votre mot de passe doit contenir au moins 8 caractères.",
+      "passwordTooLong": "Votre mot de passe ne peut pas dépasser 200 caractères.",
+      "passwordRequired": "Saisissez votre mot de passe.",
+      "emailTaken": "Cette adresse e-mail est déjà associée à un compte.",
+      "invalidCredentials": "Adresse e-mail ou mot de passe incorrect.",
+      "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes."
+    },
+    "fields": {
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "displayName": "Nom d'affichage"
+    },
+    "login": {
+      "title": "Connexion",
+      "submit": "Se connecter",
+      "pending": "Connexion…",
+      "noAccount": "Pas encore de compte ?",
+      "signupLink": "Créer un compte"
+    },
+    "signup": {
+      "title": "Créer votre compte",
+      "submit": "Créer mon compte",
+      "pending": "Création du compte…",
+      "hasAccount": "Déjà un compte ?",
+      "loginLink": "Se connecter"
+    }
   }
 }
