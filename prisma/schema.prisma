@@ -70,18 +70,19 @@ model User {
   sessions                    Session[]
   channelsCreated             Channel[]
   channelMemberships          ChannelMember[]
-  threads                     Thread[]        @relation("ThreadAuthor")
-  answers                     Answer[]        @relation("AnswerAuthor")
+  threads                     Thread[]             @relation("ThreadAuthor")
+  answers                     Answer[]             @relation("AnswerAuthor")
   votes                       Vote[]
-  friendshipsSent             Friendship[]    @relation("SentFriendships")
-  friendshipsReceived         Friendship[]    @relation("ReceivedFriendships")
-  conversationsAsParticipant1 Conversation[]  @relation("ConversationParticipant1")
-  conversationsAsParticipant2 Conversation[]  @relation("ConversationParticipant2")
-  messages                    Message[]       @relation("MessageSender")
+  friendshipsSent             Friendship[]         @relation("SentFriendships")
+  friendshipsReceived         Friendship[]         @relation("ReceivedFriendships")
+  conversationsAsParticipant1 Conversation[]       @relation("ConversationParticipant1")
+  conversationsAsParticipant2 Conversation[]       @relation("ConversationParticipant2")
+  messages                    Message[]            @relation("MessageSender")
   notifications               Notification[]
   oauthAccounts               OAuthAccount[]
   auditLogs                   AuditLog[]
   channelInvites              ChannelInvite[]
+  channelJoinRequests         ChannelJoinRequest[]
 }
 
 model Document {
@@ -147,17 +148,18 @@ model ChannelMember {
 }
 
 model Channel {
-  id          Int      @id @default(autoincrement())
-  createdBy   String?  @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
-  title       String   @db.VarChar(100)
-  description String?  @db.VarChar(250)
-  isPrivate   Boolean @default(false)
-  creator User?           @relation(fields: [createdBy], references: [id], onDelete: SetNull)
-  members ChannelMember[]
-  threads Thread[]
-  invites ChannelInvite[]
+  id           Int                  @id @default(autoincrement())
+  createdBy    String?              @map("created_by")
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @default(now()) @updatedAt @map("updated_at")
+  title        String               @db.VarChar(100)
+  description  String?              @db.VarChar(250)
+  isPrivate    Boolean              @default(false)
+  creator      User?                @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  members      ChannelMember[]
+  threads      Thread[]
+  invites      ChannelInvite[]
+  joinRequests ChannelJoinRequest[]
 }
 
 model Thread {
@@ -301,3 +303,16 @@ model ChannelInvite {
 
   @@id([channelId, userId])
 }
+
+model ChannelJoinRequest {
+  channelId Int      @map("channel_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+  @@index([userId])
+}
+
