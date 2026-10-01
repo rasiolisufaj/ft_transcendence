@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/auth/session";
 import { getJoinableChannels } from "./data";
 import { joinChannel } from "./actions";
-
+import requestJoinChannel from "./actions";
 export default async function JoinPage() {
   const t = await getTranslations("channels.join");
   const { user } = await requireUser();
@@ -52,15 +52,25 @@ export default async function JoinPage() {
                 <p className="mt-1 text-xs text-zinc-400">
                   {t("membersCount", { count: channel._count.members })}
                 </p>
-                <form action={joinChannel} className="mt-3">
-                  <input type="hidden" name="channelId" value={channel.id} />
-                  <button
-                    type="submit"
-                    className="rounded-md px-3 py-2 text-sm text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950"
-                  >
-                    {t("join")}
-                  </button>
-                </form>
+                {channel.isPrivate ? (
+                  <form action={requestJoinChannel} className="mt-3">
+                    <input type="hidden" name="channelId" value={channel.id} />
+                    <input type="hidden" name="userId" value={user.id} />
+                    <button type="submit" className="...">
+                      requestJoinChannel
+                    </button>
+                  </form>
+                ) : (
+                  <form action={joinChannel} className="mt-3">
+                    <input type="hidden" name="channelId" value={channel.id} />
+                    <button
+                      type="submit"
+                      className="rounded-md px-3 py-2 text-sm text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950"
+                    >
+                      {t("join")}
+                    </button>
+                  </form>
+                )}
               </div>
             ))}
           </div>

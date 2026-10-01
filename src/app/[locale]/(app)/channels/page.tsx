@@ -190,6 +190,27 @@ export default async function ChannelsHomePage() {
                       {t("edit")}
                     </Link>
                     <Link
+                      href={`/channels/${channel.id}/requests`}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-4"
+                      >
+                        <circle cx="9" cy="8" r="3.5" />
+                        <path
+                          strokeLinecap="round"
+                          d="M2.5 20a6.5 6.5 0 0 1 13 0"
+                        />
+                        <path strokeLinecap="round" d="M19 8v6M16 11h6" />
+                      </svg>
+                      the text after
+                    </Link>
+                    <Link
                       href={`/channels/${channel.id}/kick`}
                       className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
                     >

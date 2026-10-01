@@ -26,8 +26,6 @@ export default async function kickUser({
       channelId: id,
     },
   });
-  // verifie que le user est bien membre du channel
-  // et quil est bien moderator
   if (!userMember || userMember.role !== "MODERATOR") return;
 
   const channel = await prisma.channel.findFirst({
