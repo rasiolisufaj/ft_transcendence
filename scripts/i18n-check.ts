@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { findMissing, findUnused, findUsedKeys, keysOf } from "../src/i18n/check";
+import { findMissing, findOrphans, findUnused, findUsedKeys, keysOf } from "../src/i18n/check";
 import { defaultLocale, locales } from "../src/i18n/config";
 
 // read & parse all language file in list of key
@@ -23,6 +23,13 @@ for (const locale of locales) {
 
   for (const key of missing) {
     console.error(`✗ ${locale}.json — missing: ${key}`);
+    problems++;
+  }
+
+  const orphans = findOrphans(referenceKeys, localeKeys);
+
+  for (const key of orphans) {
+    console.error(`✗ ${locale}.json — orphan: ${key}`);
     problems++;
   }
 }
