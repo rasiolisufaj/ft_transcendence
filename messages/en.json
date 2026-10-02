@@ -34,9 +34,7 @@
   },
   "dashboard": {
     "title": "My documents",
-    "subtitle": "Upload your French paperwork, our AI will handle the rest.",
     "addDocument": "Add a document",
-    "upload": "Upload",
     "empty": "No documents yet. Upload your first document to get started.",
     "countByCategory": "{count, plural, one {# document, sorted by category.} other {# documents, sorted by category.}}",
     "pendingClassification": "{count, plural, one {# document awaiting automatic classification.} other {# documents awaiting automatic classification.}}"
