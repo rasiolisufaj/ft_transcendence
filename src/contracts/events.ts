@@ -1,7 +1,14 @@
-// need to know what event is needed 
-export type RealtimeEvent = never;
+type ThreadCreated = {
+  type: "thread.created";
+  channelId: number;
+  threadId: number;
+  actorUserId: string; // who posted it
+  at: string; // when, as new Date().toISOString()
+};
 
-// every member of the channel
+export type RealtimeEvent = ThreadCreated;
+
+// all member of the channel
 export const channelTopic = (channelId: number) => `channel:${channelId}`;
 
 // one account only
