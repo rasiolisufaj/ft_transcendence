@@ -34,9 +34,7 @@
   },
   "dashboard": {
     "title": "Mes documents",
-    "subtitle": "Importez vos papiers administratifs français, notre IA s'occupe du reste.",
     "addDocument": "Ajouter un document",
-    "upload": "Importer",
     "empty": "Aucun document pour l'instant. Importez votre premier document pour commencer.",
     "countByCategory": "{count, plural, one {# document, trié par catégorie.} other {# documents, triés par catégorie.}}",
     "pendingClassification": "{count, plural, one {# document en attente de classement automatique.} other {# documents en attente de classement automatique.}}"
