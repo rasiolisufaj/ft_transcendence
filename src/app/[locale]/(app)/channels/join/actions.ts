@@ -23,35 +23,30 @@ export async function joinChannel(formData: FormData) {
 
 export default async function requestJoinChannel(formData: FormData) {
   const { user } = await requireUser();
-  const channelId = formData.get("channelId");
-  const userId = formData.get("userId");
 
-  if (
-    typeof userId !== "string" ||
-    typeof channelId !== "string" ||
-    !channelId ||
-    !userId
-  )
-    return;
+  const channelId = formData.get("channelId");
+  if (typeof channelId !== "string") return;
 
   const trueChannelId = channelId.trim();
-  const trueUserId: string = userId.trim();
+  if (trueChannelId.length === 0) return;
 
-  if (trueChannelId.length === 0 || trueUserId.length === 0) return;
+  const intChannelId = parseInt(trueChannelId, 10);
+  if (isNaN(intChannelId)) return;
 
-  const intChannelID = parseInt(trueUserId, 10);
-  if (isNaN(intChannelID)) return;
+  const channel = await prisma.channel.findUnique({
+    where: { id: intChannelId },
+  });
+  if (!channel) return;
 
-  // Check if the channel exists and if the user is already a member
   const alreadyMember = await prisma.channelMember.findFirst({
-    where: { channelId: intChannelID, userId: trueUserId },
+    where: { channelId: intChannelId, userId: user.id },
   });
   if (alreadyMember) return;
 
-  prisma.channelJoinRequest.create({
+  await prisma.channelJoinRequest.create({
     data: {
-      channelId: intChannelID,
-      userId: trueUserId,
+      channelId: intChannelId,
+      userId: user.id,
     },
   });
 }
