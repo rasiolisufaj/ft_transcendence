@@ -55,7 +55,8 @@ for (const file of files) {
 }
 
 for (const key of findUnused(referenceKeys, usedKeys, usedPrefixes)) {
-  console.warn(`⚠ ${defaultLocale}.json — unused: ${key}`);
+  console.error(`✗ ${defaultLocale}.json — unused: ${key}`);
+  problems++;
 }
 
 if (problems > 0) {
