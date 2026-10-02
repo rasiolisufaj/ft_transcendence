@@ -30,6 +30,17 @@ export function findMissing(reference: string[], keys: string[]): string[] {
   return missing;
 }
 
+//keys -> en/es | reference -> (fr)
+export function findOrphans(reference: string[], keys: string[]): string[] {
+  const orphans: string[] = [];
+  for (const key of keys) {
+    if (!reference.includes(key)) {
+      orphans.push(key);
+    }
+  }
+  return orphans;
+}
+
 export function findUsedKeys(source: string): { keys: string[]; prefixes: string[] } {
   const keys: string[] = [];
   const prefixes: string[] = [];
