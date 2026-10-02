@@ -31,18 +31,52 @@ type ContentHidden = {
   at: string;
 };
 
+type MemberJoined = {
+  type: "member.joined";
+  channelId: number;
+  userId: string; // who joined
+  at: string;
+};
+
+type MemberLeft = {
+  type: "member.left";
+  channelId: number;
+  userId: string; // who left
+  at: string;
+};
+
+type MemberRoleChanged = {
+  type: "member.roleChanged";
+  channelId: number;
+  userId: string; // whose role changed
+  role: "MEMBER" | "MODERATOR"; // the new role
+  at: string;
+};
+
+type MemberMuted = {
+  type: "member.muted";
+  channelId: number;
+  userId: string; // who was muted
+  mutedUntil: string | null; // until when; null = unmuted
+  at: string;
+};
+
 export type RealtimeEvent =
   | ThreadCreated
   | AnswerCreated
   | AnswerVoted
-  | ContentHidden;
-  // | MemberJoined
-  // | MemberLeft
-  // | MemberRoleChanged
-  // | MemberBanned
+  | ContentHidden
+  | MemberJoined
+  | MemberLeft
+  | MemberRoleChanged
+  | MemberMuted;
 
 // all member of the channel
 export const channelTopic = (channelId: number) => `channel:${channelId}`;
 
 // one account only
 export const userTopic = (userId: string) => `user:${userId}`;
+
+export function topicFor(event: RealtimeEvent): string {
+  return channelTopic(event.channelId);
+}
