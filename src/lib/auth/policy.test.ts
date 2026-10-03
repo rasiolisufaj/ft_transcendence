@@ -42,10 +42,19 @@ describe("default-deny", () => {
 });
 
 describe("tier 1 — global admin", () => {
-  it("grants everything", () => {
+  it("grants everything outside the vault", () => {
     expect(can(admin, "user:manage", {})).toBe(true);
-    expect(can(admin, "document:delete", { ownerUserId: "someone-else" })).toBe(true);
+    expect(can(admin, "thread:delete", { channelId: OTHER_CHANNEL, ownerUserId: "someone-else" })).toBe(true);
     expect(can(admin, "channel:moderate", { channelId: OTHER_CHANNEL })).toBe(true);
+  });
+
+  it("the vault is owner-only, even for an admin", () => {
+    // Vision §3: no role, admin included, reads another user's documents (§C-17).
+    expect(can(admin, "document:read", { ownerUserId: "someone-else" })).toBe(false);
+    expect(can(admin, "document:update", { ownerUserId: "someone-else" })).toBe(false);
+    expect(can(admin, "document:delete", { ownerUserId: "someone-else" })).toBe(false);
+    expect(can(admin, "document:read", {})).toBe(false);   // a caller that forgot the owner
+    expect(can(admin, "document:read", { ownerUserId: "u-self" })).toBe(true);   // their own papers
   });
 
   it("user:manage is admin-only, even on your own account", () => {
@@ -59,7 +68,6 @@ describe("tier 2 — channel moderator", () => {
     expect(can(moderator, "channel:moderate", { channelId: CHANNEL })).toBe(true);
     expect(can(moderator, "thread:delete", { channelId: CHANNEL, ownerUserId: "x" })).toBe(true);
     expect(can(moderator, "answer:delete", { channelId: CHANNEL, ownerUserId: "x" })).toBe(true);
-    expect(can(moderator, "channel:manageRoles", { channelId: CHANNEL })).toBe(true);
   });
 
   it("does not moderate any other channel", () => {
@@ -69,11 +77,23 @@ describe("tier 2 — channel moderator", () => {
 
   it("is not a global admin", () => {
     expect(can(moderator, "user:manage", {})).toBe(false);
+    // Vision §3: moderators are assigned by an Admin, so a moderator cannot appoint more (§C-18).
+    expect(can(moderator, "channel:manageRoles", { channelId: CHANNEL })).toBe(false);
   });
 
   it("a plain MEMBER moderates nothing", () => {
     expect(can(member, "channel:moderate", { channelId: CHANNEL })).toBe(false);
     expect(can(member, "thread:delete", { channelId: CHANNEL, ownerUserId: "x" })).toBe(false);
+  });
+
+  it("moderation is never granted by ownership", () => {
+    // Moderation has no owner: a caller passing the user's own id (e.g. an invite's target)
+    // must not fall through to tier 3 and turn anyone into a moderator.
+    expect(can(stranger, "channel:moderate", { channelId: CHANNEL, ownerUserId: "u-self" })).toBe(false);
+    expect(can(stranger, "channel:moderate", { ownerUserId: "u-self" })).toBe(false);
+    expect(can(member, "channel:moderate", { channelId: CHANNEL, ownerUserId: "u-self" })).toBe(false);
+    expect(can(stranger, "channel:manageRoles", { channelId: CHANNEL, ownerUserId: "u-self" })).toBe(false);
+    expect(can(moderator, "channel:moderate", { channelId: CHANNEL, ownerUserId: "x" })).toBe(true);
   });
 });
 
@@ -152,10 +172,10 @@ describe("truth table — every Action × every role (C4)", () => {
   // Record<Action, …>: an Action added to the union without a row here fails the typecheck.
   const table: Record<Action, [Resource, boolean, boolean, boolean, boolean, boolean]> = {
     //                      resource       admin  mod    member owner  stranger
-    "document:read":       [own,          true,  false, false, true,  false],
+    "document:read":       [own,          false, false, false, true,  false],
     "document:create":     [none,         true,  true,  true,  true,  true],
-    "document:update":     [own,          true,  false, false, true,  false],
-    "document:delete":     [own,          true,  false, false, true,  false],
+    "document:update":     [own,          false, false, false, true,  false],
+    "document:delete":     [own,          false, false, false, true,  false],
     "assistant:ask":       [none,         true,  true,  true,  true,  true],
     "channel:create":      [none,         true,  true,  true,  true,  true],
     "channel:update":      [inChannel,    true,  true,  false, false, false],
@@ -172,7 +192,7 @@ describe("truth table — every Action × every role (C4)", () => {
     "message:send":        [none,         true,  true,  true,  true,  true],
     "friend:request":      [none,         true,  true,  true,  true,  true],
     "user:manage":         [none,         true,  false, false, false, false],
-    "channel:manageRoles": [inChannel,    true,  true,  false, false, false],
+    "channel:manageRoles": [inChannel,    true,  false, false, false, false],
     "gdpr:export":         [none,         true,  true,  true,  true,  true],
     "gdpr:delete":         [none,         true,  true,  true,  true,  true],
   };

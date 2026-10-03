@@ -26,7 +26,7 @@ npm test                                                                    # ev
 npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" --reporter=verbose    # auth only
 ```
 
-Expected: `npm test` reports **97 passed**. The auth part is 6 files and 65 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
+Expected: `npm test` reports **99 passed**. The auth part is 6 files and 67 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
 
 | File | What it proves |
 |---|---|
@@ -34,7 +34,7 @@ Expected: `npm test` reports **97 passed**. The auth part is 6 files and 65 test
 | [session.test.ts](../src/lib/auth/session.test.ts) | tokens are random and ≥128 bits; only the SHA-256 is stored; expired sessions are rejected and deleted; the expiry never slides; logout kills one session or all of them; channel memberships load. Uses the real DB. |
 | [schemas.test.ts](../src/lib/auth/schemas.test.ts) | the signup and login rules; every error key exists in fr, en and es |
 | [login/actions.test.ts](<../src/app/[locale]/(auth)/login/actions.test.ts>) | the action returns the schema's errors; 6 failures lock an email for 15 minutes |
-| [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything; a moderator acts only in their own channel; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` is admin-only, even on your own account. Plus the C4 truth table: one row per `Action` (23) with the resource its caller passes and the answer for admin, moderator, member, owner and stranger; a new `Action` without a row fails the typecheck |
+| [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything except touch another user's documents (the vault is owner-only, even for an admin); a moderator acts only in their own channel, and moderation is never granted by ownership; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` and `channel:manageRoles` are admin-only, even on your own account. Plus the C4 truth table: one row per `Action` (23) with the resource its caller passes and the answer for admin, moderator, member, owner and stranger; a new `Action` without a row fails the typecheck |
 | [audit.test.ts](../src/lib/audit.test.ts) | `writeAudit()` records the actor, action, target and channel; a failed write is logged and never throws. Uses the real DB. |
 
 To run one test by name: `npx vitest run -t "never extends"`.
@@ -51,7 +51,7 @@ A test only counts if it fails when the code is wrong. Break the code on purpose
    - Run `npx vitest run -t "admin-only"`. Expected: **FAIL**, because a user could now "manage" (promote) their own account.
 4. In [audit.ts](../src/lib/audit.ts), replace `console.error("audit write failed", entry.action, error);` with `throw error;`.
    - Run `npx vitest run -t "never throws"`. Expected: **FAIL**.
-5. Undo all four edits (`git checkout -- src/` if you have nothing else there). Check that `git diff src/` is empty, then run `npm test` again (97 passed).
+5. Undo all four edits (`git checkout -- src/` if you have nothing else there). Check that `git diff src/` is empty, then run `npm test` again (99 passed).
 
 ### A3. Build gates (graded: zero errors)
 
