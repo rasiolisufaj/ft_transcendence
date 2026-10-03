@@ -22,3 +22,31 @@ server.on("connection", (socket) => {
     log("info", "client disconnected", { clients: server.clients.size });
   });
 });
+
+let shuttingDown = false;
+
+function shutdown(signal: string) {
+  if (shuttingDown) {
+    return;
+  }
+  shuttingDown = true;
+  log("info", "shutting down", { signal, clients: server.clients.size });
+
+  for (const socket of server.clients) {
+    socket.close(1001, "server shutting down");
+  }
+
+  setTimeout(() => {
+    for (const socket of server.clients) {
+      socket.terminate();
+    }
+  }, 5000).unref();
+
+  server.close(() => {
+    log("info", "realtime server stopped");
+    process.exit(0);
+  });
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
