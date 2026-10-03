@@ -1,6 +1,6 @@
-# Testing the auth work (roadmap phases 0–2.4)
+# Testing the auth work (roadmap phases 0–3)
 
-How to check the auth code yourself: the session core, signup / login / logout, and the route guard. It covers roadmap tasks 0.4, 1.1–1.3 and 2.1–2.4 (C1, C2, C3, and part of C5 and C11 in `PROJECT_PLAN.md` §7).
+How to check the auth code yourself: the session core, signup / login / logout, the route guard, the permission policy and the audit log. It covers roadmap tasks 0.4, 1.1–1.3, 2.1–2.4 and 3.1–3.3 (C1, C2, C3, C4, C6, and part of C5 and C11 in `PROJECT_PLAN.md` §7).
 
 There are two parts:
 
@@ -23,10 +23,10 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 npm run db:generate
 
 npm test                                                                    # everything
-npx vitest run src/lib/auth "src/app/[locale]/(auth)" --reporter=verbose    # auth only
+npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" --reporter=verbose    # auth only
 ```
 
-Expected: `npm test` reports **57 passed**. The auth part is 4 files and 25 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
+Expected: `npm test` reports **99 passed**. The auth part is 6 files and 67 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
 
 | File | What it proves |
 |---|---|
@@ -34,6 +34,8 @@ Expected: `npm test` reports **57 passed**. The auth part is 4 files and 25 test
 | [session.test.ts](../src/lib/auth/session.test.ts) | tokens are random and ≥128 bits; only the SHA-256 is stored; expired sessions are rejected and deleted; the expiry never slides; logout kills one session or all of them; channel memberships load. Uses the real DB. |
 | [schemas.test.ts](../src/lib/auth/schemas.test.ts) | the signup and login rules; every error key exists in fr, en and es |
 | [login/actions.test.ts](<../src/app/[locale]/(auth)/login/actions.test.ts>) | the action returns the schema's errors; 6 failures lock an email for 15 minutes |
+| [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything except touch another user's documents (the vault is owner-only, even for an admin); a moderator acts only in their own channel, and moderation is never granted by ownership; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` and `channel:manageRoles` are admin-only, even on your own account. Plus the C4 truth table: one row per `Action` (23) with the resource its caller passes and the answer for admin, moderator, member, owner and stranger; a new `Action` without a row fails the typecheck |
+| [audit.test.ts](../src/lib/audit.test.ts) | `writeAudit()` records the actor, action, target and channel; a failed write is logged and never throws. Uses the real DB. |
 
 To run one test by name: `npx vitest run -t "never extends"`.
 
@@ -45,7 +47,11 @@ A test only counts if it fails when the code is wrong. Break the code on purpose
    - Run `npx vitest run -t "locks an email"`. Expected: **FAIL**.
 2. In [session.ts](../src/lib/auth/session.ts), comment out the `if (row.expiresAt.getTime() <= Date.now()) { … }` block.
    - Run `npx vitest run -t "expired"`. Expected: **FAIL**.
-3. Undo both edits. Check that `git diff src/` shows none of your edits, then run `npm test` again (57 passed).
+3. In [policy.ts](../src/lib/auth/policy.ts), comment out `if (ADMIN_ONLY.has(action)) return false;`.
+   - Run `npx vitest run -t "admin-only"`. Expected: **FAIL**, because a user could now "manage" (promote) their own account.
+4. In [audit.ts](../src/lib/audit.ts), replace `console.error("audit write failed", entry.action, error);` with `throw error;`.
+   - Run `npx vitest run -t "never throws"`. Expected: **FAIL**.
+5. Undo all four edits (`git checkout -- src/` if you have nothing else there). Check that `git diff src/` is empty, then run `npm test` again (99 passed).
 
 ### A3. Build gates (graded: zero errors)
 
@@ -59,6 +65,44 @@ Expected:
 - **Lint:** `0 errors`. The 2 known warnings are in `prisma/seed.ts`.
 
 If the build says `Cannot find module '…/src/app/[locale]/page.js'`, `.next/dev/types` is stale from before the routes moved into `(app)`. Run `rm -rf .next/dev/types` and build again.
+
+### A4. Phase 3 by hand: ask `can()`, write an audit row
+
+Nothing in the app calls `can()` or `writeAudit()` yet (phase 4 and Amir's channel actions will), so you try them from the terminal.
+
+**Ask the policy a question.** No database is involved, so you can edit the user, the action and the resource, then run it again:
+
+```bash
+npx tsx -e '
+import { can } from "./src/lib/auth/policy.ts";
+const me = { user: { id: "me", globalRole: "USER" }, memberships: [{ channelId: 7, role: "MODERATOR" }] };
+console.log(can(me, "thread:delete", { channelId: 7, ownerUserId: "someone" }));  // true: I moderate channel 7
+console.log(can(me, "thread:delete", { channelId: 8, ownerUserId: "someone" }));  // false: not channel 8
+console.log(can(me, "user:manage", { ownerUserId: "me" }));                      // false: admin-only
+'
+```
+
+Then try `globalRole: "ADMIN"` (all three become `true`) or `role: "MEMBER"` (the first one becomes `false`).
+
+**Write an audit row and look at it.** This uses the database, so it needs the host Prisma engine (A1):
+
+```bash
+npx tsx --env-file=.env -e '
+import { writeAudit } from "./src/lib/audit.ts";
+writeAudit({ actorUserId: null, action: "demo:hello", targetType: "Demo", targetId: "1", channelId: 7, metadata: { note: "my first audit row" } }).then(() => console.log("written"));
+'
+```
+
+`tsx -e` compiles to CommonJS, so use `.then()`, not a top-level `await`. Then, in `psql` (`docker exec -it mespapiers_db psql -U mespapiers -d mespapiers`):
+
+```sql
+select action, "targetType", "targetId", "channelId", metadata from "AuditLog" where action = 'demo:hello';
+delete from "AuditLog" where action = 'demo:hello';
+```
+
+Expected: one row, with `channelId` stored as the text `7` (roadmap §C-8) and `metadata` as JSON.
+
+**`AUTH_STUB` is gone (task 3.3).** `grep -rn AUTH_STUB src .env.example` prints nothing.
 
 ---
 
@@ -78,7 +122,7 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
   docker exec -it mespapiers_db psql -U mespapiers -d mespapiers
   ```
 
-- Use a **private window** at `https://localhost`, or `https://mespapiers.local` if you have the hosts entry. Accept the self-signed certificate.
+- Use a **private window** at **`https://mespapiers.local`**, the name `next.config.ts` allows for dev (`allowedDevOrigins`). Every URL below uses it. It needs `127.0.0.1 mespapiers.local` in the Windows hosts file (`C:\Windows\System32\drivers\etc\hosts`), which WSL picks up too (`getent hosts mespapiers.local`). Accept the self-signed certificate.
 - Keep DevTools open, on the **Console** and **Network** tabs.
 - The seeded users have no password and cannot log in. Every step below uses a fresh account, `moi@mespapiers.test`.
 
@@ -88,7 +132,7 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 |---|---|
 | Go to `/fr` | You land on **`/fr/login`**. The nav shows *Se connecter* and *Créer un compte*, and no dashboard links. |
 | Go to `/es/documents/new` | You land on **`/es/login`**, so the language is kept |
-| `curl -k -i https://localhost/api/documents/1` | **`401`**. Before task 2.4 this returned the seeded user's file to anyone. |
+| `curl -k -i https://mespapiers.local/api/documents/1` | **`401`**. Before task 2.4 this returned the seeded user's file to anyone. |
 
 ### B2. Signup validation
 
@@ -143,8 +187,8 @@ Expected:
 - Test the file route with your cookie:
 
   ```bash
-  curl -k -i -b "mp_session=PASTE_COOKIE_VALUE" https://localhost/api/documents/YOUR_DOC_ID   # 200
-  curl -k -i -b "mp_session=PASTE_COOKIE_VALUE" https://localhost/api/documents/1             # 404, someone else's
+  curl -k -i -b "mp_session=PASTE_COOKIE_VALUE" https://mespapiers.local/api/documents/YOUR_DOC_ID   # 200
+  curl -k -i -b "mp_session=PASTE_COOKIE_VALUE" https://mespapiers.local/api/documents/1             # 404, someone else's
   ```
 
 ### B5. Logout invalidates the session on the server
@@ -184,7 +228,7 @@ Server Actions rely on Next.js's built-in Origin check (roadmap §C-5). To prove
 3. Count the sessions (query from B3).
 4. Paste the copied command in a terminal:
    - add `-k -i`
-   - change `-H 'origin: https://localhost'` to `-H 'origin: https://evil.example'`
+   - change `-H 'origin: https://mespapiers.local'` to `-H 'origin: https://evil.example'`
    - run it
 5. Expected:
    - the curl output starts with `HTTP/1.1 500`
@@ -201,8 +245,36 @@ After step 4, an idle dev tab may log `Cannot write to a CLOSED writable stream`
 - **Keyboard:** with Tab only, you can reach every nav link, the language switcher, *Se déconnecter* and each form field, in a logical order. Enter submits the forms.
 - **Console:** no red or yellow messages on any page you visited. The React DevTools info message and the HMR logs are fine.
 
+### B10. A second account can't see or delete your documents (C5)
+
+You need a second account, `autre@mespapiers.test`, signed in **at the same time** as `moi@mespapiers.test`. Private windows of one browser share their cookies, so use a second browser (or a normal window next to your private one).
+
+1. **Setup.**
+   - As `moi`: sign in again (B5 logged you out) and copy the new `mp_session` cookie as `MOI_COOKIE`. Keep the document from B4; its id is `YOUR_DOC_ID` (B4 query).
+   - As `autre`: sign up, upload any PNG or PDF, and copy its cookie as `AUTRE_COOKIE`. The file appears under *Autres* (`/fr/documents/other`).
+2. **The list is owner-scoped.** `autre`'s `/fr/documents/other` shows only `autre`'s file, never `moi`'s.
+3. **The file route.**
+
+   ```bash
+   curl -k -i -b "mp_session=AUTRE_COOKIE" https://mespapiers.local/api/documents/YOUR_DOC_ID   # 404
+   curl -k -i -b "mp_session=MOI_COOKIE" https://mespapiers.local/api/documents/YOUR_DOC_ID     # 200, control
+   ```
+
+   It's 404, not 403. The query only searches your own documents, so someone else's id looks exactly like a missing one, and the answer doesn't confirm that it exists (roadmap §C-14).
+4. **The delete action.** In `autre`'s window, on `/fr/documents/other`:
+   - DevTools → Elements: in the delete button's form, change `<input type="hidden" name="id" value="…">` to `YOUR_DOC_ID`, then click the delete button.
+   - Expected: Next's dev error overlay, *Runtime Error · Server · this document does not exist, or is not yours*. The Console shows two red lines (a `500` and the same message); this is the only step in this guide where console errors are expected. `docker logs --tail 5 mespapiers_web` shows the same error, and the query below still lists `moi`'s document.
+   - **Control:** reload the page and delete `autre`'s own document normally. Expected: you land on `/fr`, and the query no longer lists that document.
+
+   ```sql
+   select d.id, u.email from "Document" d join "User" u on u.id = d."ownerId"
+   where u.email in ('moi@mespapiers.test', 'autre@mespapiers.test');
+   ```
+
+   The refused delete answers **500**, not 403 or 404, because `deleteDocument` throws a plain `Error` (`src/app/[locale]/action.ts`, Amir's). Nothing is deleted, but the user gets an error screen and a red console.
+
 ### Cleanup
 
 ```sql
-delete from "User" where email = 'moi@mespapiers.test';   -- cascades to its sessions and documents
+delete from "User" where email in ('moi@mespapiers.test', 'autre@mespapiers.test');   -- cascades to their sessions and documents
 ```
