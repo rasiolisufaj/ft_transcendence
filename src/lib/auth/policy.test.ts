@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ForbiddenError, assertCan, can, type Action } from "@/lib/auth/policy";
+import { ForbiddenError, assertCan, can, type Action, type Resource } from "@/lib/auth/policy";
 import type { SessionContext } from "@/lib/auth/session";
 
 const CHANNEL = 7;
@@ -128,6 +128,58 @@ describe("reputation is a badge, not a tier", () => {
     expect(can(helper, "thread:delete", { channelId: CHANNEL, ownerUserId: "x" })).toBe(false);
     expect(can(helper, "user:manage", {})).toBe(false);
     expect(can(helper, "document:read", { ownerUserId: "u-other" })).toBe(false);
+  });
+});
+
+describe("truth table — every Action × every role (C4)", () => {
+  // One source of power per column: the owner holds no membership, the member owns nothing.
+  const OWNER = "u-owner";
+  const users = {
+    admin: ctx({ id: "u-admin", globalRole: "ADMIN" }),
+    moderator: ctx({ id: "u-mod", memberships: [{ channelId: CHANNEL, role: "MODERATOR" }] }),
+    member: ctx({ id: "u-member", memberships: [{ channelId: CHANNEL, role: "MEMBER" }] }),
+    owner: ctx({ id: OWNER }),
+    stranger: ctx({ id: "u-stranger" }),
+  };
+  const ROLES = ["admin", "moderator", "member", "owner", "stranger"] as const;
+
+  // The resource is what the caller passes (roadmap phase 5 mapping), so each row is also its contract.
+  const none = {};
+  const own = { ownerUserId: OWNER };
+  const inChannel = { channelId: CHANNEL };
+  const ownInChannel = { channelId: CHANNEL, ownerUserId: OWNER };
+
+  // Record<Action, …>: an Action added to the union without a row here fails the typecheck.
+  const table: Record<Action, [Resource, boolean, boolean, boolean, boolean, boolean]> = {
+    //                      resource       admin  mod    member owner  stranger
+    "document:read":       [own,          true,  false, false, true,  false],
+    "document:create":     [none,         true,  true,  true,  true,  true],
+    "document:update":     [own,          true,  false, false, true,  false],
+    "document:delete":     [own,          true,  false, false, true,  false],
+    "assistant:ask":       [none,         true,  true,  true,  true,  true],
+    "channel:create":      [none,         true,  true,  true,  true,  true],
+    "channel:update":      [inChannel,    true,  true,  false, false, false],
+    "channel:delete":      [ownInChannel, true,  false, false, true,  false],
+    "channel:join":        [inChannel,    true,  true,  true,  true,  true],
+    "channel:moderate":    [inChannel,    true,  true,  false, false, false],
+    "thread:create":       [inChannel,    true,  true,  true,  false, false],
+    "thread:update":       [own,          true,  false, false, true,  false],
+    "thread:delete":       [ownInChannel, true,  true,  false, true,  false],
+    "answer:create":       [inChannel,    true,  true,  true,  false, false],
+    "answer:update":       [own,          true,  false, false, true,  false],
+    "answer:delete":       [ownInChannel, true,  true,  false, true,  false],
+    "answer:vote":         [inChannel,    true,  true,  true,  false, false],
+    "message:send":        [none,         true,  true,  true,  true,  true],
+    "friend:request":      [none,         true,  true,  true,  true,  true],
+    "user:manage":         [none,         true,  false, false, false, false],
+    "channel:manageRoles": [inChannel,    true,  true,  false, false, false],
+    "gdpr:export":         [none,         true,  true,  true,  true,  true],
+    "gdpr:delete":         [none,         true,  true,  true,  true,  true],
+  };
+
+  it.each(Object.entries(table))("%s", (action, [resource, ...expected]) => {
+    const actual = ROLES.map((role) => `${role} ${can(users[role], action as Action, resource)}`);
+    expect(actual).toEqual(ROLES.map((role, i) => `${role} ${expected[i]}`));
   });
 });
 
