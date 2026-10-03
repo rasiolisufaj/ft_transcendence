@@ -16,7 +16,7 @@ export default function UiGalleryPage() {
       <h1 className="text-2xl font-semibold">UI Gallery</h1>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-400">Button</h2>
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Button</h2>
         <div className="flex gap-3">
           <Button>Primary</Button>
           <Button variant="secondary">Secondary</Button>
@@ -25,12 +25,12 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-400">Card</h2>
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Card</h2>
         <Card>Card content</Card>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-400">Badge</h2>
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Badge</h2>
         <div className="flex gap-3">
           <Badge>Neutral</Badge>
           <Badge tone="success">Success</Badge>
@@ -40,7 +40,7 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500">Input</h2>
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Input</h2>
         <div className="max-w-sm space-y-4">
           <Input label="Email" type="email" placeholder="you@example.com" />
           <Input label="Password" type="password" error="Password must be at least 8 characters" />
@@ -48,7 +48,7 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500">EmptyState</h2>
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">EmptyState</h2>
         <EmptyState
           title="No documents yet"
           description="Upload your first document to get started."
@@ -57,7 +57,7 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500">Dialog</h2>
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Dialog</h2>
         <Button onClick={() => setDialogOpen(true)}>Open Dialog</Button>
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Confirm action">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -73,7 +73,7 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500">Table</h2>
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Table</h2>
         <Card className="bg-zinc-50 dark:bg-zinc-900/50">
           <Table>
             <TableHead>
