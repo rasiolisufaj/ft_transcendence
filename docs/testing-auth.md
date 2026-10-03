@@ -1,6 +1,6 @@
-# Testing the auth work (roadmap phases 0–2.4)
+# Testing the auth work (roadmap phases 0–3)
 
-How to check the auth code yourself: the session core, signup / login / logout, and the route guard. It covers roadmap tasks 0.4, 1.1–1.3 and 2.1–2.4 (C1, C2, C3, and part of C5 and C11 in `PROJECT_PLAN.md` §7).
+How to check the auth code yourself: the session core, signup / login / logout, the route guard, the permission policy and the audit log. It covers roadmap tasks 0.4, 1.1–1.3, 2.1–2.4 and 3.1–3.3 (C1, C2, C3, C4, C6, and part of C5 and C11 in `PROJECT_PLAN.md` §7).
 
 There are two parts:
 
@@ -23,10 +23,10 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 npm run db:generate
 
 npm test                                                                    # everything
-npx vitest run src/lib/auth "src/app/[locale]/(auth)" --reporter=verbose    # auth only
+npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" --reporter=verbose    # auth only
 ```
 
-Expected: `npm test` reports **57 passed**. The auth part is 4 files and 25 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
+Expected: `npm test` reports **74 passed**. The auth part is 6 files and 42 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
 
 | File | What it proves |
 |---|---|
@@ -34,6 +34,8 @@ Expected: `npm test` reports **57 passed**. The auth part is 4 files and 25 test
 | [session.test.ts](../src/lib/auth/session.test.ts) | tokens are random and ≥128 bits; only the SHA-256 is stored; expired sessions are rejected and deleted; the expiry never slides; logout kills one session or all of them; channel memberships load. Uses the real DB. |
 | [schemas.test.ts](../src/lib/auth/schemas.test.ts) | the signup and login rules; every error key exists in fr, en and es |
 | [login/actions.test.ts](<../src/app/[locale]/(auth)/login/actions.test.ts>) | the action returns the schema's errors; 6 failures lock an email for 15 minutes |
+| [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything; a moderator acts only in their own channel; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` is admin-only, even on your own account |
+| [audit.test.ts](../src/lib/audit.test.ts) | `writeAudit()` records the actor, action, target and channel; a failed write is logged and never throws. Uses the real DB. |
 
 To run one test by name: `npx vitest run -t "never extends"`.
 
@@ -45,7 +47,7 @@ A test only counts if it fails when the code is wrong. Break the code on purpose
    - Run `npx vitest run -t "locks an email"`. Expected: **FAIL**.
 2. In [session.ts](../src/lib/auth/session.ts), comment out the `if (row.expiresAt.getTime() <= Date.now()) { … }` block.
    - Run `npx vitest run -t "expired"`. Expected: **FAIL**.
-3. Undo both edits. Check that `git diff src/` shows none of your edits, then run `npm test` again (57 passed).
+3. Undo both edits. Check that `git diff src/` shows none of your edits, then run `npm test` again (74 passed).
 
 ### A3. Build gates (graded: zero errors)
 
@@ -201,8 +203,36 @@ After step 4, an idle dev tab may log `Cannot write to a CLOSED writable stream`
 - **Keyboard:** with Tab only, you can reach every nav link, the language switcher, *Se déconnecter* and each form field, in a logical order. Enter submits the forms.
 - **Console:** no red or yellow messages on any page you visited. The React DevTools info message and the HMR logs are fine.
 
+### B10. A second account can't see or delete your documents (C5)
+
+You need a second account, `autre@mespapiers.test`, signed in **at the same time** as `moi@mespapiers.test`. Private windows of one browser share their cookies, so use a second browser (or a normal window next to your private one).
+
+1. **Setup.**
+   - As `moi`: sign in again (B5 logged you out) and copy the new `mp_session` cookie as `MOI_COOKIE`. Keep the document from B4; its id is `YOUR_DOC_ID` (B4 query).
+   - As `autre`: sign up, upload any PNG or PDF, and copy its cookie as `AUTRE_COOKIE`. The file appears under *Autres* (`/fr/documents/other`).
+2. **The list is owner-scoped.** `autre`'s `/fr/documents/other` shows only `autre`'s file, never `moi`'s.
+3. **The file route.**
+
+   ```bash
+   curl -k -i -b "mp_session=AUTRE_COOKIE" https://localhost/api/documents/YOUR_DOC_ID   # 404
+   curl -k -i -b "mp_session=MOI_COOKIE" https://localhost/api/documents/YOUR_DOC_ID     # 200, control
+   ```
+
+   It's 404, not 403. The query only searches your own documents, so someone else's id looks exactly like a missing one, and the answer doesn't confirm that it exists (roadmap §C-14).
+4. **The delete action.** In `autre`'s window, on `/fr/documents/other`:
+   - DevTools → Elements: in the delete button's form, change `<input type="hidden" name="id" value="…">` to `YOUR_DOC_ID`, then click the delete button.
+   - Expected: `docker logs --tail 5 mespapiers_web` shows `Error: this document does not exist, or is not yours`, and the query below still lists `moi`'s document.
+   - **Control:** reload the page and delete `autre`'s own document normally. Expected: you land on `/fr`, and the query no longer lists that document.
+
+   ```sql
+   select d.id, u.email from "Document" d join "User" u on u.id = d."ownerId"
+   where u.email in ('moi@mespapiers.test', 'autre@mespapiers.test');
+   ```
+
+   The refused delete answers **500**, not 403 or 404, because `deleteDocument` throws a plain `Error` (`src/app/[locale]/action.ts`). Nothing is deleted.
+
 ### Cleanup
 
 ```sql
-delete from "User" where email = 'moi@mespapiers.test';   -- cascades to its sessions and documents
+delete from "User" where email in ('moi@mespapiers.test', 'autre@mespapiers.test');   -- cascades to their sessions and documents
 ```
