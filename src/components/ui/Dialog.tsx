@@ -12,16 +12,54 @@ type DialogProps = {
 export function Dialog({ open, onClose, title, children }: DialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
+  // Focus moves into the dialog on open, and back to whatever opened it on close,
+  // so a keyboard user does not land at the top of the page.
+  // Only depends on `open`: a new onClose on each parent render must not move focus.
+  useEffect(() => {
+    if (!open) return;
+
+    const opener = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus();
+
+    return () => opener?.focus();
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
+      if (e.key === "Tab") keepFocusInside(e);
+    }
+
+    // aria-modal: Tab and Shift+Tab loop inside the dialog instead of reaching
+    // the page hidden behind the overlay.
+    function keepFocusInside(e: KeyboardEvent) {
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+
+      const focusables = dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+
+      if (!first || !last) {
+        e.preventDefault(); // nothing to focus: stay on the dialog itself
+        return;
+      }
+
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || active === dialog)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    dialogRef.current?.focus();
-
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
 
