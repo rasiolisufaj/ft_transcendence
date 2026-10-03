@@ -144,11 +144,17 @@ Each one is a deliberate, reversible choice. Read them out at evaluation rather 
 
 13. **`AUTH_STUB` was never built.** §9 wanted it so teammates could work before the session core existed, and C3 lists it. The real session core shipped first, so the stub never had a job. Phase 3 deletes the commented `AUTH_STUB` line from `.env.example`, as §8 W2 says to do.
 
-14. **A foreign document is a 404, not a 403.** C5 says "returns 403". E6 says "another user's id 404s". The shipped code follows E6: the queries are owner-scoped, so a foreign id cannot be told apart from a missing one, and a 403 would confirm that the id exists. Admins do not read other users' papers through these routes, even though tier 1 would allow it, because the owner-scoped `where` decides before `can()` is consulted.
+14. **A foreign document is a 404, not a 403.** C5 says "returns 403". E6 says "another user's id 404s". The shipped code follows E6: the queries are owner-scoped, so a foreign id cannot be told apart from a missing one, and a 403 would confirm that the id exists. Admins do not read other users' papers through these routes: the owner-scoped `where` decides, and since §C-17 `can()` refuses it as well.
 
 15. **Posting needs a membership.** §5's three tiers make `thread:create`, `answer:create` and `answer:vote` available to anyone. Private channels now exist (Amir's `isPrivate`), and his actions already refuse non-members, so `can()` checks `ctx.memberships` for those three actions (phase 3). This is additive: the signature does not change.
 
 16. **Member management maps onto `channel:moderate`.** Amir's invite, accept/reject join request and kick actions are moderator-only inside one channel, which is what `channel:moderate` already means. Adding new `Action` members would change a published interface and need a whole-team decision, and nothing would gain from it. The `writeAudit()` action string records which operation it was (`channel:kick`, …).
+
+*Added 2026-10-03, from the phase 3 final review:*
+
+17. **The document vault is owner-only, even for an admin.** §5 says tier 1 (ADMIN) "wins everywhere". The vision (§3) says "no role — moderator or admin — can read another user's vault", checked on all four paths, including the assistant endpoint. The vision wins: `can()` answers `document:read`, `document:update` and `document:delete` with ownership alone, before tier 1 runs, and a call without `ownerUserId` is refused. This also makes `assertCan(ctx, "document:read", doc)` safe for Adrien's assistant context (B10), where tier 1 would have handed an admin anyone's ID papers. The signature is unchanged, but the meaning of a published interface changed: **announce it to the team.**
+
+18. **Only an admin manages channel roles.** This roadmap's task 6.1 let a moderator promote and demote inside their own channel. The vision (§3: a moderator is "assigned per channel by an Admin", and the Admin can "promote and demote moderators"), §5 (`channel:manageRoles` is tagged "admin surface") and C14's Done-when ("an ADMIN promotes…") all reserve it for admins. The spec wins: `channel:manageRoles` is in `ADMIN_ONLY`, so a moderator cannot appoint more moderators (sockpuppet moderation is the same farming the Helper rule prevents). Task 6.1 is updated. The meaning of a published interface changed: **announce it to the team.**
 
 ---
 
@@ -1947,7 +1953,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 
 | Task | Deliverable | Done when |
 |---|---|---|
-| 6.1 | `setChannelRole(channelId, userId, role)` action | `assertCan(ctx, "channel:manageRoles", { channelId })`: an admin anywhere, a moderator in their own channel. Refuses to demote a channel's **last** MODERATOR (Amir's `leaveChannel` already assumes one always exists). Writes `channel:setRole` to the audit log. **Invalidates no sessions:** `validateSessionToken()` re-reads memberships on every request, so the change applies on the target's next request |
+| 6.1 | `setChannelRole(channelId, userId, role)` action | `assertCan(ctx, "channel:manageRoles", { channelId })`: admins only, in any channel (§C-18). Refuses to demote a channel's **last** MODERATOR (Amir's `leaveChannel` already assumes one always exists). Writes `channel:setRole` to the audit log. **Invalidates no sessions:** `validateSessionToken()` re-reads memberships on every request, so the change applies on the target's next request |
 | 6.2 | Promote/demote buttons | next to Amir's kick buttons on the channel's member list (`/channels/[id]/kick` today), shown only when `can(ctx, "channel:manageRoles", { channelId })`. Strings go in his `channels` namespace. Agree the placement with him |
 | 6.3 | **C14 Done-when, scoped** | an ADMIN promotes a member to MODERATOR in channel A; that user can now kick and accept requests in A, and is refused in B (forged form). Hide/mute join this check in phase 7, once E11 exists |
 | 6.4 | Helper badge | `reputation >= HELPER_THRESHOLD`, **derived at render**: no column, no "threshold job" (C14's wording), so it cannot drift. Agree the constant with Alexandre (D14 profile) and Amir (answer list); whoever renders it first owns it. Never in `policy.ts`. "Grants no action" is already phase 3's reputation test |
