@@ -29,12 +29,15 @@ export type Resource = {
 
 const ALL_ACTIONS = new Set<string>(ACTIONS);
 
-/** Only a global ADMIN, ever. */
-const ADMIN_ONLY = new Set<Action>(["user:manage"]);
+/** The document vault: its owner only. No role, admin included, touches another user's papers (vision §3, §C-17). */
+const VAULT = new Set<Action>(["document:read", "document:update", "document:delete"]);
+
+/** Only a global ADMIN, ever. Moderators are assigned by an admin (vision §3, §C-18). */
+const ADMIN_ONLY = new Set<Action>(["user:manage", "channel:manageRoles"]);
 
 /** What a MODERATOR may do inside the channel they moderate — and nowhere else. */
 const MODERATOR_ACTIONS = new Set<Action>([
-  "channel:moderate", "channel:update", "channel:manageRoles",
+  "channel:moderate", "channel:update",
   "thread:delete", "answer:delete",
 ]);
 
@@ -57,7 +60,10 @@ export function can(ctx: SessionContext, action: Action, resource: Resource = {}
   // Default-deny: an action outside the union loses before any role logic runs.
   if (!ALL_ACTIONS.has(action)) return false;
 
-  // Tier 1 — global admin wins everywhere.
+  // The vault, before tier 1: no owner passed means no one matches.
+  if (VAULT.has(action)) return ctx.user.id === resource.ownerUserId;
+
+  // Tier 1 — global admin wins everywhere else.
   if (ctx.user.globalRole === "ADMIN") return true;
   if (ADMIN_ONLY.has(action)) return false;
 
@@ -66,6 +72,8 @@ export function can(ctx: SessionContext, action: Action, resource: Resource = {}
     const membership = ctx.memberships.find((m) => m.channelId === resource.channelId);
     if (membership?.role === "MODERATOR") return true;
   }
+  // Moderation itself has no owner: never fall through to tier 3.
+  if (action === "channel:moderate") return false;
 
   // Membership — no channelId means no membership can match: denied.
   if (MEMBER_ACTIONS.has(action)) {
