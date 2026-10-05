@@ -119,5 +119,42 @@
       "hasAccount": "¿Ya tiene una cuenta?",
       "loginLink": "Iniciar sesión"
     }
+  },
+  "friends": {
+    "title": "Mis amigos",
+    "subtitle": "Añada personas de la comunidad con su dirección de correo electrónico.",
+    "add": {
+      "label": "Correo electrónico",
+      "submit": "Enviar solicitud",
+      "pending": "Enviando…",
+      "sent": "Solicitud enviada."
+    },
+    "sections": {
+      "friends": "Amigos",
+      "incoming": "Solicitudes recibidas",
+      "outgoing": "Solicitudes enviadas",
+      "blocked": "Personas bloqueadas"
+    },
+    "empty": {
+      "friends": "Todavía no tiene amigos.",
+      "incoming": "No ha recibido ninguna solicitud.",
+      "outgoing": "No hay solicitudes pendientes.",
+      "blocked": "No ha bloqueado a nadie."
+    },
+    "actions": {
+      "accept": "Aceptar",
+      "decline": "Rechazar",
+      "cancel": "Cancelar",
+      "remove": "Eliminar",
+      "block": "Bloquear",
+      "unblock": "Desbloquear"
+    },
+    "errors": {
+      "emailInvalid": "Introduzca un correo electrónico válido.",
+      "notFound": "Ninguna cuenta usa este correo electrónico.",
+      "self": "No puede añadirse a sí mismo.",
+      "blocked": "No puede enviar una solicitud a esta persona.",
+      "notPending": "Esta solicitud ya no existe."
+    }
   }
 }
