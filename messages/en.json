@@ -119,5 +119,42 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in"
     }
+  },
+  "friends": {
+    "title": "My friends",
+    "subtitle": "Add people from the community with their email address.",
+    "add": {
+      "label": "Email address",
+      "submit": "Send request",
+      "pending": "Sending…",
+      "sent": "Request sent."
+    },
+    "sections": {
+      "friends": "Friends",
+      "incoming": "Requests received",
+      "outgoing": "Requests sent",
+      "blocked": "Blocked people"
+    },
+    "empty": {
+      "friends": "You have no friends yet.",
+      "incoming": "No requests received.",
+      "outgoing": "No pending requests.",
+      "blocked": "You haven't blocked anyone."
+    },
+    "actions": {
+      "accept": "Accept",
+      "decline": "Decline",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "block": "Block",
+      "unblock": "Unblock"
+    },
+    "errors": {
+      "emailInvalid": "Enter a valid email address.",
+      "notFound": "No account uses this email address.",
+      "self": "You can't add yourself.",
+      "blocked": "You can't send a request to this person.",
+      "notPending": "This request no longer exists."
+    }
   }
 }
