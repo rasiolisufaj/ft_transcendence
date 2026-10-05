@@ -12,6 +12,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "realtime": "tsx src/realtime/main.ts",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "i18n:check": "tsx scripts/i18n-check.ts",
@@ -31,6 +32,7 @@
     "next-intl": "^4.14.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "ws": "^8.22.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -38,6 +40,7 @@
     "@types/node": "^22.20.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.2",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
