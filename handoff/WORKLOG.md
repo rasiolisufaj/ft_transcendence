@@ -1,11 +1,20 @@
 # Session Handoff
 
-_Last updated: 2026-10-03. Owner: Rasiol (auth, permissions, OAuth, 2FA). Plan: [`docs/plans/2026-09-21-rasiol-modules-roadmap.md`](../docs/plans/2026-09-21-rasiol-modules-roadmap.md). This file is the progress record. The roadmap's checkboxes are ticked for phases 0–2.4 (revised 2026-10-02)._
+_Last updated: 2026-10-05. Owner: Rasiol (auth, permissions, OAuth, 2FA). Plan: [`docs/plans/2026-09-21-rasiol-modules-roadmap.md`](../docs/plans/2026-09-21-rasiol-modules-roadmap.md). This file is the progress record. The roadmap's checkboxes are ticked for phases 0–3 (revised 2026-10-05)._
 
 ## 🎯 Current Objective
-Start **roadmap phase 3**: `can()` / `assertCan()` + `writeAudit()` (C4, C6). Phase 2 (tasks 2.1–2.4) is merged. Before writing code, expand phase 3 into its own TDD plan at `docs/plans/2026-10-01-<task-id>.md`, and **announce `policy.ts` at standup the day it starts** (it blocks all three teammates).
+**Roadmap phase 4** (admin surface, C14a) and **task 2.5** (WS ticket, C12), which is due now that Alexandre's realtime server is merged. Phase 3 is merged (PR #18). Phase 5 is unblocked (Amir's channels merged in PR #9). Expand each into its own TDD plan under `docs/plans/` before writing code. Still owed from phase 3: **the standup announcement of `policy.ts` with §C-17/18**, and the phase 5 mapping table for Amir.
 
 ## 📝 Recent Commits & Changes
+* 2026-10-05 (not committed, on `chore/docs`): `main` merged into `chore/docs` (staged, not committed), and `CLAUDE.md`, the roadmap and this worklog checked against `main` and updated. Roadmap phase 3 ticked with an *As shipped* note.
+* `90a0142` (2026-10-05, all merged by Adrien): `main` jumps 51 commits.
+  * PR #18 `e11c60b`: **phase 3** (`c227302` policy, `64f8b80` audit, `18783f6` drop `AUTH_STUB`, `7894246` `testing-auth.md`, `229f185` truth table, `508bec0` review fixes)
+  * PR #9: Amir's channels (E9), three migrations, `prisma/seed.ts` rewritten
+  * PR #20: Adrien's AI extraction (`src/lib/ai/`), called by `classifyDocument()`; the `add_document_deadline` migration (`DeadlineType`, `targetDate`)
+  * PRs #15, #16: Alexandre's `src/contracts/events.ts` and the `ws` server in `src/realtime/` (no auth on connect)
+  * PR #14 `npm run i18n:check`, PR #17 responsive nav (`MobileMenu`), PR #19 gallery and `Dialog` focus fixes
+  * After pulling: `npm install`, `npm run db:migrate`, `npm run db:generate`
+* `1a06759` (2026-10-03, `chore/docs`, no PR yet): phase 3 rulings, auth test guide and worklog.
 * `dbefd7d` (2026-09-30, merged by Adrien): **PR #13 merged, phase 2 tasks 2.1–2.4 are on `main`.**
   * `f07b382`: shared Zod schemas, plus `.gitignore`, `CLAUDE.md`, `MEETING_DISCUSSION.md`, the roadmap and this worklog, which are now committed (no longer local-only)
   * `b1cc507`: signup/login/logout server actions
@@ -19,42 +28,44 @@ Start **roadmap phase 3**: `can()` / `assertCan()` + `writeAudit()` (C4, C6). Ph
 * 2026-10-01 (not committed): `CLAUDE.md` updated for PR #13 (routes, `schemas.ts`, docs now tracked, phase status, E9–E11 ownership, git author → name map); this worklog rewritten.
 
 ## 🛑 Where We Stopped
-**Phase 3 code-complete (2026-10-03, branch `feat/auth-policy`): 3.1 `c227302`, 3.2 `64f8b80` committed; 3.3 done, not committed.**
+**Phase 3 merged (PR #18, `e11c60b`, 2026-10-05).** The history of how it got there:
 * 3.3: `.env.example` drops `AUTH_STUB` (the feature commit). `docs/testing-auth.md` now covers phases 0–3 and uses **`https://mespapiers.local`** throughout (Rasiol's rule: never localhost). It gains B10 (the two-account C5 check), A2 break-it checks for policy and audit, A4 (try `can()` with `npx tsx -e`, and write a demo audit row), and Part A counts (74 total, auth 6 files / 42 tests). It and the `CLAUDE.md` line stay uncommitted (chore/docs). C5 run, 2026-10-03, in real Chromium on mespapiers.local: B reading A's doc gets 404; B deleting A's doc gets **500** with Next's error overlay and 2 console errors, and nothing is deleted; the controls get 200 and → `/fr`; CSRF with a foreign Origin is aborted. Full evidence is in the SDD ledger.
 * ⚠ For Amir: a refused `deleteDocument` throws a plain `Error`, so the user gets a 500 error page instead of a 403/404. For Adrien: B10's assistant must `assertCan(ctx, "document:read", doc)` before putting a document in a prompt.
 * 3.1: `src/lib/auth/policy.ts` + `policy.test.ts` (15 tests; the plan's 14 + "user:manage is admin-only, even on your own account", found by a mutation check). `Action` is derived from one `as const` list.
 * 3.2: `src/lib/audit.ts` (`writeAudit`) + `audit.test.ts` (2 DB tests, not in the plan). `metadata` is typed `Prisma.InputJsonObject`; the plan's `Record<string, unknown>` fails tsc. **Callers that delete a user must write the audit row first**, or the actor FK rejects it silently. `npm test` 74/74, lint 0 errors, build + typecheck clean.
 * 2026-10-03: Rasiol committed and pushed 3.3 (`18783f6`, `7894246`). No PR yet. The exit gate's "truth table for every Action × every role" (C4 Done-when) wasn't met: 7 of the 23 actions were never tested. A `truth table` block now in `policy.test.ts` (uncommitted) has one row per Action, with the resource the caller passes and the answer for admin / moderator / member / owner / stranger. It is typed `Record<Action, …>`, so a new Action without a row fails tsc. `npm test` 97/97 (auth 65); `testing-auth.md` counts updated.
 * 2026-10-03: Rasiol committed the truth table (`229f185`). Final review (fresh Opus reviewer): **with fixes**, 1 Critical + 2 Important, all verified. Rasiol: "apply all the fixes". **Fix 1 done (uncommitted): the document vault is owner-only, even for an admin** (vision §3 over §5's "ADMIN wins everywhere"; roadmap §C-17). **Must be announced to the team.** **Fix 2 done (uncommitted): moderation is never granted by ownership** (`channel:moderate` / `channel:manageRoles` stop after tier 2). **Fix 3 done (uncommitted): `channel:manageRoles` is admin-only** (roadmap §C-18; task 6.1 updated). **Must be announced to the team.** `npm test` 99/99 (auth 67). The fix pass is complete; the 8 minors are in the SDD ledger, deferred.
-* 2026-10-03: Rasiol committed and pushed the fixes (`508bec0`). Docs flushed to `chore/docs` (CLAUDE.md, roadmap §C-17/18 + task 6.1, `testing-auth.md`, this worklog); they stay as uncommitted edits on `feat/auth-policy`. **Merge the `chore/docs` PR before the phase 3 PR:** `feat/auth-policy` was cut from `chore/docs`, so it carries `c54b0b5` and `testing-auth.md` until then.
-* Next: open the phase 3 PR (`gh` isn't logged in: run `gh auth login` or use the web compare page). Then the standup announcement of `policy.ts` and the phase 5 mapping for Amir. Phase 4 (admin surface) after that. Rulings are in the SDD ledger (`.superpowers/sdd/2026-09-21-rasiol-modules-roadmap/progress.md`).
+* 2026-10-03: Rasiol committed and pushed the fixes (`508bec0`). Docs flushed to `chore/docs` (CLAUDE.md, roadmap §C-17/18 + task 6.1, `testing-auth.md`, this worklog); they stay as uncommitted edits on `feat/auth-policy`. **Merge the `chore/docs` PR before the phase 3 PR:** `feat/auth-policy` was cut from `chore/docs`, so its PR diff shows `c54b0b5`'s docs until then. `testing-auth.md` drops out only after **Update branch** (merge `main` into it). This only affects the diff a reviewer sees; nothing breaks in either order. (Moot: PR #18 merged first, on 2026-10-05.)
+* Next: (1) the standup announcement of `policy.ts` with §C-17/18, and the phase 5 mapping for Amir; (2) task 2.5; (3) phase 4; (4) phase 5. Commit the `chore/docs` merge and doc edits, then open its PR (`gh` isn't logged in: run `gh auth login` or use the web compare page). Rulings are in the SDD ledger (`.superpowers/sdd/2026-09-21-rasiol-modules-roadmap/progress.md`).
 
-* **Git state (checked 2026-10-01 after `git fetch --prune`):** `main` = `origin/main` = `feat/auth-login` = `origin/feat/auth-login` = `dbefd7d`. Tree clean apart from the two doc edits above.
-  * Start phase 3 on a **new branch from `main`** (e.g. `feat/auth-policy`). `feat/auth-login` is spent.
-  * Can be deleted: `origin/feat/auth-login` (merged), `origin/feature-file-storage` (0 ahead, fully merged), local `chore/app-chore-system` (its remote is gone). Local and remote `feat/auth-session-core` are already gone.
-* **Task 2.5 (WS ticket, C12) is deferred.** Do it the day Alexandre needs it. `real-time-event-contract` (sku, 1 commit, 2026-10-01) just started `src/contracts/events.ts` + `src/lib/realtime/publish.ts`, so ask him.
+* **Git state (checked 2026-10-05 after `git fetch --prune`):** `main` = `origin/main` = `90a0142`. `chore/docs` = `origin/chore/docs` = `1a06759`, plus a merge of `main` staged and the doc edits uncommitted. `stash@{0}` is a backup of these docs taken on 2026-10-05; `stash@{1}` is an old worklog stash from `feat/auth-login`.
+  * Start task 2.5 and phase 4 on **new branches from `main`**. Local `feat/auth-policy` and `feat/auth-login` are merged and spent.
+  * Can be deleted: local `feat/auth-policy` and `feat/auth-login`, `origin/feat/auth-login` (0 ahead), `origin/feature-file-storage` (0 ahead).
+* **Task 2.5 (WS ticket, C12) is due now.** Alexandre's `src/realtime/` (PR #16) accepts any connection, and `src/lib/realtime/publish.ts` is a no-op stub. Agree the handshake with him.
 
-### Teammate branches (as of 2026-10-01)
+### Teammate branches (as of 2026-10-05, after `git fetch --prune`)
 | Branch | Author | vs `main` (behind/ahead) | Notes |
 |---|---|---|---|
-| `feat/channels` | Amir (khelifi) | 0 / 13, active today | Channels, private channels, invites, join requests, kick, answer editing. 3 migrations: `ChannelInvite`, `ChannelJoinRequest`, `Channel.isPrivate`. |
-| `real-time-event-contract` | Alexandre (sku) | 0 / 1, active today | Start of the realtime contract → trigger for task 2.5 |
-| `feat/llm-IA-image-Scan` | Adrien (Reaven23) | 12 / 1 | AI image recognition |
-| `feat/login-page` | Amir | 37 / 2 | Stale (2026-09-16), superseded by PR #13 |
-| `feat/ui-shell` | Alexandre | 39 / 5 | Stale (2026-09-16) |
-| `feature/prisma` | Amir | 57 / 1 | Stale (2026-09-09) |
+| `friends` | Alexandre (sku) | 0 / 8, active today | Friends page |
+| `feature-file-storage` | Amir | 70 / 0 | Fully merged, can be deleted |
+| `feat/login-page` | Amir | 88 / 2 | Stale (2026-09-16), superseded by PR #13 |
+| `feat/ui-shell` | Alexandre | 90 / 5 | Stale (2026-09-16) |
+| `feature/prisma` | Amir | 108 / 1 | Stale (2026-09-09) |
 
-* **`feat/channels` matters for phase 3** (the full action → `assertCan` mapping is now in roadmap phase 5):
-  * It settles E9–E11 ownership in practice (Amir builds them), so roadmap phases 5–7 probably drop out. Record that in `MEETING_DISCUSSION.md`.
-  * Authorisation is `requireUser()` + inline `role === "MODERATOR"` checks, no `can()`. Phase 3's `Action` union should cover his actions (invite, join request accept/reject, kick, private channel, answer edit) so he can switch to `assertCan()`.
-  * Review notes for his PR (full list in roadmap phase 5): ⚠ `requestJoinChannel` takes `userId` from the form instead of the session, parses the channel id from it, and never awaits its `create`; the two new models have no `updatedAt` (review-failure rule); unauthorised actions silently `return` instead of a 403; `package.json` picked up `npm init` junk (`"main": "index.js"`, `author`, `keywords`, `bugs`, `homepage`).
+Merged on 2026-10-05 and deleted: `feat/channels`, `real-time-event-contract`, `realtime-server`, `feat/llm-IA-image-Scan`, `i18n-check`, `responsive-nav`, `ui-gallery`, `feat/auth-policy`.
+
+* **Amir's channels (PR #9) and phase 5** (the full action → `assertCan` mapping is in roadmap phase 5):
+  * E9–E11 are Amir's in practice; E10 (votes) and E11 (hide/mute) are not started. Still to do: record the decision in `MEETING_DISCUSSION.md`.
+  * Every check is still inline (`role === "MODERATOR"`, `createdBy`), so all of phase 5's table is to do.
+  * Review notes, checked 2026-10-05: ✅ `requestJoinChannel` now uses the session user and awaits its `create`; ✅ the `npm init` junk is gone. Still open: no `updatedAt` on `ChannelInvite` / `ChannelJoinRequest` (review-failure rule); refusals silently `return` instead of a 403; duplicate `kick` and `deleteChannel` actions; bare `revalidatePath("/channels…")` paths.
 
 ### Open items, owned by others (raise at standup)
-* **375 px horizontal scroll on every page (graded).** `src/components/Nav.tsx` (sku/Alex) is ~415 px wide; the auth links from 2.4 made it worse.
+* **375 px horizontal scroll (graded).** PR #17 (responsive nav, `MobileMenu`) targets it. Recheck at 375 px.
 * **Prisma client fights between host and Docker.** Fix is infra-owned: an anonymous volume `- /app/src/generated` on `web` in `docker-compose.yml`. Workaround: `docker exec mespapiers_web chown -R 1000:1000 /app/src/generated && npm run db:generate`.
-* **Seeded users can't log in** (no `passwordHash`, mixed-case emails). Teammates sign up locally.
-* `npm run lint`: 0 errors, 2 warnings in `prisma/seed.ts` (`firstDocument`, `adrienInsuranceDoc` unused). The plan requires zero.
-* The `gh` token is still unverified.
+* **Seeded users can't log in** (no `passwordHash`, mixed-case emails). Teammates sign up locally. Roadmap task 4.1 step 2 fixes it, now unblocked.
+* `npm run lint`: **1 error** (`react/no-unescaped-entities` in `channels/[id]/requests/page.tsx`) and 12 warnings, all under `(app)/channels/` (Amir). The `prisma/seed.ts` warnings are gone. The plan requires zero.
+* `.env.example` lacks `REALTIME_PORT` and `HEARTBEAT_MS`, which `src/realtime/main.ts` reads (Alexandre).
+* `gh` is not logged in (401 on 2026-10-05): run `gh auth login`.
 
 ### Phase 2 lessons worth keeping
 * Actions redirect with `return redirect({ href, locale: await getLocale() })` from `@/i18n/navigation`; the `return` is needed because TS doesn't treat the destructured `redirect` as `never`.

@@ -6,7 +6,7 @@
 
 **Architecture:** Database-backed opaque sessions (random token in an httpOnly cookie, only its SHA-256 stored), one synchronous default-deny `can()` policy function resolving three tiers (global admin → channel moderator → resource owner), and Server Actions that each call `requireUser()` then `assertCan()`. No auth in middleware, no auth library, no service layer — plain functions in `src/lib/auth/`.
 
-> **Status (revised 2026-10-02):** phases **0, 1 and 2.1–2.4 are done and merged** (PRs #10 and #13, `main` = `dbefd7d`). Task 2.5 is deferred until Alexandre needs it. **Next: phase 3.** Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 3–11 are rewritten against today's code: `[locale]` routes, i18n keys, and Amir's `feat/channels`. `handoff/WORKLOG.md` remains the day-to-day progress log.
+> **Status (revised 2026-10-05):** phases **0, 1, 2.1–2.4 and 3 are done and merged** (PRs #10, #13 and #18, `main` = `90a0142`). Task 2.5 is **due now**: Alexandre's realtime server is merged and accepts any connection. **Next: phase 4**, and phase 5 is unblocked too (`feat/channels` merged in PR #9). Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 4–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` on 2026-10-05. `handoff/WORKLOG.md` remains the day-to-day progress log.
 
 **Tech Stack:** Next.js 16 App Router · React 19 · TypeScript strict · Prisma 6 (generator `prisma-client` → `src/generated/prisma/`) · PostgreSQL 17 · Vitest 5 · Zod 4 · `@node-rs/argon2` · `otpauth` · `node:crypto`
 
@@ -39,15 +39,17 @@ Copied from `PROJECT_PLAN.md` §0. Every task's definition of done implicitly in
 
 ## A. Dependency analysis — why this order
 
-### What exists today (2026-10-02, `main` = `dbefd7d`)
+### What exists today (2026-10-05, `main` = `90a0142`)
 
 - **Auth core, merged:** `src/lib/auth/password.ts` (argon2id), `session.ts` (§5's interface plus `memberships`, 30-day sessions that never slide, cookie `mp_session` always `Secure`), `schemas.ts` (shared Zod, error messages are `auth.errors.*` keys). Tests: `password`, `session`, `schemas` and `login/actions.test.ts` (rate limit).
+- **Policy and audit, merged (PR #18):** `policy.ts` (`can`, `assertCan`, `ForbiddenError`, 23 actions) and `audit.ts` (`writeAudit`). **No call sites yet.**
 - **Routes:** `src/app/[locale]/(auth)/{login,signup,logout}`, and the `(app)` group whose `layout.tsx` calls `requireUser()`. The dashboard, the category page, `uploadDocument`, `deleteDocument` (`src/app/[locale]/action.ts`) and `GET /api/documents/[id]` each call `requireUser()`/`getCurrentUser()` and scope by `ownerId`. A foreign document id gives 404. `src/components/Nav.tsx` shows the user and logout.
 - **i18n:** `next-intl`, `fr`/`en`/`es`, `localePrefix: "always"`, `src/middleware.ts` (locale routing only). `Locale` is exported from `src/i18n/config.ts`.
-- **Missing:** `policy.ts`, `audit.ts`, `ticket.ts`, OAuth, TOTP, the admin surface. `AUTH_STUB` was never built. No `error.tsx` anywhere.
-- **Teammates in flight:**
-  - Amir's `feat/channels` (unmerged, 13 commits, active 2026-10-01) covers most of E9: channel create/edit/delete, public join, private channels with invites and join requests, kick, leave, plus answer create/edit/delete. It adds three migrations (`ChannelInvite`, `ChannelJoinRequest`, `Channel.isPrivate`) and **rewrites `prisma/seed.ts`**. Every check in it is inline (`role === "MODERATOR"`, `createdBy !== user.id`), and a refusal is a silent `return`.
-  - Alexandre's `real-time-event-contract` has just started `src/contracts/events.ts`.
+- **Missing:** `ticket.ts`, OAuth, TOTP, the admin surface. `AUTH_STUB` was never built, and phase 3 removed it from `.env.example`. No `error.tsx` anywhere.
+- **Merged from teammates (all on 2026-10-05):**
+  - Amir's `feat/channels` (PR #9) covers most of E9: channel create/edit/delete, public join, private channels with invites and join requests, kick, leave, plus answer create/edit/delete. It added three migrations (`ChannelInvite`, `ChannelJoinRequest`, `Channel.isPrivate`) and **rewrote `prisma/seed.ts`**. Every check in it is inline (`role === "MODERATOR"`, `createdBy !== user.id`), and a refusal is a silent `return`. E10 (votes) and E11 (hide/mute) are not started.
+  - Alexandre's `src/contracts/events.ts` (PR #15) and a bare `ws` server in `src/realtime/` (PR #16): **no authentication on connect**, no topics, and `src/lib/realtime/publish.ts` is a stub. His `friends` branch is in flight.
+  - Adrien's `src/lib/ai/extract.ts` (PR #20), called by `classifyDocument()` on upload, and the `add_document_deadline` migration.
 
 ### The blocking dependencies, in order
 
@@ -56,9 +58,9 @@ Copied from `PROJECT_PLAN.md` §0. Every task's definition of done implicitly in
 | 1 | Vitest + `zod` + `@node-rs/argon2` | every task | ✅ phase 0 |
 | 2 | `session.ts`: `requireUser()` and friends | everything, and 3 teammates | ✅ phase 1, used by Amir's branch |
 | 3 | Login / signup + the `(app)` guard | phases 3–11 | ✅ phase 2 |
-| 4 | **`policy.ts`: `can()` / `assertCan()`** | modules 1–2, and 3 teammates | **next.** Amir's branch is hard-coding the rules it would hold, so every day it waits is more inline checks to convert later. |
-| 5 | **`writeAudit()`** | admin surface, moderation | next, with #4 |
-| 6 | Amir's `feat/channels` merged | phase 5 (policy in his actions), phase 6 (channel roles) | his PR |
+| 4 | **`policy.ts`: `can()` / `assertCan()`** | modules 1–2, and 3 teammates | ✅ phase 3 (PR #18). No call sites yet: Amir's merged actions still check inline, which phase 5 converts. |
+| 5 | **`writeAudit()`** | admin surface, moderation | ✅ phase 3 (PR #18) |
+| 6 | Amir's `feat/channels` merged | phase 5 (policy in his actions), phase 6 (channel roles) | ✅ PR #9 (2026-10-05) |
 | 7 | Amir's E10 (votes, reputation) and E11 (hide/mute) | phase 6's Helper badge, phase 7 | not started |
 
 ### Module order
@@ -66,9 +68,9 @@ Copied from `PROJECT_PLAN.md` §0. Every task's definition of done implicitly in
 ```
 Phase 0–2  tooling · session core · login/guard ✅      merged (PRs #10, #13)
    │
-Phase 3    can() + audit (C4, C6) ← 3 teammates wait    NEXT
+Phase 3    can() + audit (C4, C6) ✅                    merged (PR #18)
    │
-Phase 4    admin surface (C14a)                         → MODULE 1 done
+Phase 4    admin surface (C14a)               NEXT      → MODULE 1 done
    │
    ├──────────────────────────────────────┬──────────────────────────────────────
    │ Track A — waits on Amir's merges     │ Track B — no outside dependency
@@ -78,7 +80,7 @@ Phase 4    admin surface (C14a)                         → MODULE 1 done
    │           → MODULE 2 done            │ Phase 11  step-up (C10)      → MODULE 4
 ```
 
-**The load-bearing observation (revised):** phases 3–4 are the critical path. Phases 5–7 now depend on **Amir's merges**, not on your own work, and phases 8–11 depend only on phase 2. So after phase 4, work on whichever is unblocked: phase 5 the day `feat/channels` lands, and OAuth/TOTP in the gaps. Do not leave phase 5 waiting behind OAuth once his branch is merged: permissions is 2 of your 6 points, and its graded demo, "different actions per role", needs the channel tier.
+**The load-bearing observation (revised 2026-10-05):** phase 4 is the critical path. Phase 5 is unblocked now that `feat/channels` is merged; phase 6's Helper part and phase 7 wait on Amir's E10/E11; phases 8–11 depend only on phase 2. So after phase 4, do phase 5, and OAuth/TOTP in the gaps. Do not leave phase 5 waiting behind OAuth: permissions is 2 of your 6 points, and its graded demo, "different actions per role", needs the channel tier.
 
 **Module 1 (user management & auth)** is complete at phase 4 for what this plan owns: signup, login, sessions, the admin user list. The profile and settings page (D14: display name, locale, avatar, Helper badge) is built by Alexandre and counts toward this module (§6). **Module 2 (advanced permissions)** is complete at phase 7, once the channel-moderator tier is in use in real channels.
 
@@ -91,9 +93,9 @@ Phase 4    admin surface (C14a)                         → MODULE 1 done
 | Deliverable | Phase | Who is blocked | Note |
 |---|---|---|---|
 | `requireUser()` / `getCurrentUser()` | 1 | Amir, Adrien, Alexandre | ✅ merged, and already in use on `feat/channels` |
-| `can()` / `assertCan()` | 3 | Amir (his channel actions), Alexandre (WS topic authz), Adrien (assistant context) | **Next.** Publish `policy.ts` the day phase 3 starts, together with the action mapping for Amir's actions (phase 5 table), so he can switch while his PR is still open. |
-| WS ticket + `verifyTicket()` | 2 (task 2.5) | Alexandre (D2 handshake) | Deferred. His `real-time-event-contract` branch started on 2026-10-01, so ask him when D2 starts and do it that day. |
-| Channel-role management (C14b) | 6 | Amir's moderators can only be the channel creator until it exists | needs `feat/channels` merged |
+| `can()` / `assertCan()` | 3 | Amir (his channel actions), Alexandre (WS topic authz), Adrien (assistant context) | ✅ PR #18. Still owed: the standup announcement (§C-17 and §C-18 change what a published interface means) and the phase 5 mapping table for Amir. |
+| WS ticket + `verifyTicket()` | 2 (task 2.5) | Alexandre (D2 handshake) | **Due now.** His realtime server (PR #16) is merged and accepts any connection. Agree the handshake with him and do it. |
+| Channel-role management (C14b) | 6 | Amir's moderators can only be the channel creator until it exists | unblocked (PR #9 merged) |
 
 ### What you need from them
 
@@ -102,13 +104,13 @@ Phase 4    admin surface (C14a)                         → MODULE 1 done
 | `components/ui` primitives | Alexandre (D0) | — | ✅ in `src/components/ui/` |
 | `app/[locale]/` + `next-intl` (D10, D11) | Alexandre | — | ✅ PR #12. All new routes go under `[locale]`; §C-3 is obsolete. |
 | `DocumentCategory` | Amir | — | ✅ PR #11. `Document.version` is still missing, and nothing of yours needs it. |
-| `feat/channels` merged | Amir | phases 5 and 6 | open. Review notes are in `handoff/WORKLOG.md`, and phase 5 adds the policy mapping. |
+| `feat/channels` merged | Amir | phases 5 and 6 | ✅ PR #9 (2026-10-05). The review notes still open are in phase 5. |
 | E10 votes/reputation, E11 hide/mute | Amir | phase 6's Helper part, phase 7 | not started |
 | Redis | Adrien | nothing of yours | The login limiter and the WS nonce set are in-process Maps. |
 
 ### Ownership: E9–E11 are Amir's (resolved in practice; write it down)
 
-`PROJECT_PLAN.md` §6 gives the organization module to Amir, and §7 gives him E9, E10 and E11. He is building them on `feat/channels`. The original roadmap claimed them for phases 5–7. That claim is dropped, and phases 5–7 below now cover only your share: the policy (C4/C5/C6) applied to his actions, and channel-role management (C14b). **Action:** add one dated line to `MEETING_DISCUSSION.md` so the decision is visible to the team, not only to this file.
+`PROJECT_PLAN.md` §6 gives the organization module to Amir, and §7 gives him E9, E10 and E11. He built E9 on `feat/channels` (PR #9, merged 2026-10-05). The original roadmap claimed them for phases 5–7. That claim is dropped, and phases 5–7 below now cover only your share: the policy (C4/C5/C6) applied to his actions, and channel-role management (C14b). **Action:** add one dated line to `MEETING_DISCUSSION.md` so the decision is visible to the team, not only to this file.
 
 ---
 
@@ -174,13 +176,13 @@ src/lib/auth/
 ├─ schemas.ts                             P2 ✅ THE Zod module for signup + login; AuthErrorKey
 ├─ rate-limit.ts                          P10  login limiter moved out of login/actions.ts so 2FA shares it
 ├─ ticket.ts                              P2.5 WS ticket mint/verify (C12, Alexandre), deferred
-├─ policy.ts                              P3   Action union, can(), assertCan()
+├─ policy.ts                              P3 ✅ Action union, can(), assertCan()
 ├─ totp.ts                                P10  secret, URI, verify, recovery codes, requireFreshTwoFactor
 └─ oauth/
    ├─ pkce.ts                             P8   verifier + challenge + state
    └─ providers.ts                        P8/9 Google and GitHub as two config objects
 
-src/lib/audit.ts                          P3   writeAudit()
+src/lib/audit.ts                          P3 ✅ writeAudit()
 
 src/app/[locale]/
 ├─ (auth)/login/{page,actions,actions.test}  P2 ✅
@@ -191,7 +193,7 @@ src/app/[locale]/
 ├─ (app)/page.tsx, documents/, action.ts  P2 ✅ owner-scoped                 ⚠ Amir's
 ├─ (app)/admin/layout.tsx                 P4   403 render, not throw (§C-2)
 ├─ (app)/admin/users/{page,actions}       P4
-├─ (app)/channels/                        ⚠ Amir's (feat/channels). P5 swaps his checks for assertCan, P6 adds the role buttons
+├─ (app)/channels/                        ⚠ Amir's (PR #9). P5 swaps his checks for assertCan, P6 adds the role buttons
 ├─ (app)/settings/security/               P10  TOTP enrollment (route name to settle with Alexandre's D14 settings page)
 └─ (app)/verify-2fa/page.tsx              P11  step-up re-verification
 
@@ -204,7 +206,7 @@ src/components/Nav.tsx                    ⚠ Alexandre's. P4 adds an admin-only
 messages/{fr,en,es}.json                  every phase with UI: fr.json first (it types t())
 ```
 
-**One schema migration** remains in this plan: **phase 10** (2FA columns). Phase 7's moderation columns are now Amir's to add as part of E11. `prisma/` is Amir's directory. Coordinate the phase 10 migration with him, because his branch already carries three.
+**One schema migration** remains in this plan: **phase 10** (2FA columns). Phase 7's moderation columns are now Amir's to add as part of E11. `prisma/` is Amir's directory. Coordinate the phase 10 migration with him: `main` already has seven, three of them his.
 
 ---
 
@@ -772,7 +774,7 @@ Post in the team channel: `requireUser()` and `getCurrentUser()` are on `main`, 
 
 ## Phase 2 — Signup, login, logout, route guard (C2, C3, C11 partial, C12) ✅ except 2.5
 
-> **Tasks 2.1–2.4 done.** PR #13, `dbefd7d` (2026-09-30): `f07b382` schemas, `b1cc507` actions, `f6aa994` forms, `3dfd3cc` guard, `8517338` `docs/testing-auth.md` (manual test guide). **Task 2.5 is deferred** (see the task). The exit gate's "the WS ticket route returns a ticket" moves with it. **As shipped:**
+> **Tasks 2.1–2.4 done.** PR #13, `dbefd7d` (2026-09-30): `f07b382` schemas, `b1cc507` actions, `f6aa994` forms, `3dfd3cc` guard, `8517338` `docs/testing-auth.md` (manual test guide). **Task 2.5 is still open** (see the task: due now). The exit gate's "the WS ticket route returns a ticket" moves with it. **As shipped:**
 > - Everything sits under **`src/app/[locale]/`** (`(auth)/…`, `(app)/…`), because next-intl landed first (PR #12, §C-3 obsolete). The upload action is at `src/app/[locale]/(app)/documents/new/actions.ts`, and `deleteDocument` is at `src/app/[locale]/action.ts`.
 > - **Error messages are i18n keys**, not English strings. `AuthFormState.error` and `fieldErrors` are typed as `AuthErrorKey` (`keyof Messages["auth"]["errors"]`), Zod messages are those keys, and `z.flattenError(err, (i) => i.message as AuthErrorKey)` keeps the type. `schemas.test.ts` has two extra tests: every key is translated in `en`/`es`, and only `auth.errors` keys are emitted.
 > - Actions redirect with `return redirect({ href: "/", locale: await getLocale() })` from `@/i18n/navigation`.
@@ -1261,7 +1263,7 @@ git commit -m "feat(auth): guard the app routes and attach uploads to the signed
 
 ### Task 2.5: WS ticket endpoint (C12) — do this the day Alexandre starts D2
 
-Not part of your four modules; it is C12, and it blocks Alexandre's WebSocket handshake (§9, R4). Two hours. Skip it until he asks, then do it immediately. **Status:** not started. Alexandre's `real-time-event-contract` branch (started 2026-10-01) is the signal to ask him. Revised 2026-10-02: there is no fallback secret, and step 6 uncomments a line instead of appending one.
+Not part of your four modules; it is C12, and it blocks Alexandre's WebSocket handshake (§9, R4). Two hours. Skip it until he asks, then do it immediately. **Status:** not started, and **due now**: Alexandre's realtime server (`src/realtime/`, PR #16) merged on 2026-10-05 and accepts any connection. Agree the handshake with him. Revised 2026-10-02: there is no fallback secret, and step 6 uncomments a line instead of appending one.
 
 **Design:** an HMAC-signed `userId.expiry.nonce` string. No Redis, no table, no `jose`. The `realtime` process verifies the HMAC and keeps used nonces in a `Set` — single-use, and a restart only invalidates tickets younger than 60 seconds.
 
@@ -1384,7 +1386,15 @@ Tell him: `POST /api/auth/ws-ticket` → `{ ticket }`; call `verifyTicket(ticket
 
 ---
 
-## Phase 3 — `can()` / `assertCan()` + audit log (C4, C6)
+## Phase 3 — `can()` / `assertCan()` + audit log (C4, C6) ✅
+
+> **Done.** PR #18, `e11c60b` (2026-10-05): `c227302` policy, `64f8b80` audit, `18783f6` drop `AUTH_STUB`, `7894246` `docs/testing-auth.md`, `229f185` truth table, `508bec0` review fixes. **As shipped:**
+> - `Action` has **23** members, derived from one `as const` list so the type and the runtime default-deny set cannot drift.
+> - `policy.test.ts` has the 14 planned tests, plus "user:manage is admin-only, even on your own account" (found by a mutation check) and a `truth table` block typed `Record<Action, …>`: one row per Action × admin / moderator / member / owner / stranger, so a new Action without a row fails tsc.
+> - The final review changed three rules: the vault is owner-only, even for an admin (§C-17); moderation is never granted by ownership (`channel:moderate` and `channel:manageRoles` stop after tier 2); `channel:manageRoles` is admin-only (§C-18).
+> - `writeAudit()` types `metadata` as `Prisma.InputJsonObject`, because the plan's `Record<string, unknown>` fails tsc. `audit.test.ts` (2 DB tests) was added. Callers that delete a user must write the audit row first, or the actor FK rejects it silently.
+> - C5 run (2026-10-03, Chromium on mespapiers.local): a foreign document read gets 404; a foreign `deleteDocument` gets a **500** (it throws a plain `Error`; Amir's file) and deletes nothing.
+> - Still owed: the standup announcement (with §C-17/18) and the phase 5 table sent to Amir. No route calls `can()` or `assertCan()` yet.
 
 **Est:** 1.5d · **Entry gate:** phase 2 exit gate green ✅ (2.1–2.4; 2.5 is not a gate for this phase).
 **Exit gate for phase 4:** the truth-table test passes for every `Action` × every role; an unknown action returns `false`; a user with reputation 10 000 gains nothing; posting needs a membership in that channel. **Announce `policy.ts` at standup the day you start**, together with the phase 5 mapping table for Amir's actions. §9 lists it as a blocker for all three teammates.
@@ -1406,7 +1416,7 @@ Tell him: `POST /api/auth/ws-ticket` → `{ ticket }`; call `verifyTicket(ticket
 - Produces:
 
 ```ts
-export type Action = /* the 24-member union from §5 */;
+export type Action = /* the §5 union (23 members as shipped) */;
 export type Resource = { ownerUserId?: string | null; channelId?: number | null };
 export class ForbiddenError extends Error { readonly status = 403; }
 export function can(ctx: SessionContext, action: Action, resource?: Resource): boolean;
@@ -1421,7 +1431,7 @@ export async function writeAudit(entry: {
 
 ### Task 3.1: The policy module (TDD)
 
-- [ ] **Step 1: Write the failing truth-table test** — `src/lib/auth/policy.test.ts`
+- [x] **Step 1: Write the failing truth-table test** — `src/lib/auth/policy.test.ts`
 
 ```ts
 import { describe, expect, it } from "vitest";
@@ -1568,9 +1578,9 @@ describe("assertCan", () => {
 });
 ```
 
-- [ ] **Step 2: Run and watch it fail** — `npm test -- policy`. Expected: FAIL, module not found.
+- [x] **Step 2: Run and watch it fail** — `npm test -- policy`. Expected: FAIL, module not found.
 
-- [ ] **Step 3: Implement** — `src/lib/auth/policy.ts`
+- [x] **Step 3: Implement** — `src/lib/auth/policy.ts`
 
 ```ts
 import type { SessionContext } from "@/lib/auth/session";
@@ -1673,9 +1683,9 @@ export function assertCan(ctx: SessionContext, action: Action, resource: Resourc
 
 Note what is **not** in this file: any reference to `ctx.user.reputation`. That absence is the Helper rule from §5 — reputation is a badge and grants nothing, so reputation can never be farmed into moderation power. The test asserts it; the file enforces it by omission.
 
-- [ ] **Step 4: Run and watch it pass** — `npm test -- policy`. Expected: 14 passed.
+- [x] **Step 4: Run and watch it pass** — `npm test -- policy`. Expected: 14 passed.
 
-- [ ] **Step 5: Commit and announce**
+- [x] **Step 5: Commit and announce**
 
 ```bash
 git add src/lib/auth/policy.ts src/lib/auth/policy.test.ts
@@ -1688,7 +1698,7 @@ Tell the team: `can()` and `assertCan()` are on `main` with the §5 signature pl
 
 ### Task 3.2: The audit log writer
 
-- [ ] **Step 1: Implement** — `src/lib/audit.ts`
+- [x] **Step 1: Implement** — `src/lib/audit.ts`
 
 ```ts
 import { prisma } from "@/lib/db";
@@ -1723,13 +1733,13 @@ export async function writeAudit(entry: {
 }
 ```
 
-- [ ] **Step 2: Verify it compiles**
+- [x] **Step 2: Verify it compiles**
 
 ```bash
 npm run lint && npm run build && npm run typecheck
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/audit.ts
@@ -1738,13 +1748,13 @@ git commit -m "feat(auth): record privileged actions in the audit log"
 
 ### Task 3.3: Close the C3 and C5 loose ends
 
-- [ ] **Step 1: Delete `AUTH_STUB`** (§C-13). Remove the `# AUTH_STUB=0 …` line from `.env.example`. No code reads it, and `CLAUDE.md` already says it does not exist.
+- [x] **Step 1: Delete `AUTH_STUB`** (§C-13). Remove the `# AUTH_STUB=0 …` line from `.env.example`. No code reads it, and `CLAUDE.md` already says it does not exist.
 
-- [ ] **Step 2: Leave the document call sites as they are** (§C-14). `uploadDocument`, `deleteDocument`, the dashboard, the category page and `GET /api/documents/[id]` are already owner-scoped in the query, which is E6's requirement. Adding `assertCan` after an owner-scoped load is a check that cannot fail, and loading by id alone to run `can()` would let tier 1 hand admins other people's ID papers. The one place `document:read` has to go through `assertCan` is Adrien's assistant context (B10), because it loads documents for a prompt. Tell him.
+- [x] **Step 2: Leave the document call sites as they are** (§C-14). `uploadDocument`, `deleteDocument`, the dashboard, the category page and `GET /api/documents/[id]` are already owner-scoped in the query, which is E6's requirement. Adding `assertCan` after an owner-scoped load is a check that cannot fail, and loading by id alone to run `can()` would let tier 1 hand admins other people's ID papers. The one place `document:read` has to go through `assertCan` is Adrien's assistant context (B10), because it loads documents for a prompt. Tell him.
 
-- [ ] **Step 3: C5 evidence.** Add a two-account check to `docs/testing-auth.md`: user B requests user A's `/api/documents/<id>` and gets **404**, and submits `deleteDocument` with A's id and is refused. Run it once, and paste the result into the PR.
+- [x] **Step 3: C5 evidence.** Add a two-account check to `docs/testing-auth.md`: user B requests user A's `/api/documents/<id>` and gets **404**, and submits `deleteDocument` with A's id and is refused. Run it once, and paste the result into the PR.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .env.example docs/testing-auth.md
@@ -1758,12 +1768,12 @@ git commit -m "chore(auth): drop the unused AUTH_STUB key and document the C5 ow
 **Est:** 1d · **Entry gate:** phase 3 exit gate green.
 **Exit gate for phase 5:** a non-admin visiting `/fr/admin/users` sees a rendered 403, **not a blank page and not a redirect**, in all three locales; an admin can list, search, promote, demote and delete users; every mutation writes an `AuditLog` row; you cannot demote or delete yourself; only admins see the nav link.
 
-**Revised 2026-10-02:** paths are under `src/app/[locale]/(app)/`, strings are in `messages/*.json` under `admin`, `revalidatePath` uses the file pattern, and the seed change waits for Amir's rewrite of `prisma/seed.ts` on `feat/channels`. **Expand into** `docs/plans/<date>-c14a-admin-surface.md` before starting.
+**Revised 2026-10-02:** paths are under `src/app/[locale]/(app)/`, strings are in `messages/*.json` under `admin`, `revalidatePath` uses the file pattern, and the seed change (task 4.1 step 2) can go in now that Amir's rewrite of `prisma/seed.ts` is merged (PR #9). **Expand into** `docs/plans/<date>-c14a-admin-surface.md` before starting.
 
 **Files:**
 - Create: `src/app/[locale]/(app)/admin/layout.tsx`, `src/app/[locale]/(app)/admin/users/page.tsx`, `src/app/[locale]/(app)/admin/users/actions.ts`
 - Modify: `messages/{fr,en,es}.json` (an `admin` namespace; `fr.json` first), `src/components/Nav.tsx` (admin-only link) ⚠ Alexandre's file
-- Modify, after `feat/channels` merges: `prisma/seed.ts`, which gets a seeded ADMIN and USER with passwords ⚠ Amir's file
+- Modify (`feat/channels` is merged): `prisma/seed.ts`, which gets a seeded ADMIN and USER with passwords ⚠ Amir's file
 
 **Interfaces:**
 - Consumes: `requireUser`, `can`, `assertCan`, `writeAudit`, `invalidateAllSessions`.
@@ -1775,7 +1785,7 @@ git commit -m "chore(auth): drop the unused AUTH_STUB key and document the C5 ow
 
 - [ ] **Step 1: Now, for development.** Sign up two accounts at `/fr/signup`, then set `globalRole = ADMIN` on one of them in `npm run db:studio`. This needs no code. It is enough to build and verify the whole phase.
 
-- [ ] **Step 2: After `feat/channels` merges, seed them.** Amir's branch rewrites `prisma/seed.ts` (users become `` `${name}@gmail.com` ``), so changing it before then guarantees a conflict. Once it lands, give one seeded user `globalRole: "ADMIN"` and both a `passwordHash` from `hashPassword()` (import it relatively, `../src/lib/auth/password`, as the seed already does for the Prisma client). **Lowercase the seeded emails.** The login schema lowercases its input, so `Amir@gmail.com` can never match. That is also why today's seeded users cannot log in. Write the dev password in `docs/testing-auth.md`. Then:
+- [ ] **Step 2: Seed them.** Amir's rewrite of `prisma/seed.ts` is merged (PR #9: ten users named `` `${name}@gmail.com` ``). Give one seeded user `globalRole: "ADMIN"` and both a `passwordHash` from `hashPassword()` (import it relatively, `../src/lib/auth/password`, as the seed already does for the Prisma client). **Lowercase the seeded emails.** The login schema lowercases its input, so `Amir@gmail.com` can never match. That is also why today's seeded users cannot log in. Write the dev password in `docs/testing-auth.md`. Then:
 
 ```bash
 npm run db:reset   # resets AND seeds (prisma.config.ts registers the seed); do not run db:seed after it
@@ -1909,10 +1919,10 @@ Title: `feat(admin): user management and role administration`. In the descriptio
 
 Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are specified at task level and each is expanded into its own `docs/plans/YYYY-MM-DD-<id>.md` when its gate opens.** Phases 5–7 were rewritten on 2026-10-02. E9–E11 are Amir's (§B), so they now cover only what is yours: putting the policy into his community actions, channel-role management (C14b), and signing off module 2.
 
-### Phase 5 — The policy in the channel actions (C5, C6 on `feat/channels`) · 1d
+### Phase 5 — The policy in the channel actions (C5, C6 in Amir's merged code) · 1d
 
 **Expand into:** `docs/plans/<date>-c5-c6-channel-policy.md`
-**Entry gate:** phase 3 merged **and** `feat/channels` merged. Best case: Amir converts his actions with the table below **before** his PR merges, and this phase shrinks to reviewing them and adding the audit writes.
+**Entry gate:** phase 3 merged **and** `feat/channels` merged: **both met on 2026-10-05** (PRs #18 and #9). His PR merged with every check still inline, so the whole table below is still to do.
 **Schema:** none. **Files:** Amir's, under `src/app/[locale]/(app)/channels/`. If you write the change, open `feat/channel-policy` and tag him.
 
 **The mapping.** Validation failures (bad id, empty text) can keep their silent `return`. Authorization becomes `assertCan`, called after loading the row it needs.
@@ -1923,7 +1933,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 | `editChannel` (`[id]/edit/action.ts`) | `createdBy === user.id` | `"channel:update", { channelId }`. Moderators may edit too, a behaviour change to agree with Amir | yes |
 | `deleteChannel` (`[id]/delete/action.ts`; a duplicate is in `create/action.ts`) | MODERATOR membership | `"channel:delete", { channelId, ownerUserId: channel.createdBy }`: creator or admin (phase 3 test) | yes, **before** the delete |
 | `joinChannel` (`join/actions.ts`) | `!isPrivate` | `"channel:join", { channelId }`; keep the `isPrivate` check | — |
-| `requestJoinChannel` (`join/actions.ts`) | ⚠ see review notes | `"channel:join", { channelId }` | — |
+| `requestJoinChannel` (`join/actions.ts`, default export) | session user, not already a member | `"channel:join", { channelId }` | — |
 | `acceptJoinRequest` / `rejectJoinRequest` (`[id]/requests/action.ts`) | MODERATOR membership | `"channel:moderate", { channelId }` (§C-16) | yes |
 | `inviteUser` (`[id]/invite/action.ts`) | MODERATOR membership | `"channel:moderate", { channelId }` | yes |
 | `kickMember` (`[id]/actions.ts`) / `kickMembers` (`[id]/kick/action.ts`, a duplicate) | MODERATOR membership | `"channel:moderate", { channelId }` | yes |
@@ -1939,10 +1949,11 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 | 5.2 | Audit writes | every "yes" row writes one `AuditLog` row with `channelId` and the target |
 | 5.3 | Cross-channel check by hand | a moderator of channel A who replays a kick form with channel B's id is refused; a plain member's kick in A is refused; recorded in `docs/testing-auth.md` |
 
-**Review notes for Amir's PR.** Send them with the table:
-- ⚠ **`requestJoinChannel` trusts `formData.get("userId")`.** It must use `user.id` from `requireUser()`, or anyone can file a request under someone else's name. It also parses the *channel* id from `trueUserId`, and it never `await`s `prisma.channelJoinRequest.create`. Prisma queries are lazy, so the row is never written.
-- `revalidatePath("/channels")` and `` revalidatePath(`/channels/${id}`) `` match nothing under `[locale]`. Use the file pattern: `revalidatePath("/[locale]/(app)/channels/[id]", "page")`. His bare `redirect` hrefs are fine, because `@/i18n/navigation` localises them.
-- `ChannelInvite` and `ChannelJoinRequest` have no `updatedAt` (a review-failure rule). `package.json` picked up `npm init` junk. The two `kick` actions and the two `deleteChannel` actions are duplicates: keep one of each. Seeded emails are capitalised, so seeded users cannot log in (task 4.1).
+**Review notes for Amir's code** (PR #9 merged; status checked 2026-10-05). Send them with the table:
+- ✅ **Fixed before merge:** `requestJoinChannel` now takes `user.id` from `requireUser()`, parses the channel id from `channelId` and awaits the `create`.
+- `revalidatePath("/channels")` and `` revalidatePath(`/channels/${id}`) `` match nothing under `[locale]`. Use the file pattern: `revalidatePath("/[locale]/(app)/channels/[id]", "page")`. His bare `redirect` hrefs are fine, because `@/i18n/navigation` localises them. **Still open:** most calls are bare paths.
+- **Still open:** `ChannelInvite` and `ChannelJoinRequest` have no `updatedAt` (a review-failure rule). The two `kick` actions and the two `deleteChannel` actions are duplicates: keep one of each. Seeded emails are capitalised, so seeded users cannot log in (task 4.1). **Fixed:** the `npm init` junk is gone from `package.json`.
+- **New since merge:** `npm run lint` has 1 error (`react/no-unescaped-entities` in `[id]/requests/page.tsx`) and 12 warnings (unused vars, `<img>`), all under `channels/`.
 - `joinChannel` already uses `createMany({ skipDuplicates: true })`, so E9's "idempotent under a double-click, via the constraint" holds. Keep it that way.
 
 ### Phase 6 — Channel role management + Helper badge (C14, second half) · 1d
@@ -2050,14 +2061,14 @@ Every "To Do" from the four modules (`PROJECT_PLAN.md` §6), mapped to the phase
 | | Sessions, protected routes | 1, 2 ✅ |
 | | User CRUD | 2 ✅ (create), 4 (read/update/delete) |
 | | Profile & settings: display name, locale, avatar, Helper badge | D14, built by Alexandre, counts here (§6) |
-| 2 · Advanced permissions | `can()` / `assertCan()` policy module | 3 |
+| 2 · Advanced permissions | `can()` / `assertCan()` policy module | 3 ✅ |
 | | Admin surface: user list, promote/demote | 4 |
 | | Role-based route guards | 2 ✅ (`(app)`), 4 (`/admin` 403) |
-| | Audit log writes | 3 (`writeAudit`), 4 · 5 · 6 · 7 (call sites) |
+| | Audit log writes | 3 ✅ (`writeAudit`), 4 · 5 · 6 · 7 (call sites) |
 | | Roles admin / user / moderator | 4 (global), 6 (channel-scoped), §C-1 |
 | | Policy applied to the community actions | 5 |
 | | Different views/actions per role | 4 (admin vs user, nav link), 7.4 (admin / moderator / member demo) |
-| | Helper is a badge, not a tier | 3 (test), 6.4 (badge) |
+| | Helper is a badge, not a tier | 3 ✅ (test), 6.4 (badge) |
 | 3 · OAuth 2.0 | Authorization-code + PKCE for Google | 8 |
 | | Same for GitHub | 9 |
 | | Callback routes | 8, 9 |
@@ -2068,10 +2079,10 @@ Every "To Do" from the four modules (`PROJECT_PLAN.md` §6), mapped to the phase
 | | Step-up on destructive actions | 11 |
 | *(Domain C hygiene)* | C11 rate limit · CSRF · rotation on login | 2 ✅ |
 | | C11 rotation on privilege change | 4 (`invalidateAllSessions` on a global-role change) |
-| | C5 ownership guards on documents | 2 ✅ (owner-scoped queries), 3.3 (evidence, §C-14) |
-| *(teammate unblock)* | WS ticket endpoint (C12) | 2.5, deferred |
+| | C5 ownership guards on documents | 2 ✅ (owner-scoped queries), 3.3 ✅ (evidence, §C-14) |
+| *(teammate unblock)* | WS ticket endpoint (C12) | 2.5, due now |
 | *(Amir's module)* | Organization system: E9 channels, E10 threads/votes, E11 moderation | Amir; policy hooks in 5–7 |
 
-**Deliberately out of scope of this plan:** C13 (the OWASP / `npm audit` / `gitleaks` security review) is a week-5 task with no code dependency. Findings to carry into it: there is no `.dockerignore`, so the Dockerfile's `COPY . .` bakes `.env` and its secrets into the `web` image; and `requestJoinChannel`'s user-id trust (phase 5) if it is still open.
+**Deliberately out of scope of this plan:** C13 (the OWASP / `npm audit` / `gitleaks` security review) is a week-5 task with no code dependency. Findings to carry into it: there is no `.dockerignore`, so the Dockerfile's `COPY . .` bakes `.env` and its secrets into the `web` image.
 
-**Total:** phases 0–2 are done (≈ 4d). Remaining: 2.5 (0.25d) + 3 (1.5d) + 4 (1d) + 5 (1d) + 6 (1d) + 7 (0.5d) + 8 (1.5d) + 9 (1d) + 10 (1.5d) + 11 (0.5d) ≈ **9.75d**, so ≈ **14d** in all against §7's 15-day Domain C budget. The original plan was 15.5d plus a 4-day E9–E11 overhang; that overhang is now Amir's, as §7 always intended.
+**Total:** phases 0–3 are done (≈ 5.5d). Remaining: 2.5 (0.25d) + 4 (1d) + 5 (1d) + 6 (1d) + 7 (0.5d) + 8 (1.5d) + 9 (1d) + 10 (1.5d) + 11 (0.5d) ≈ **8.25d**, so ≈ **14d** in all against §7's 15-day Domain C budget. The original plan was 15.5d plus a 4-day E9–E11 overhang; that overhang is now Amir's, as §7 always intended.
