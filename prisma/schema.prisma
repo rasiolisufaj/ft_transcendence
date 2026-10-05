@@ -42,6 +42,25 @@ enum DocumentCategory {
   OTHER
 }
 
+// How a document's deadline behaves, which decides whether it can ever expire.
+//
+// NONE is the value PROJECT_PLAN §3 is missing: a birth certificate, a diploma
+// or a payslip has no expiry date by nature. Without it, rule 1 of deriveStatus
+// (§5) marks every such document ACTION_REQUIRED forever — a correct document
+// permanently asking for human attention.
+//
+// Read together with targetDate, the pair is unambiguous:
+//   null + null  -> not analysed yet
+//   NONE + null  -> no expiry, and that is correct     -> VALID
+//   HARD + date  -> a legal deadline                   -> VALID/EXPIRING_SOON/EXPIRED
+//   HARD + null  -> should have one, could not read it -> ACTION_REQUIRED
+enum DeadlineType {
+  HARD // legal: passport, residence permit, roadworthiness test
+  SOFT // financial: an insurance contract that renews itself
+  PERIODIC // has to be redone: a declaration, a certificate
+  NONE // no expiry by nature: birth certificate, diploma, payslip
+}
+
 // Etat de la classification IA. PENDING = pas encore analyse, NEEDS_REVIEW =
 // confiance trop basse, un humain tranche (PROJECT_PLAN §5, regle 1 de
 // deriveStatus : un document que l'IA n'a pas su lire n'est pas "valide").
@@ -70,17 +89,19 @@ model User {
   sessions                    Session[]
   channelsCreated             Channel[]
   channelMemberships          ChannelMember[]
-  threads                     Thread[]        @relation("ThreadAuthor")
-  answers                     Answer[]        @relation("AnswerAuthor")
+  threads                     Thread[]             @relation("ThreadAuthor")
+  answers                     Answer[]             @relation("AnswerAuthor")
   votes                       Vote[]
-  friendshipsSent             Friendship[]    @relation("SentFriendships")
-  friendshipsReceived         Friendship[]    @relation("ReceivedFriendships")
-  conversationsAsParticipant1 Conversation[]  @relation("ConversationParticipant1")
-  conversationsAsParticipant2 Conversation[]  @relation("ConversationParticipant2")
-  messages                    Message[]       @relation("MessageSender")
+  friendshipsSent             Friendship[]         @relation("SentFriendships")
+  friendshipsReceived         Friendship[]         @relation("ReceivedFriendships")
+  conversationsAsParticipant1 Conversation[]       @relation("ConversationParticipant1")
+  conversationsAsParticipant2 Conversation[]       @relation("ConversationParticipant2")
+  messages                    Message[]            @relation("MessageSender")
   notifications               Notification[]
   oauthAccounts               OAuthAccount[]
   auditLogs                   AuditLog[]
+  channelInvites              ChannelInvite[]
+  channelJoinRequests         ChannelJoinRequest[]
 }
 
 model Document {
@@ -99,11 +120,18 @@ model Document {
   category         DocumentCategory @default(OTHER)
   extractionStatus ExtractionStatus @default(PENDING)
 
+  // The deadline lives on the base row, not on each subtype table: one query
+  // then finds every deadline whatever the category, and adding a category
+  // cannot break it (PROJECT_PLAN §3).
+  targetDate   DateTime?
+  deadlineType DeadlineType?
+
   identity      DocumentIdentity?
   insuranceAuto DocumentInsuranceAuto?
 
   @@index([ownerId])
   @@index([ownerId, category]) // dashboard (groupBy) et liste d'une categorie
+  @@index([deadlineType, targetDate]) // the nightly deadline scan (D8)
 }
 
 model DocumentIdentity {
@@ -146,16 +174,18 @@ model ChannelMember {
 }
 
 model Channel {
-  id          Int      @id @default(autoincrement())
-  createdBy   String?  @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
-  title       String   @db.VarChar(100)
-  description String?  @db.VarChar(250)
-
-  creator User?           @relation(fields: [createdBy], references: [id], onDelete: SetNull)
-  members ChannelMember[]
-  threads Thread[]
+  id           Int                  @id @default(autoincrement())
+  createdBy    String?              @map("created_by")
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @default(now()) @updatedAt @map("updated_at")
+  title        String               @db.VarChar(100)
+  description  String?              @db.VarChar(250)
+  isPrivate    Boolean              @default(false)
+  creator      User?                @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  members      ChannelMember[]
+  threads      Thread[]
+  invites      ChannelInvite[]
+  joinRequests ChannelJoinRequest[]
 }
 
 model Thread {
@@ -288,3 +318,27 @@ model AuditLog {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 }
+
+model ChannelInvite {
+  channelId Int      @map("channel_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+}
+
+model ChannelJoinRequest {
+  channelId Int      @map("channel_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+  @@index([userId])
+}
+
