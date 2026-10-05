@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Prisma } from "@/generated/prisma/client";
 import { DocumentCategory } from "@/generated/prisma/enums";
 
 /**
@@ -189,4 +190,57 @@ export function narrowSubtypeFields(category: CategoryKey, fields: unknown): Nar
   // the schema's own; precise narrowing happens at write time, where the typed
   // Prisma delegate takes over.
   return { ok: true, model: subtype.model, data: parsed.data as Record<string, unknown> };
+}
+
+// ── Writing the typed row ────────────────────────────────────────────────────
+
+/**
+ * Writes the subtype row for a classified document.
+ *
+ * The `switch` lives here, in the registry, on purpose: it is the one place that
+ * has to grow when a category is added, so the promise that adding a category
+ * touches a single file still holds.
+ *
+ * Each branch re-parses through its own schema rather than casting. It costs a
+ * few microseconds and buys real type safety on the Prisma call — a field that
+ * drifted between the schema and the table fails here, not in Postgres.
+ *
+ * Dates are converted here rather than in the schemas: the schemas are also fed
+ * to `zodOutputFormat()` to build the model's JSON schema, and a `.transform()`
+ * in them would complicate that generation for no gain.
+ */
+export async function writeSubtypeRow(
+  tx: Prisma.TransactionClient,
+  model: SubtypeModel,
+  documentId: number,
+  data: Record<string, unknown>,
+): Promise<void> {
+  switch (model) {
+    case "documentIdentity": {
+      const d = IdentitySchema.parse(data);
+      await tx.documentIdentity.create({
+        data: {
+          documentId,
+          fullName: d.fullName,
+          birthDate: new Date(`${d.birthDate}T00:00:00Z`),
+          documentNumber: d.documentNumber,
+          expiryDate: new Date(`${d.expiryDate}T00:00:00Z`),
+        },
+      });
+      return;
+    }
+    case "documentInsuranceAuto": {
+      const d = InsuranceAutoSchema.parse(data);
+      await tx.documentInsuranceAuto.create({
+        data: {
+          documentId,
+          provider: d.provider,
+          policyNumber: d.policyNumber,
+          vehiclePlate: d.vehiclePlate,
+          expiryDate: new Date(`${d.expiryDate}T00:00:00Z`),
+        },
+      });
+      return;
+    }
+  }
 }

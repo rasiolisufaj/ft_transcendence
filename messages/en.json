@@ -5,7 +5,9 @@
     "addDocument": "Add a document",
     "login": "Sign in",
     "signup": "Sign up",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -34,9 +36,7 @@
   },
   "dashboard": {
     "title": "My documents",
-    "subtitle": "Upload your French paperwork, our AI will handle the rest.",
     "addDocument": "Add a document",
-    "upload": "Upload",
     "empty": "No documents yet. Upload your first document to get started.",
     "countByCategory": "{count, plural, one {# document, sorted by category.} other {# documents, sorted by category.}}",
     "pendingClassification": "{count, plural, one {# document awaiting automatic classification.} other {# documents awaiting automatic classification.}}"
@@ -87,6 +87,116 @@
     },
     "chooseAnother": "Choose another file",
     "backToDocuments": "View my documents"
+  },
+  "channels": {
+    "home": {
+      "title": "Channels",
+      "subtitle": "Ask questions, share tips and help others with their paperwork.",
+      "createTitle": "Create a channel",
+      "createDesc": "Create a space to discuss a topic.",
+      "joinTitle": "Join a channel",
+      "joinDesc": "Browse public channels and join one.",
+      "invitationsTitle": "View my invitations",
+      "invitationsDesc": "Request access to a private channel.",
+      "empty": "You don't belong to any channel.",
+      "membersCount": "{count, plural, one {# member} other {# members}}",
+      "optionsAria": "Channel options",
+      "invite": "Invite",
+      "edit": "Edit",
+      "delete": "Delete",
+      "kick": "Remove a member",
+      "leave": "Leave",
+      "public": "public channel",
+      "private": "private channel"
+    },
+    "create": {
+      "title": "Create a channel",
+      "subtitle": "Create a space where people can ask questions and help each other on a topic.",
+      "nameLabel": "Channel name",
+      "namePlaceholder": "e.g. Car insurance",
+      "descriptionLabel": "Description (optional)",
+      "descriptionPlaceholder": "What is this channel about?",
+      "questionLabel": "Question (required)",
+      "questionPlaceholder": "Ask your question with as much detail as possible so answers can be clear.",
+      "cancel": "Cancel",
+      "submit": "Create channel"
+    },
+    "join": {
+      "back": "← Back to channels",
+      "title": "Join a channel",
+      "subtitle": "Browse public channels and join one.",
+      "empty": "No public channel to join for now.",
+      "noDescription": "This channel has no description.",
+      "membersCount": "{count, plural, one {# member} other {# members}}",
+      "join": "Join"
+    },
+    "detail": {
+      "back": "← Back to channels",
+      "leave": "Leave channel",
+      "membersCount": "{count, plural, one {# member} other {# members}}",
+      "moderator": "moderator",
+      "kick": "Remove",
+      "authoredBy": "by {name} · {date}",
+      "deletedUser": "Deleted user",
+      "repliesCount": "{count, plural, one {# reply} other {# replies}}",
+      "noReplies": "Nobody has replied yet.",
+      "editReplyAria": "Edit reply",
+      "deleteReplyAria": "Delete reply",
+      "replyPlaceholder": "Write a reply…",
+      "replyAria": "Your reply",
+      "send": "Send",
+      "noQuestion": "No question in this channel.",
+      "editedAt": "edited at {time}",
+      "sentAt": "sent at {time}"
+    },
+    "edit": {
+      "title": "Edit channel",
+      "subtitle": "Change the name, description or question.",
+      "nameLabel": "Channel name",
+      "descriptionLabel": "Description (optional)",
+      "questionLabel": "Question",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "invite": {
+      "back": "← Back to channels",
+      "title": "Invite to {channel}",
+      "subtitle": "Pick someone to invite.",
+      "userAria": "User to invite",
+      "chooseUser": "Choose a user…",
+      "submit": "Invite"
+    },
+    "answerEdit": {
+      "title": "Edit my reply",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "invitations": {
+      "back": "← Back to channels",
+      "title": "My invitations",
+      "empty": "You have no pending invitations at the moment.",
+      "pending": "{count, plural, one {You have # pending invitation.} other {You have # pending invitations.}}",
+      "intro": "A moderator has invited you to join their channel. Accept to become a member, or decline to remove the invitation.",
+      "description": "description: {description}",
+      "noDescription": "This channel has no description.",
+      "membersCount": "Number of members in the channel: {count}",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "kick": {
+      "back": "← Back to channels",
+      "membersCount": "{count, plural, one {# member} other {# members}}",
+      "kick": "Remove"
+    },
+    "delete": {
+      "back": "← Back to channels",
+      "title": "Delete channel \"{channel}\"?",
+      "warning": "{count, plural, one {This channel has # member. Deleting it is permanent and will remove all messages.} other {This channel has # members. Deleting it is permanent and will remove all messages.}}",
+      "reminder": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "submit": "Delete channel"
+    }
+    
   },
   "auth": {
     "errors": {
@@ -157,4 +267,5 @@
       "notPending": "This request no longer exists."
     }
   }
+  
 }

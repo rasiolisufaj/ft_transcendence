@@ -5,7 +5,9 @@
     "addDocument": "Ajouter un document",
     "login": "Se connecter",
     "signup": "Créer un compte",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -34,9 +36,7 @@
   },
   "dashboard": {
     "title": "Mes documents",
-    "subtitle": "Importez vos papiers administratifs français, notre IA s'occupe du reste.",
     "addDocument": "Ajouter un document",
-    "upload": "Importer",
     "empty": "Aucun document pour l'instant. Importez votre premier document pour commencer.",
     "countByCategory": "{count, plural, one {# document, trié par catégorie.} other {# documents, triés par catégorie.}}",
     "pendingClassification": "{count, plural, one {# document en attente de classement automatique.} other {# documents en attente de classement automatique.}}"
@@ -87,6 +87,115 @@
     },
     "chooseAnother": "Choisir un autre fichier",
     "backToDocuments": "Voir mes documents"
+  },
+  "channels": {
+    "home": {
+      "title": "Channels",
+      "subtitle": "Pose des questions, partage tes astuces et aide les autres avec leurs papiers.",
+      "createTitle": "Créer un channel",
+      "createDesc": "Crée un espace pour parler d'un sujet.",
+      "joinTitle": "Rejoindre un channel",
+      "joinDesc": "Parcours les channels publics et rejoins-en un.",
+      "invitationsTitle": "Voir mes invitations",
+      "invitationsDesc": "Demande l'accès à un channel privé.",
+      "empty": "Tu n'appartiens à aucun channel.",
+      "membersCount": "{count, plural, one {# membre} other {# membres}}",
+      "optionsAria": "Options du channel",
+      "invite": "Inviter",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "kick": "Retirer un membre",
+      "leave": "Quitter",
+      "public": "channel public",
+      "private": "channel privé"
+    },
+    "create": {
+      "title": "Créer un channel",
+      "subtitle": "Crée un espace où les gens posent des questions et s'entraident sur un sujet.",
+      "nameLabel": "Nom du channel",
+      "namePlaceholder": "ex. : Assurance auto",
+      "descriptionLabel": "Description (facultatif)",
+      "descriptionPlaceholder": "De quoi parle ce channel ?",
+      "questionLabel": "Question (obligatoire)",
+      "questionPlaceholder": "Pose ta question en donnant le plus de détails possible pour obtenir des réponses claires.",
+      "cancel": "Annuler",
+      "submit": "Créer le channel"
+    },
+    "join": {
+      "back": "← Retour aux channels",
+      "title": "Rejoindre un channel",
+      "subtitle": "Parcours les channels publics et rejoins-en un.",
+      "empty": "Aucun channel public à rejoindre pour le moment.",
+      "noDescription": "Ce channel n'a pas de description.",
+      "membersCount": "{count, plural, one {# membre} other {# membres}}",
+      "join": "Rejoindre"
+    },
+    "detail": {
+      "back": "← Retour aux channels",
+      "leave": "Quitter le channel",
+      "membersCount": "{count, plural, one {# membre} other {# membres}}",
+      "moderator": "modérateur",
+      "kick": "Retirer",
+      "authoredBy": "par {name} · {date}",
+      "deletedUser": "Utilisateur supprimé",
+      "repliesCount": "{count, plural, one {# réponse} other {# réponses}}",
+      "noReplies": "Personne n'a encore répondu.",
+      "editReplyAria": "Modifier la réponse",
+      "deleteReplyAria": "Supprimer la réponse",
+      "replyPlaceholder": "Écrire une réponse…",
+      "replyAria": "Votre réponse",
+      "send": "Envoyer",
+      "noQuestion": "Pas de question pour ce channel.",
+      "editedAt": "modifié à {time}",
+      "sentAt": "envoyé à {time}"
+    },
+    "edit": {
+      "title": "Modifier le channel",
+      "subtitle": "Change le nom, la description ou la question.",
+      "nameLabel": "Nom du channel",
+      "descriptionLabel": "Description (optionnelle)",
+      "questionLabel": "Question",
+      "cancel": "Annuler",
+      "save": "Enregistrer"
+    },
+    "invite": {
+      "back": "← Retour aux channels",
+      "title": "Inviter dans {channel}",
+      "subtitle": "Choisis une personne à inviter.",
+      "userAria": "Utilisateur à inviter",
+      "chooseUser": "Choisir un utilisateur…",
+      "submit": "Inviter"
+    },
+    "answerEdit": {
+      "title": "Modifier ma réponse",
+      "cancel": "Annuler",
+      "save": "Enregistrer"
+    },
+    "invitations": {
+      "back": "← Retour aux channels",
+      "title": "Mes invitations",
+      "empty": "Tu n'as aucune invitation pour le moment.",
+      "pending": "{count, plural, one {Tu as # invitation en attente.} other {Tu as # invitations en attente.}}",
+      "intro": "Un modérateur t'a invité à rejoindre son channel. Accepte pour devenir membre, ou refuse pour supprimer l'invitation.",
+      "description": "description : {description}",
+      "noDescription": "Ce channel n'a pas de description.",
+      "membersCount": "Nombre de membres du channel : {count}",
+      "accept": "Accepter",
+      "decline": "Refuser"
+    },
+    "kick": {
+      "back": "← Retour aux channels",
+      "membersCount": "{count, plural, one {# membre} other {# membres}}",
+      "kick": "Retirer"
+    },
+    "delete": {
+      "back": "← Retour aux channels",
+      "title": "Supprimer le channel « {channel} » ?",
+      "warning": "{count, plural, one {Ce channel compte # membre. La suppression est définitive et effacera tous les messages.} other {Ce channel compte # membres. La suppression est définitive et effacera tous les messages.}}",
+      "reminder": "Cette action est irréversible.",
+      "cancel": "Annuler",
+      "submit": "Supprimer le channel"
+    }
   },
   "auth": {
     "errors": {
