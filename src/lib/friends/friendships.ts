@@ -6,7 +6,7 @@ export type Result = { ok: true } | { ok: false; error: FriendError };
 const ok: Result = { ok: true };
 const fail = (error: FriendError): Result => ({ ok: false, error });
 
-// Both directions between two users.
+// A→B or B→A: the unique index only covers one direction.
 function between(a: string, b: string) {
   return {
     OR: [
@@ -16,7 +16,7 @@ function between(a: string, b: string) {
   };
 }
 
-// Adding by email -> the only way now
+// Emails are stored lowercase (see signup).
 export async function findUserIdByEmail(email: string): Promise<string | null> {
   const user = await prisma.user.findUnique({
     where: { email: email.trim().toLowerCase() },
@@ -32,12 +32,11 @@ export async function sendRequest(me: string, other: string): Promise<Result> {
 
   const rows = await prisma.friendship.findMany({ where: between(me, other) });
 
-  // if blocked -> not possible
   if (rows.some((row) => row.status === "BLOCKED")) {
     return fail("blocked");
   }
 
-  // Already friends, already asked (double click): nothing to do.
+  // Already friends or already asked (double click): nothing to do.
   if (rows.some((row) => row.status === "ACCEPTED" || row.requesterId === me)) {
     return ok;
   }
@@ -51,7 +50,7 @@ export async function sendRequest(me: string, other: string): Promise<Result> {
   try {
     await prisma.friendship.create({ data: { requesterId: me, receiverId: other } });
   } catch (error) {
-    // Two clicks at the same time: the unique index refused the second row. Fine.
+    // Simultaneous clicks: the unique index refused the 2nd row.
     if ((error as { code?: string }).code !== "P2002") throw error;
   }
   return ok;
@@ -66,7 +65,7 @@ export async function acceptRequest(me: string, requester: string): Promise<Resu
     return ok;
   }
 
-  // Second click: it is already accepted, so this is not an error.
+  // Second click: already accepted, not an error.
   const accepted = await prisma.friendship.count({
     where: { requesterId: requester, receiverId: me, status: "ACCEPTED" },
   });

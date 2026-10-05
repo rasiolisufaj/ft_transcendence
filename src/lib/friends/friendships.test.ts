@@ -13,7 +13,7 @@ import {
   unblock,
 } from "@/lib/friends/friendships";
 
-// Hits the real Postgres from .env, like session.test.ts: `db` must be up and migrated.
+// Real Postgres from .env: `db` must be running.
 let alice: string;
 let bob: string;
 let aliceEmail: string;
@@ -25,7 +25,6 @@ async function createUser(name: string) {
   return user;
 }
 
-// Every row between the two test users, in both directions.
 function rowsBetween(a: string, b: string) {
   return prisma.friendship.findMany({
     where: {
@@ -45,7 +44,7 @@ beforeEach(async () => {
   aliceEmail = a.email;
 });
 
-// Friendship rows cascade from User.
+// Friendships are deleted with the users.
 afterEach(async () => {
   await prisma.user.deleteMany({ where: { id: { in: [alice, bob] } } });
 });

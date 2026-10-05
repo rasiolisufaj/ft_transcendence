@@ -15,9 +15,8 @@ import {
 } from "@/lib/friends/friendships";
 import { addFriendSchema, otherUserSchema, type FriendFormState } from "@/lib/friends/schemas";
 
-// Every action checks the session itself: the (app) layout is not the boundary.
+// Each action checks the session: the (app) layout is not a security boundary.
 
-// The add form: an email, then a request. Returns an error key or `sent`.
 export async function addFriend(_prev: FriendFormState, formData: FormData): Promise<FriendFormState> {
   const { user } = await requireUser();
 
@@ -40,7 +39,7 @@ export async function addFriend(_prev: FriendFormState, formData: FormData): Pro
   return { sent: true };
 }
 
-// The buttons next to a person all work the same way: a hidden userId, one call.
+// Shared by every per-person button.
 async function onOtherUser(
   formData: FormData,
   run: (me: string, other: string) => Promise<Result>,
