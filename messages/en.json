@@ -196,7 +196,6 @@
       "cancel": "Cancel",
       "submit": "Delete channel"
     }
-    
   },
   "auth": {
     "errors": {
@@ -240,14 +239,16 @@
       "sent": "Request sent."
     },
     "sections": {
+      "incoming": "Requests received"
+    },
+    "tabs": {
       "friends": "Friends",
-      "incoming": "Requests received",
-      "outgoing": "Requests sent",
-      "blocked": "Blocked people"
+      "outgoing": "Sent",
+      "blocked": "Blocked",
+      "label": "Lists"
     },
     "empty": {
       "friends": "You have no friends yet.",
-      "incoming": "No requests received.",
       "outgoing": "No pending requests.",
       "blocked": "You haven't blocked anyone."
     },
@@ -267,5 +268,4 @@
       "notPending": "This request no longer exists."
     }
   }
-  
 }

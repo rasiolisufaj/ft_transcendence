@@ -239,14 +239,16 @@
       "sent": "Solicitud enviada."
     },
     "sections": {
+      "incoming": "Solicitudes recibidas"
+    },
+    "tabs": {
       "friends": "Amigos",
-      "incoming": "Solicitudes recibidas",
-      "outgoing": "Solicitudes enviadas",
-      "blocked": "Personas bloqueadas"
+      "outgoing": "Enviadas",
+      "blocked": "Bloqueados",
+      "label": "Listas"
     },
     "empty": {
       "friends": "Todavía no tiene amigos.",
-      "incoming": "No ha recibido ninguna solicitud.",
       "outgoing": "No hay solicitudes pendientes.",
       "blocked": "No ha bloqueado a nadie."
     },
