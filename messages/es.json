@@ -34,9 +34,7 @@
   },
   "dashboard": {
     "title": "Mis documentos",
-    "subtitle": "Suba sus documentos administrativos franceses, nuestra IA se encarga del resto.",
     "addDocument": "Añadir un documento",
-    "upload": "Subir",
     "empty": "Todavía no hay documentos. Suba su primer documento para empezar.",
     "countByCategory": "{count, plural, one {# documento, ordenado por categoría.} other {# documentos, ordenados por categoría.}}",
     "pendingClassification": "{count, plural, one {# documento pendiente de clasificación automática.} other {# documentos pendientes de clasificación automática.}}"
