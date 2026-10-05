@@ -239,14 +239,16 @@
       "sent": "Demande envoyée."
     },
     "sections": {
+      "incoming": "Demandes reçues"
+    },
+    "tabs": {
       "friends": "Amis",
-      "incoming": "Demandes reçues",
-      "outgoing": "Demandes envoyées",
-      "blocked": "Personnes bloquées"
+      "outgoing": "Envoyées",
+      "blocked": "Bloqués",
+      "label": "Listes"
     },
     "empty": {
       "friends": "Vous n'avez pas encore d'amis.",
-      "incoming": "Aucune demande reçue.",
       "outgoing": "Aucune demande en attente.",
       "blocked": "Vous n'avez bloqué personne."
     },
