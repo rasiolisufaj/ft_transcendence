@@ -5,7 +5,9 @@
     "addDocument": "Ajouter un document",
     "login": "Se connecter",
     "signup": "Créer un compte",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
   },
   "localeSwitcher": {
     "label": "Langue",
