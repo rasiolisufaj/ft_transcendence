@@ -1,57 +1,57 @@
 # Session Handoff
 
-_Last updated: 2026-09-29 (evening). Owner: Rasiol (auth, permissions, OAuth, 2FA). Plan: [`docs/plans/2026-09-21-rasiol-modules-roadmap.md`](../docs/plans/2026-09-21-rasiol-modules-roadmap.md). This file is the progress record; the roadmap's checkboxes are not ticked._
+_Last updated: 2026-10-02. Owner: Rasiol (auth, permissions, OAuth, 2FA). Plan: [`docs/plans/2026-09-21-rasiol-modules-roadmap.md`](../docs/plans/2026-09-21-rasiol-modules-roadmap.md). This file is the progress record. The roadmap's checkboxes are ticked for phases 0–2.4 (revised 2026-10-02)._
 
 ## 🎯 Current Objective
-Start **roadmap phase 2**: signup/login/logout, the `(app)` guard and the WS ticket (C2, C3, C11p, C12). Phase 1 (session core) is merged. Phase 2 now has to sit inside the team's new `app/[locale]/` + `next-intl` routing instead of the flat English routes the roadmap assumed.
+Start **roadmap phase 3**: `can()` / `assertCan()` + `writeAudit()` (C4, C6). Phase 2 (tasks 2.1–2.4) is merged. Before writing code, expand phase 3 into its own TDD plan at `docs/plans/2026-10-01-<task-id>.md`, and **announce `policy.ts` at standup the day it starts** (it blocks all three teammates).
 
 ## 📝 Recent Commits & Changes
-* `f07b382`, `b1cc507`, `f6aa994`, `3dfd3cc` (2026-09-29, `feat/auth-login`, not pushed): phase 2 tasks 2.1–2.4: shared Zod schemas, signup/login/logout actions, the forms, the route guard.
-* `0dcdb38` (2026-09-25): **PR #10 merged, phase 1 is on `main`.** It contains `37be36b` (token + SHA-256), `7f1ff0c` (create/validate/invalidate sessions), `ee18f4a` (`getCurrentUser`, `requireUser`, cookie helpers) and `b1dc30f` (sliding expiry removed).
-* `9b4c3c4` (2026-09-27, Reaven23): **PR #11 merged.** New migration `20260926124225_add_document_category_and_extraction_status`, which adds the `DocumentCategory` and `ExtractionStatus` enums, `Document.category` / `extractionStatus` and `@@index([ownerId, category])`. It also adds `src/lib/documents/{classify,subtypes}.ts` with tests, and **`src/lib/auth/seed-user.ts`** (`getSeedUser()`, the temporary hardcoded `Amir@gmail.com` owner), which is in my directory.
-* `767ef90` (2026-09-27, sku/Reaven23): **PR #12 merged.** `next-intl` ^4 routing under `src/app/[locale]/` (fr/en/es), `messages/{fr,en,es}.json`, `src/i18n/`, a language switcher, and **`src/middleware.ts`** (the next-intl middleware; matcher excludes `api`, `_next` and files).
-* `07436b6`: local merge of `main` into `feat/auth-session-core`. **Not pushed, and it doesn't need to be:** the branch tree is identical to `origin/main` (`git diff origin/main HEAD` is empty).
-* Files changed this session (all local-only, none committed). `CLAUDE.md` was also corrected for PRs #10–#12 (phase 1 merged, i18n routes, new schema enums, `seed-user.ts`, `allowedDevOrigins` restored):
-  * `docs/WORKLOG.md` → `handoff/WORKLOG.md` (moved and rewritten into this template)
-  * `CLAUDE.md`: the worklog pointer now says `handoff/WORKLOG.md`
-  * Claude memory `feedback-maintain-worklog.md`: same path update
+* `dbefd7d` (2026-09-30, merged by Adrien): **PR #13 merged, phase 2 tasks 2.1–2.4 are on `main`.**
+  * `f07b382`: shared Zod schemas, plus `.gitignore`, `CLAUDE.md`, `MEETING_DISCUSSION.md`, the roadmap and this worklog, which are now committed (no longer local-only)
+  * `b1cc507`: signup/login/logout server actions
+  * `f6aa994`: login and signup forms
+  * `3dfd3cc`: the `(app)` route guard; uploads owned by the signed-in user; `seed-user.ts` deleted
+  * `8517338`: `docs/testing-auth.md`, a manual test guide for phases 0–2.4
+* `767ef90` (2026-09-27): PR #12, `next-intl` routing under `src/app/[locale]/`.
+* `9b4c3c4` (2026-09-27): PR #11, document category + extraction status.
+* `0dcdb38` (2026-09-25): PR #10, phase 1 (session core).
+* 2026-10-02 (not committed): **roadmap revised.** Phases 0–2.4 ticked, each with an *As shipped* note. §A–§D rewritten for the current code. Phase 3 gains a membership rule for posting (§C-15) and task 3.3 (drop `AUTH_STUB`, C5 evidence). Phase 4 moves to `[locale]` + i18n. **Phases 5–7 rewritten**: E9–E11 are Amir's, so they become policy-in-his-actions (with a mapping table), channel roles (C14b) and moderation sign-off. Phases 8–11 adapted (env forwarding in compose, the limiter moved to `lib/auth/rate-limit.ts`, the pending-2FA check in `session.ts`). New §C-11…16.
+* 2026-10-01 (not committed): `CLAUDE.md` updated for PR #13 (routes, `schemas.ts`, docs now tracked, phase status, E9–E11 ownership, git author → name map); this worklog rewritten.
 
 ## 🛑 Where We Stopped
-**Phase 2: 2.1 (`f07b382`), 2.2 (`b1cc507`) and 2.3 (`f6aa994`) committed. Task 2.4 (the route guard) committed as `3dfd3cc`** (`feat/auth-login`, not pushed). Next: 2.5 (WS ticket), only when Alexandre starts D2.
+**Phase 2 merged; phase 3 not started.** No code changes since PR #13.
 
-* **Task 2.4 files:** `git mv` of the dashboard and `documents/` into `src/app/[locale]/(app)/`, plus a new `(app)/layout.tsx` (`await requireUser()`). `getSeedUser()` is replaced by `requireUser()` in the dashboard, the category page, `uploadDocument` (first line) and `deleteDocument`, and `seed-user.ts` is deleted. `/api/documents/[id]` answers 401 with no session and 404 for a foreign document (it threw a 500 before). `Nav.tsx` is async and shows Sign in/Sign up or name + Sign out, with `flex-wrap`. `nav.login|signup|logout` added in fr/en/es. CLAUDE.md updated.
-  * ⚠ **Other people's files, flag in the PR and tag them:** the moved pages, `new/actions.ts`, `action.ts` and `api/documents/[id]/route.ts` (Amir); `Nav.tsx` (sku/Alex). Teammates now have to sign up locally, since the seeded `Amir@gmail.com` can't log in.
-  * Every route is now dynamic (`ƒ`), because the root nav reads the cookie. This is what plan step 5 asks for.
-  * The layout is not the security boundary: in Next 16 a layout doesn't stop its page from rendering. Each page, action and route checks the session itself.
-  * Evidence: RED with no session gave `/api/documents/1` → 200 image/png (Amir's file, served to anyone). GREEN: 307 → `/login`, 401, and `/es/…` → `/es/login` (so `requireUser()` needed no locale fix). Playwright walkthrough: uploads are owned by the signed-in user, Amir's file is 404, logout deletes the Session row, 0 px overflow at 375/768/1440, console 0 on fr/en/es. `npm test` 57/57, build and typecheck clean, lint has 0 errors.
-  * **CSRF evidence for the PR (C11):** a real login request replayed with `Origin: https://evil.example` gets `HTTP/1.1 500` and the server logs ``x-forwarded-host` header with value `localhost` does not match `origin` header with value `evil.example` from a forwarded Server Actions request. Aborting the action.`` No Session row is created. The same replay with its own Origin creates one (control).
-  * **`docs/testing-auth.md`** (new, not committed): a guide to testing phases 0–2.4 by hand, for reviewers. Part A covers the automated tests and mutation checks; Part B is a browser walkthrough with SQL/curl checks, including the CSRF replay. Link it from the PR.
-  * Dev-only noise, not bugs: an action POST from outside the browser makes an idle dev tab log `Cannot write to a CLOSED writable stream` (React debug channel). The build's `PrismaClientInitializationError` lines come from the musl-only client; there are 0 after a host `db:generate`.
+* **Git state (checked 2026-10-01 after `git fetch --prune`):** `main` = `origin/main` = `feat/auth-login` = `origin/feat/auth-login` = `dbefd7d`. Tree clean apart from the two doc edits above.
+  * Start phase 3 on a **new branch from `main`** (e.g. `feat/auth-policy`). `feat/auth-login` is spent.
+  * Can be deleted: `origin/feat/auth-login` (merged), `origin/feature-file-storage` (0 ahead, fully merged), local `chore/app-chore-system` (its remote is gone). Local and remote `feat/auth-session-core` are already gone.
+* **Task 2.5 (WS ticket, C12) is deferred.** Do it the day Alexandre needs it. `real-time-event-contract` (sku, 1 commit, 2026-10-01) just started `src/contracts/events.ts` + `src/lib/realtime/publish.ts`, so ask him.
 
-* **Task 2.3 files:** `src/app/[locale]/(auth)/{login,signup}/page.tsx` (client pages, `useActionState`, statically prerendered for fr/en/es), plus `auth.fields`, `auth.login` and `auth.signup` in `messages/*.json`.
-  * They use Input's own `label`/`error` props (aria-describedby is already wired up). Errors are schema keys rendered through `t("errors.<key>")`.
-  * Email and display name are **controlled** because React 19 resets uncontrolled fields after every form action, so a wrong password would otherwise wipe them too. The password is left to be cleared.
-  * Evidence: lint, `npm test` 57/57, build and typecheck are clean.
-  * **Browser check on https://mespapiers.local (Playwright Chromium, from the session scratchpad; not a project dependency):** all passed.
-    * signup: a short password shows the error, display name and email are kept, the password is cleared, and `aria-invalid` is set
-    * signup: Enter submits and lands on `/fr`
-    * `mp_session` is `HttpOnly`, `Secure` and `Lax`, and JS can't read it; `Session.id` = sha256(cookie)
-    * login: a wrong password shows the generic error and keeps the email; the right one lands on `/en` and creates a second, different Session row
-    * keyboard: Tab order is display name > email > password > submit > link
-    * **console:** zero warnings or errors on `/fr|en|es/login`, `/fr|en/signup`, `/fr` and `/en` (only React's DevTools info and HMR logs)
-  * **⚠ Graded, not caused by 2.3: horizontal scroll at 375 px on every page.** The shared `Nav` (links plus LocaleSwitcher) is 415 px wide, so the language button is cut off. It's `src/components/Nav.tsx` (not mine), and 2.4 will add auth links to it, which makes it worse. Raise it with the team.
-* **Prisma client is now generated by the container** (restarted `web` on 2026-09-29, then `chown` back to 1000). Docker works, but **host DB tests fail** until `npm run db:generate`, and that breaks Docker again. The cause is the shared bind mount: the generated client embeds the absolute output path of whoever ran `generate`.
-  * Real fix, infra-owned: an anonymous volume `- /app/src/generated` on `web` in `docker-compose.yml`, so host and container stop sharing the generated client.
-* **Task 2.2 files:** `src/app/[locale]/(auth)/{signup,login,logout}/actions.ts` and `login/actions.test.ts`. It also adds 3 keys to `auth.errors`, a key-parity test in `schemas.test.ts`, and `server.deps.inline: ["next-intl"]` in `vitest.config.mts` (next-intl's extensionless `next/navigation` import breaks Node ESM).
-  * Actions redirect with `return redirect({ href, locale: await getLocale() })` from `@/i18n/navigation`. The `return` is needed because the destructured `redirect` has no explicit type, so TS doesn't treat it as `never`.
-  * The login rate limit is 6 failures per email per 15 min, in memory, and it prunes expired entries.
-  * Evidence: RED → GREEN; both mutants are caught; `npm test` 57/57; eslint, build and typecheck clean.
-  * **Seed caveat:** the seeded users have no `passwordHash` and use mixed-case emails, so they can't log in. Sign up a fresh account for the walkthrough.
-* **Docs decision made:** `f07b382` also commits `.gitignore`, `CLAUDE.md`, `MEETING_DISCUSSION.md`, the roadmap and this worklog, so they are no longer local-only. CLAUDE.md's Workflow bullet that says they are git-ignored is now stale.
-* **Branch:** `feat/auth-login`, cut from `origin/main` @ `767ef90`, no upstream set (so a bare `git push` can't land on `main`). `feat/auth-session-core` is spent and can be deleted locally and on the remote.
-* **Tooling state:**
-  * `docker` works now and the stack is up.
-  * `node_modules` was stale (no `next-intl`); fixed with `npm ci`.
-  * The root-owned `src/generated` came back again; fixed with `docker exec mespapiers_web chown -R 1000:1000 /app/src/generated && npm run db:generate` (no sudo).
-  * `.next/dev/types` was stale from before the `[locale]` move, which made `npm run build` fail typecheck. I deleted it; `next dev` regenerates it.
-  * The `gh` token is still unverified.
+### Teammate branches (as of 2026-10-01)
+| Branch | Author | vs `main` (behind/ahead) | Notes |
+|---|---|---|---|
+| `feat/channels` | Amir (khelifi) | 0 / 13, active today | Channels, private channels, invites, join requests, kick, answer editing. 3 migrations: `ChannelInvite`, `ChannelJoinRequest`, `Channel.isPrivate`. |
+| `real-time-event-contract` | Alexandre (sku) | 0 / 1, active today | Start of the realtime contract → trigger for task 2.5 |
+| `feat/llm-IA-image-Scan` | Adrien (Reaven23) | 12 / 1 | AI image recognition |
+| `feat/login-page` | Amir | 37 / 2 | Stale (2026-09-16), superseded by PR #13 |
+| `feat/ui-shell` | Alexandre | 39 / 5 | Stale (2026-09-16) |
+| `feature/prisma` | Amir | 57 / 1 | Stale (2026-09-09) |
+
+* **`feat/channels` matters for phase 3** (the full action → `assertCan` mapping is now in roadmap phase 5):
+  * It settles E9–E11 ownership in practice (Amir builds them), so roadmap phases 5–7 probably drop out. Record that in `MEETING_DISCUSSION.md`.
+  * Authorisation is `requireUser()` + inline `role === "MODERATOR"` checks, no `can()`. Phase 3's `Action` union should cover his actions (invite, join request accept/reject, kick, private channel, answer edit) so he can switch to `assertCan()`.
+  * Review notes for his PR (full list in roadmap phase 5): ⚠ `requestJoinChannel` takes `userId` from the form instead of the session, parses the channel id from it, and never awaits its `create`; the two new models have no `updatedAt` (review-failure rule); unauthorised actions silently `return` instead of a 403; `package.json` picked up `npm init` junk (`"main": "index.js"`, `author`, `keywords`, `bugs`, `homepage`).
+
+### Open items, owned by others (raise at standup)
+* **375 px horizontal scroll on every page (graded).** `src/components/Nav.tsx` (sku/Alex) is ~415 px wide; the auth links from 2.4 made it worse.
+* **Prisma client fights between host and Docker.** Fix is infra-owned: an anonymous volume `- /app/src/generated` on `web` in `docker-compose.yml`. Workaround: `docker exec mespapiers_web chown -R 1000:1000 /app/src/generated && npm run db:generate`.
+* **Seeded users can't log in** (no `passwordHash`, mixed-case emails). Teammates sign up locally.
+* `npm run lint`: 0 errors, 2 warnings in `prisma/seed.ts` (`firstDocument`, `adrienInsuranceDoc` unused). The plan requires zero.
+* The `gh` token is still unverified.
+
+### Phase 2 lessons worth keeping
+* Actions redirect with `return redirect({ href, locale: await getLocale() })` from `@/i18n/navigation`; the `return` is needed because TS doesn't treat the destructured `redirect` as `never`.
+* React 19 resets uncontrolled fields after a form action, so email and display name are controlled inputs; the password is left to be cleared.
+* `vitest.config.mts` has `server.deps.inline: ["next-intl"]` (its extensionless `next/navigation` import breaks Node ESM).
+* CSRF (C11) is Next's built-in Server Action Origin/Host check. Evidence: a login replayed with `Origin: https://evil.example` is aborted and creates no Session row. Full steps in `docs/testing-auth.md`.
+* Dev-only noise, not bugs: `Cannot write to a CLOSED writable stream` after an out-of-browser action POST; `PrismaClientInitializationError` during build with the musl-only client.
+* A stale `.next/dev/types` (from before the `[locale]` move) breaks `npm run build`'s typecheck; delete it, `next dev` regenerates it.
