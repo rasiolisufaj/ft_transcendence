@@ -88,8 +88,8 @@ export function UserMenu({ name }: { name: string }) {
             </li>
           );
         })}
-        <li role="separator" className="my-1 border-t border-zinc-200 dark:border-zinc-800" />
-        <li>
+        {/* The separator is a border, not an empty <li>: a list may only hold list items. */}
+        <li className="mt-1 border-t border-zinc-200 pt-1 dark:border-zinc-800">
           <form action={logout}>
             <button type="submit" className={`${item} ${idle}`}>
               <span aria-hidden="true" className="w-4" />
