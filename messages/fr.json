@@ -2,6 +2,7 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Tableau de bord",
+    "admin": "Administration",
     "addDocument": "Ajouter un document",
     "login": "Se connecter",
     "signup": "Créer un compte",
@@ -228,5 +229,9 @@
       "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter"
     }
+  },
+  "admin": {
+    "forbiddenTitle": "Accès refusé",
+    "forbiddenBody": "Cette page est réservée aux administrateurs."
   }
 }

@@ -2,6 +2,7 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Panel",
+    "admin": "Administración",
     "addDocument": "Añadir un documento",
     "login": "Iniciar sesión",
     "signup": "Crear cuenta",
@@ -228,5 +229,9 @@
       "hasAccount": "¿Ya tiene una cuenta?",
       "loginLink": "Iniciar sesión"
     }
+  },
+  "admin": {
+    "forbiddenTitle": "Acceso denegado",
+    "forbiddenBody": "Esta página está reservada a los administradores."
   }
 }

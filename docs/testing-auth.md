@@ -124,7 +124,7 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 
 - Use a **private window** at **`https://mespapiers.local`**, the name `next.config.ts` allows for dev (`allowedDevOrigins`). Every URL below uses it. It needs `127.0.0.1 mespapiers.local` in the Windows hosts file (`C:\Windows\System32\drivers\etc\hosts`), which WSL picks up too (`getent hosts mespapiers.local`). Accept the self-signed certificate.
 - Keep DevTools open, on the **Console** and **Network** tabs.
-- The seeded users have no password and cannot log in. Every step below uses a fresh account, `moi@mespapiers.test`.
+- After `npm run db:reset` (it wipes the local database, then seeds it), the ten seeded users log in as `<first name in lowercase>@gmail.com` (`amir@gmail.com`, `rasiol@gmail.com`, …) with the dev password **`motdepasse123`**. `rasiol@gmail.com` is the only `ADMIN`; the others are `USER`. Every step below still uses a fresh account, `moi@mespapiers.test`, so that signup is tested too.
 
 ### B1. The guard
 
