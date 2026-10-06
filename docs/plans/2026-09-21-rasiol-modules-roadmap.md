@@ -6,7 +6,7 @@
 
 **Architecture:** Database-backed opaque sessions (random token in an httpOnly cookie, only its SHA-256 stored), one synchronous default-deny `can()` policy function resolving three tiers (global admin → channel moderator → resource owner), and Server Actions that each call `requireUser()` then `assertCan()`. No auth in middleware, no auth library, no service layer — plain functions in `src/lib/auth/`.
 
-> **Status (revised 2026-10-05):** phases **0, 1, 2.1–2.4 and 3 are done and merged** (PRs #10, #13 and #18, `main` = `90a0142`). Task 2.5 is **due now**: Alexandre's realtime server is merged and accepts any connection. **Next: phase 4**, and phase 5 is unblocked too (`feat/channels` merged in PR #9). Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 4–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` on 2026-10-05. `handoff/WORKLOG.md` remains the day-to-day progress log.
+> **Status (revised 2026-10-05, evening):** phases **0, 1, 2.1–2.4 and 3 are done and merged** (PRs #10, #13 and #18, `main` = `2f9acc9`). **Task 2.5 is built and in review**: `60bbe07` on `feat/auth-ws-ticket`, PR #22 open; its boxes get ticked when it merges. **Next: phase 4**, then phase 5 (unblocked since `feat/channels` merged in PR #9). Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 4–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` on 2026-10-05. `handoff/WORKLOG.md` remains the day-to-day progress log.
 
 **Tech Stack:** Next.js 16 App Router · React 19 · TypeScript strict · Prisma 6 (generator `prisma-client` → `src/generated/prisma/`) · PostgreSQL 17 · Vitest 5 · Zod 4 · `@node-rs/argon2` · `otpauth` · `node:crypto`
 
@@ -39,13 +39,14 @@ Copied from `PROJECT_PLAN.md` §0. Every task's definition of done implicitly in
 
 ## A. Dependency analysis — why this order
 
-### What exists today (2026-10-05, `main` = `90a0142`)
+### What exists today (2026-10-05, `main` = `2f9acc9`)
 
 - **Auth core, merged:** `src/lib/auth/password.ts` (argon2id), `session.ts` (§5's interface plus `memberships`, 30-day sessions that never slide, cookie `mp_session` always `Secure`), `schemas.ts` (shared Zod, error messages are `auth.errors.*` keys). Tests: `password`, `session`, `schemas` and `login/actions.test.ts` (rate limit).
 - **Policy and audit, merged (PR #18):** `policy.ts` (`can`, `assertCan`, `ForbiddenError`, 23 actions) and `audit.ts` (`writeAudit`). **No call sites yet.**
 - **Routes:** `src/app/[locale]/(auth)/{login,signup,logout}`, and the `(app)` group whose `layout.tsx` calls `requireUser()`. The dashboard, the category page, `uploadDocument`, `deleteDocument` (`src/app/[locale]/action.ts`) and `GET /api/documents/[id]` each call `requireUser()`/`getCurrentUser()` and scope by `ownerId`. A foreign document id gives 404. `src/components/Nav.tsx` shows the user and logout.
 - **i18n:** `next-intl`, `fr`/`en`/`es`, `localePrefix: "always"`, `src/middleware.ts` (locale routing only). `Locale` is exported from `src/i18n/config.ts`.
-- **Missing:** `ticket.ts`, OAuth, TOTP, the admin surface. `AUTH_STUB` was never built, and phase 3 removed it from `.env.example`. No `error.tsx` anywhere.
+- **In review:** `ticket.ts` + `POST /api/auth/ws-ticket` (task 2.5, PR #22). Nothing calls `verifyTicket()` yet: that is Alexandre's handshake.
+- **Missing:** OAuth, TOTP, the admin surface. `AUTH_STUB` was never built, and phase 3 removed it from `.env.example`. No `error.tsx` anywhere.
 - **Merged from teammates (all on 2026-10-05):**
   - Amir's `feat/channels` (PR #9) covers most of E9: channel create/edit/delete, public join, private channels with invites and join requests, kick, leave, plus answer create/edit/delete. It added three migrations (`ChannelInvite`, `ChannelJoinRequest`, `Channel.isPrivate`) and **rewrote `prisma/seed.ts`**. Every check in it is inline (`role === "MODERATOR"`, `createdBy !== user.id`), and a refusal is a silent `return`. E10 (votes) and E11 (hide/mute) are not started.
   - Alexandre's `src/contracts/events.ts` (PR #15) and a bare `ws` server in `src/realtime/` (PR #16): **no authentication on connect**, no topics, and `src/lib/realtime/publish.ts` is a stub. His `friends` branch is in flight.
@@ -94,7 +95,7 @@ Phase 4    admin surface (C14a)               NEXT      → MODULE 1 done
 |---|---|---|---|
 | `requireUser()` / `getCurrentUser()` | 1 | Amir, Adrien, Alexandre | ✅ merged, and already in use on `feat/channels` |
 | `can()` / `assertCan()` | 3 | Amir (his channel actions), Alexandre (WS topic authz), Adrien (assistant context) | ✅ PR #18. Still owed: the standup announcement (§C-17 and §C-18 change what a published interface means) and the phase 5 mapping table for Amir. |
-| WS ticket + `verifyTicket()` | 2 (task 2.5) | Alexandre (D2 handshake) | **Due now.** His realtime server (PR #16) is merged and accepts any connection. Agree the handshake with him and do it. |
+| WS ticket + `verifyTicket()` | 2 (task 2.5) | Alexandre (D2 handshake) | Built, PR #22 open. Still owed: tell him the contract (task 2.5 step 7), that `realtime` needs the same `WS_TICKET_SECRET` (`npm run realtime` does not load `.env`), and that nginx has no `/ws` block yet. |
 | Channel-role management (C14b) | 6 | Amir's moderators can only be the channel creator until it exists | unblocked (PR #9 merged) |
 
 ### What you need from them
@@ -158,6 +159,10 @@ Each one is a deliberate, reversible choice. Read them out at evaluation rather 
 
 18. **Only an admin manages channel roles.** This roadmap's task 6.1 let a moderator promote and demote inside their own channel. The vision (§3: a moderator is "assigned per channel by an Admin", and the Admin can "promote and demote moderators"), §5 (`channel:manageRoles` is tagged "admin surface") and C14's Done-when ("an ADMIN promotes…") all reserve it for admins. The spec wins: `channel:manageRoles` is in `ADMIN_ONLY`, so a moderator cannot appoint more moderators (sockpuppet moderation is the same farming the Helper rule prevents). Task 6.1 is updated. The meaning of a published interface changed: **announce it to the team.**
 
+*Added 2026-10-06, before phase 4:*
+
+19. **Deleting a channel's only moderator leaves the channel without one, and that is accepted.** Phase 4's `deleteUser` cascades the user's `ChannelMember` rows and sets `Channel.createdBy` to null; pages already render a missing author as `t("deletedUser")`. Until phase 5 the channel is frozen, because Amir's inline checks need a `MODERATOR` membership and an admin has none. From phase 5, tier 1 lets an admin moderate, edit and delete every channel; from phase 6, an admin appoints a successor with `setChannelRole`. Refusing the delete was rejected: the only fix would be promoting someone first, which does not exist until phase 6, so every seeded channel creator (each its channel's only moderator) would be undeletable, and a reachable refusal would need its own i18n error. Auto-promoting a remaining member was rejected too: it hands moderation to someone nobody chose, which §C-18 forbids.
+
 ---
 
 ## D. File structure
@@ -175,7 +180,7 @@ src/lib/auth/
 ├─ session.ts                             P1 ✅ §5's published interface + memberships
 ├─ schemas.ts                             P2 ✅ THE Zod module for signup + login; AuthErrorKey
 ├─ rate-limit.ts                          P10  login limiter moved out of login/actions.ts so 2FA shares it
-├─ ticket.ts                              P2.5 WS ticket mint/verify (C12, Alexandre), deferred
+├─ ticket.ts                              P2.5 WS ticket mint/verify (C12, Alexandre), PR #22
 ├─ policy.ts                              P3 ✅ Action union, can(), assertCan()
 ├─ totp.ts                                P10  secret, URI, verify, recovery codes, requireFreshTwoFactor
 └─ oauth/
@@ -198,7 +203,7 @@ src/app/[locale]/
 └─ (app)/verify-2fa/page.tsx              P11  step-up re-verification
 
 src/app/api/auth/                         not localised (the middleware matcher skips /api)
-├─ ws-ticket/route.ts                     P2.5
+├─ ws-ticket/route.ts                     P2.5 PR #22
 ├─ google/{start,callback}/route.ts       P8
 └─ github/{start,callback}/route.ts       P9
 
@@ -1263,7 +1268,13 @@ git commit -m "feat(auth): guard the app routes and attach uploads to the signed
 
 ### Task 2.5: WS ticket endpoint (C12) — do this the day Alexandre starts D2
 
-Not part of your four modules; it is C12, and it blocks Alexandre's WebSocket handshake (§9, R4). Two hours. Skip it until he asks, then do it immediately. **Status:** not started, and **due now**: Alexandre's realtime server (`src/realtime/`, PR #16) merged on 2026-10-05 and accepts any connection. Agree the handshake with him. Revised 2026-10-02: there is no fallback secret, and step 6 uncomments a line instead of appending one.
+Not part of your four modules; it is C12, and it blocks Alexandre's WebSocket handshake (§9, R4). Two hours. Revised 2026-10-02: there is no fallback secret, and step 6 uncomments a line instead of appending one.
+
+> **Built, in review (2026-10-05).** `60bbe07` on `feat/auth-ws-ticket`, pushed, **PR #22 open**. Steps 1–6 are done; the boxes stay unticked until it merges. **As shipped:**
+> - The route uses `Response.json`, like `GET /api/documents/[id]`, so it does not import `next/server`.
+> - Compose forwards `WS_TICKET_SECRET: "${WS_TICKET_SECRET:-}"`, so `docker compose up` does not warn when the key is missing from `.env`.
+> - Evidence: `npm test` 153/153 (ticket 5/5, three mutants each caught), build and tsc clean. On mespapiers.local: 401 without a cookie, 405 on GET, 200 with a ticket that verifies once and is `null` on replay.
+> - **Still to do (step 7):** tell Alexandre the contract below, that `realtime` needs the same `WS_TICKET_SECRET` (`npm run realtime` does not load `.env`; in compose, forward it to the `realtime` service when he adds one), and that nginx has no `/ws` block yet.
 
 **Design:** an HMAC-signed `userId.expiry.nonce` string. No Redis, no table, no `jose`. The `realtime` process verifies the HMAC and keeps used nonces in a `Set` — single-use, and a restart only invalidates tickets younger than 60 seconds.
 
@@ -1766,7 +1777,9 @@ git commit -m "chore(auth): drop the unused AUTH_STUB key and document the C5 ow
 ## Phase 4 — Admin surface (C14, first half) — **Module 1 complete**
 
 **Est:** 1d · **Entry gate:** phase 3 exit gate green.
-**Exit gate for phase 5:** a non-admin visiting `/fr/admin/users` sees a rendered 403, **not a blank page and not a redirect**, in all three locales; an admin can list, search, promote, demote and delete users; every mutation writes an `AuditLog` row; you cannot demote or delete yourself; only admins see the nav link.
+**Exit gate for phase 5:** a non-admin visiting `/fr/admin/users` sees a rendered 403, **not a blank page and not a redirect**, in all three locales; an admin can list, search, promote, demote and delete users; every mutation writes an `AuditLog` row; you cannot demote or delete yourself; only admins see the nav link; the admin page, the 403 card and the nav are usable with no horizontal scroll at 375, 768 and 1440 px.
+
+**Revised 2026-10-06: Rasiol owns the front end too.** Rasiol builds the UI of this phase (the 403 card, the user table, the search box, the buttons and the nav link) and fixes the design and responsive problems it hits, the nav at 375 px included. Alexandre and Amir only review their files (`Nav.tsx`, `prisma/seed.ts`).
 
 **Revised 2026-10-02:** paths are under `src/app/[locale]/(app)/`, strings are in `messages/*.json` under `admin`, `revalidatePath` uses the file pattern, and the seed change (task 4.1 step 2) can go in now that Amir's rewrite of `prisma/seed.ts` is merged (PR #9). **Expand into** `docs/plans/<date>-c14a-admin-surface.md` before starting.
 
@@ -1828,7 +1841,7 @@ The route group does not appear in the `LayoutProps` key: `(app)/admin/layout.ts
 
 - [ ] **Step 3: The admin link in the nav** — `src/components/Nav.tsx` ⚠ Alexandre's file
 
-Inside the signed-in branch, render `<Link href="/admin/users">` only when `can(ctx, "user:manage", {})`, with a new `nav.admin` key. This is the smallest visible "different view per role", and evaluators look for it. Check the nav at 375 px: the open 375-px overflow issue (worklog) gets one item worse, so tell Alexandre.
+Inside the signed-in branch, render `<Link href="/admin/users">` only when `can(ctx, "user:manage", {})`, with a new `nav.admin` key. This is the smallest visible "different view per role", and evaluators look for it. Check the nav at 375 px: the new link adds one more item to the open 375-px overflow issue (worklog). Fix it in this phase (revised 2026-10-06), for example by putting the link in `MobileMenu` below the breakpoint, and tell Alexandre what changed.
 
 - [ ] **Step 4: Verify both roles by hand**
 
@@ -1894,24 +1907,26 @@ export async function deleteUser(userId: string): Promise<void> {
 
 The English `throw` messages and `ForbiddenError` are not i18n keys, deliberately. They are reachable only through a forged request, because the page renders no buttons on your own row and the layout hides the page from non-admins. No `error.tsx` exists, so Next's default error page shows them. Do not add one for this.
 
+`deleteUser` does not check channel moderation: deleting a channel's only moderator is accepted (§C-19).
+
 - [ ] **Step 2: Write the page** — `src/app/[locale]/(app)/admin/users/page.tsx`
 
 A server component with `export const dynamic = "force-dynamic"`. Query with `prisma.user.findMany({ select: { id, email, displayName, globalRole, reputation, createdAt, _count: { select: { documents: true, sessions: true } } }, orderBy: { createdAt: "desc" } })` and render it with `Table`/`TableHead`/`TableBody`/`TableRow`/`TableHeaderCell`/`TableCell` from `src/components/ui/Table.tsx`, with a `Badge` for the role. Every label comes from `getTranslations("admin")`, and dates are formatted with next-intl's `format.dateTime` (time zone `Europe/Paris` is already configured). `searchParams` is a Promise in Next 16: `const { q } = await searchParams`. Each row carries two `<form action={…}>` buttons — promote/demote and delete — bound with `.bind(null, user.id)`. Render no buttons on your own row, since both actions throw for it. Add a `?q=` search filter on email and display name using `contains` with `mode: "insensitive"`.
 
 - [ ] **Step 3: Verify the whole surface**
 
-As the admin: search, promote the plain user to ADMIN, demote them back, then delete a throwaway user. Confirm in `npm run db:studio` that `AuditLog` has one row per action with the right `actorUserId`, `targetId` and `metadata`. Confirm the promoted user's `Session` rows disappeared. Confirm no buttons render on your own row. Confirm the Chrome console is clean.
+As the admin: search, promote the plain user to ADMIN, demote them back, then delete a throwaway user. Confirm in `npm run db:studio` that `AuditLog` has one row per action with the right `actorUserId`, `targetId` and `metadata`. Confirm the promoted user's `Session` rows disappeared. Confirm no buttons render on your own row. Confirm the Chrome console is clean. Resize to 375, 768 and 1440 px and check there is no horizontal scroll, that the table stays readable and that the buttons can be reached with Tab. Fix any design or responsive problem before committing.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add "src/app/[locale]/(app)/admin" messages src/components/Nav.tsx
+git add "src/app/[locale]/(app)/admin" messages src/components/Nav.tsx prisma/seed.ts docs/testing-auth.md
 git commit -m "feat(admin): add the user list with role management and audit writes"
 ```
 
 - [ ] **Step 5: Open the PR**
 
-Title: `feat(admin): user management and role administration`. In the description, state the two §C decisions this phase depends on (rendered 403; no global MODERATOR) and tag Alexandre for the `Nav.tsx` link. The seed change (task 4.1 step 2) goes in a follow-up PR after `feat/channels` merges, tagged for Amir.
+Title: `feat(admin): user management and role administration`. In the description, state the two §C decisions this phase depends on (rendered 403; no global MODERATOR), tag Alexandre to review the `Nav.tsx` link and the 375-px fix, and Amir to review `prisma/seed.ts` (task 4.1 step 2 goes in this PR, since `feat/channels` is merged). Alexandre's `friends` branch also appends a namespace to `messages/*.json`, so whichever merges second resolves a small conflict at the end of those files.
 
 ---
 
@@ -1947,7 +1962,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 |---|---|---|
 | 5.1 | Every row of the table applied | no action under `channels/` authorizes with `role === "MODERATOR"`, `role: "MODERATOR"` in a `where`, or `createdBy !==` (role reads for *display* are fine) |
 | 5.2 | Audit writes | every "yes" row writes one `AuditLog` row with `channelId` and the target |
-| 5.3 | Cross-channel check by hand | a moderator of channel A who replays a kick form with channel B's id is refused; a plain member's kick in A is refused; recorded in `docs/testing-auth.md` |
+| 5.3 | Cross-channel check by hand | a moderator of channel A who replays a kick form with channel B's id is refused; a plain member's kick in A is refused; an admin kicks a member in a channel that has **no moderator** (§C-19: delete its only moderator in the admin surface first) and succeeds; recorded in `docs/testing-auth.md` |
 
 **Review notes for Amir's code** (PR #9 merged; status checked 2026-10-05). Send them with the table:
 - ✅ **Fixed before merge:** `requestJoinChannel` now takes `user.id` from `requireUser()`, parses the channel id from `channelId` and awaits the `create`.
@@ -1964,7 +1979,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 
 | Task | Deliverable | Done when |
 |---|---|---|
-| 6.1 | `setChannelRole(channelId, userId, role)` action | `assertCan(ctx, "channel:manageRoles", { channelId })`: admins only, in any channel (§C-18). Refuses to demote a channel's **last** MODERATOR (Amir's `leaveChannel` already assumes one always exists). Writes `channel:setRole` to the audit log. **Invalidates no sessions:** `validateSessionToken()` re-reads memberships on every request, so the change applies on the target's next request |
+| 6.1 | `setChannelRole(channelId, userId, role)` action | `assertCan(ctx, "channel:manageRoles", { channelId })`: admins only, in any channel (§C-18). Refuses to demote a channel's **last** MODERATOR (Amir's `leaveChannel` refuses every moderator, so leaving never empties a channel). That guard covers demotion only: deleting a user can still leave a channel with **zero** moderators (§C-19), so promoting must work there, and neither the action nor the buttons may assume a moderator exists. Writes `channel:setRole` to the audit log. **Invalidates no sessions:** `validateSessionToken()` re-reads memberships on every request, so the change applies on the target's next request |
 | 6.2 | Promote/demote buttons | next to Amir's kick buttons on the channel's member list (`/channels/[id]/kick` today), shown only when `can(ctx, "channel:manageRoles", { channelId })`. Strings go in his `channels` namespace. Agree the placement with him |
 | 6.3 | **C14 Done-when, scoped** | an ADMIN promotes a member to MODERATOR in channel A; that user can now kick and accept requests in A, and is refused in B (forged form). Hide/mute join this check in phase 7, once E11 exists |
 | 6.4 | Helper badge | `reputation >= HELPER_THRESHOLD`, **derived at render**: no column, no "threshold job" (C14's wording), so it cannot drift. Agree the constant with Alexandre (D14 profile) and Amir (answer list); whoever renders it first owns it. Never in `policy.ts`. "Grants no action" is already phase 3's reputation test |
@@ -1987,7 +2002,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 ### Phase 8 — OAuth 2.0 Google (C7) · 1.5d
 
 **Expand into:** `docs/plans/<date>-c7-oauth-google.md`
-**Entry gate:** phase 4 green. Only phase 2 is a technical dependency, and it is merged. Phases 5–7 wait on Amir's merges, so this is the work for those gaps (§A). Drop back to phase 5 the day `feat/channels` lands.
+**Entry gate:** phase 4 green. Only phase 2 is a technical dependency, and it is merged. Phases 6.4 and 7 wait on Amir's E10/E11, so this is the work for those gaps (§A). `feat/channels` has landed, so do phase 5 before this one.
 **Schema:** no migration. `OAuthAccount` exists with `@@unique([provider, providerUserId])`.
 **Env:** uncomment `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env.example` in this PR, and forward them in the `web` service's `environment:` in `docker-compose.yml` (compose does not pass `.env` through; see task 2.5 step 6).
 **Routes:** `src/app/api/auth/…` is not localised (the middleware matcher skips `/api`). The callback creates the session with `createSession()` + `setSessionCookie()`, which works in a Route Handler, and then redirects to `/`. The middleware adds the locale prefix. Failures redirect to `/login?error=oauth`, and the page shows an `auth.errors` key, never the provider's raw message.
@@ -2039,7 +2054,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 ### Phase 11 — Step-up 2FA on destructive actions (C10) · 0.5d — **Module 4 complete**
 
 **Expand into:** `docs/plans/<date>-c10-step-up-2fa.md`
-**Entry gate:** phase 10 exit gate green. Channel delete is Amir's action, so applying it there needs `feat/channels` merged.
+**Entry gate:** phase 10 exit gate green. Channel delete is Amir's action (merged in PR #9), so apply it there with his review.
 **Schema:** none. Phase 10's `twoFactorVerifiedAt` covers it; expose it as `ctx.session.twoFactorVerifiedAt` (additive to `SessionContext`).
 
 | Task | Deliverable | Done when |
@@ -2080,9 +2095,9 @@ Every "To Do" from the four modules (`PROJECT_PLAN.md` §6), mapped to the phase
 | *(Domain C hygiene)* | C11 rate limit · CSRF · rotation on login | 2 ✅ |
 | | C11 rotation on privilege change | 4 (`invalidateAllSessions` on a global-role change) |
 | | C5 ownership guards on documents | 2 ✅ (owner-scoped queries), 3.3 ✅ (evidence, §C-14) |
-| *(teammate unblock)* | WS ticket endpoint (C12) | 2.5, due now |
+| *(teammate unblock)* | WS ticket endpoint (C12) | 2.5, PR #22 open |
 | *(Amir's module)* | Organization system: E9 channels, E10 threads/votes, E11 moderation | Amir; policy hooks in 5–7 |
 
 **Deliberately out of scope of this plan:** C13 (the OWASP / `npm audit` / `gitleaks` security review) is a week-5 task with no code dependency. Findings to carry into it: there is no `.dockerignore`, so the Dockerfile's `COPY . .` bakes `.env` and its secrets into the `web` image.
 
-**Total:** phases 0–3 are done (≈ 5.5d). Remaining: 2.5 (0.25d) + 4 (1d) + 5 (1d) + 6 (1d) + 7 (0.5d) + 8 (1.5d) + 9 (1d) + 10 (1.5d) + 11 (0.5d) ≈ **8.25d**, so ≈ **14d** in all against §7's 15-day Domain C budget. The original plan was 15.5d plus a 4-day E9–E11 overhang; that overhang is now Amir's, as §7 always intended.
+**Total:** phases 0–3 and task 2.5 are done (≈ 5.75d; 2.5 awaits review). Remaining: 4 (1d) + 5 (1d) + 6 (1d) + 7 (0.5d) + 8 (1.5d) + 9 (1d) + 10 (1.5d) + 11 (0.5d) ≈ **8d**, so ≈ **14d** in all against §7's 15-day Domain C budget. The original plan was 15.5d plus a 4-day E9–E11 overhang; that overhang is now Amir's, as §7 always intended.

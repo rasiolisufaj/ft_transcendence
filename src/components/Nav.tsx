@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { can } from "@/lib/auth/policy";
 import { getCurrentUser } from "@/lib/auth/session";
 import { logout } from "@/app/[locale]/(auth)/logout/actions";
 import { LocaleSwitcher } from "./LocaleSwitcher";
@@ -14,12 +15,18 @@ export async function Nav() {
   const t = await getTranslations("nav");
   const ctx = await getCurrentUser();
 
-  // Rendered twice: in the bar from 768 px (md), in the ☰ panel below.
+  // Rendered twice: in the bar from 1024 px (lg), in the ☰ panel below. At 768 px
+  // the admin link and a long display name no longer fit on one row.
   const links = ctx ? (
     <>
       <Link href="/" className={link}>
         {t("dashboard")}
       </Link>
+      {can(ctx, "user:manage", {}) && (
+        <Link href="/admin/users" className={link}>
+          {t("admin")}
+        </Link>
+      )}
       <Link href="/documents/new" className={primary}>
         {t("addDocument")}
       </Link>
@@ -50,7 +57,7 @@ export async function Nav() {
           {t("brand")}
         </Link>
         <div className="flex items-center gap-6 text-sm">
-          <div className="hidden items-center gap-6 md:flex">{links}</div>
+          <div className="hidden items-center gap-6 lg:flex">{links}</div>
           <LocaleSwitcher />
           <MobileMenu>{links}</MobileMenu>
         </div>
