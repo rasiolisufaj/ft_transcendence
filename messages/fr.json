@@ -2,12 +2,14 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Tableau de bord",
+    "friends": "Amis",
     "addDocument": "Ajouter un document",
     "login": "Se connecter",
     "signup": "Créer un compte",
     "logout": "Se déconnecter",
     "openMenu": "Ouvrir le menu",
-    "closeMenu": "Fermer le menu"
+    "closeMenu": "Fermer le menu",
+    "account": "Compte"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -227,6 +229,45 @@
       "pending": "Création du compte…",
       "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter"
+    }
+  },
+  "friends": {
+    "title": "Mes amis",
+    "subtitle": "Ajoutez des personnes de la communauté avec leur adresse e-mail.",
+    "add": {
+      "label": "Adresse e-mail",
+      "submit": "Envoyer la demande",
+      "pending": "Envoi…",
+      "sent": "Demande envoyée."
+    },
+    "sections": {
+      "incoming": "Demandes reçues"
+    },
+    "tabs": {
+      "friends": "Amis",
+      "outgoing": "Envoyées",
+      "blocked": "Bloqués",
+      "label": "Listes"
+    },
+    "empty": {
+      "friends": "Vous n'avez pas encore d'amis.",
+      "outgoing": "Aucune demande en attente.",
+      "blocked": "Vous n'avez bloqué personne."
+    },
+    "actions": {
+      "accept": "Accepter",
+      "decline": "Refuser",
+      "cancel": "Annuler",
+      "remove": "Retirer",
+      "block": "Bloquer",
+      "unblock": "Débloquer"
+    },
+    "errors": {
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "notFound": "Aucun compte n'utilise cette adresse e-mail.",
+      "self": "Vous ne pouvez pas vous ajouter vous-même.",
+      "blocked": "Impossible d'envoyer une demande à cette personne.",
+      "notPending": "Cette demande n'existe plus."
     }
   }
 }
