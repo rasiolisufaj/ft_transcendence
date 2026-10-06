@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { logout } from "@/app/[locale]/(auth)/logout/actions";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { MobileMenu } from "./MobileMenu";
+import { UserMenu } from "./UserMenu";
 
 const link = "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100";
 const primary =
@@ -14,8 +15,8 @@ export async function Nav() {
   const t = await getTranslations("nav");
   const ctx = await getCurrentUser();
 
-  // Rendered twice: in the bar from 768 px (md), in the ☰ panel below.
-  const links = ctx ? (
+  // The ☰ panel (below 768 px) lists everything; the bar groups the account links in UserMenu.
+  const mobileLinks = ctx ? (
     <>
       <Link href="/" className={link}>
         {t("dashboard")}
@@ -46,6 +47,17 @@ export async function Nav() {
     </>
   );
 
+  const barLinks = ctx ? (
+    <>
+      <Link href="/documents/new" className={primary}>
+        {t("addDocument")}
+      </Link>
+      <UserMenu name={ctx.user.displayName} />
+    </>
+  ) : (
+    mobileLinks
+  );
+
   return (
     <header className="relative border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
@@ -53,9 +65,9 @@ export async function Nav() {
           {t("brand")}
         </Link>
         <div className="flex items-center gap-6 text-sm">
-          <div className="hidden items-center gap-6 md:flex">{links}</div>
+          <div className="hidden items-center gap-6 md:flex">{barLinks}</div>
           <LocaleSwitcher />
-          <MobileMenu>{links}</MobileMenu>
+          <MobileMenu>{mobileLinks}</MobileMenu>
         </div>
       </nav>
     </header>

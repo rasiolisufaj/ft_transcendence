@@ -8,7 +8,8 @@
     "signup": "Crear cuenta",
     "logout": "Cerrar sesión",
     "openMenu": "Abrir el menú",
-    "closeMenu": "Cerrar el menú"
+    "closeMenu": "Cerrar el menú",
+    "account": "Cuenta"
   },
   "localeSwitcher": {
     "label": "Idioma",

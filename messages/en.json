@@ -8,7 +8,8 @@
     "signup": "Sign up",
     "logout": "Sign out",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "account": "Account"
   },
   "localeSwitcher": {
     "label": "Language",
