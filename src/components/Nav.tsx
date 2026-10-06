@@ -20,6 +20,9 @@ export async function Nav() {
       <Link href="/" className={link}>
         {t("dashboard")}
       </Link>
+      <Link href="/friends" className={link}>
+        {t("friends")}
+      </Link>
       <Link href="/documents/new" className={primary}>
         {t("addDocument")}
       </Link>

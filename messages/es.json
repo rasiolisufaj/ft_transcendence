@@ -2,6 +2,7 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Panel",
+    "friends": "Amigos",
     "addDocument": "Añadir un documento",
     "login": "Iniciar sesión",
     "signup": "Crear cuenta",
