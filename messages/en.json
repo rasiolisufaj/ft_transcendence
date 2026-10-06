@@ -61,7 +61,9 @@
     },
     "status": {
       "pending": "Awaiting classification",
-      "needsReview": "Needs review"
+      "needsReview": "Needs review",
+      "confirmed": "Confirmed",
+      "failed": "Failed"
     },
     "delete": "Delete {fileName}",
     "view": "Open {fileName}"
@@ -268,6 +270,42 @@
       "self": "You can't add yourself.",
       "blocked": "You can't send a request to this person.",
       "notPending": "This request no longer exists."
+    }
+  },
+  "documentDetail": {
+    "category": "Category",
+    "size": "Size",
+    "type": "Type",
+    "deadline": "Deadline type",
+    "expiry": "Expiry date",
+    "extractedFields": "Extracted fields",
+    "fields": {
+      "fullName": "Full name",
+      "documentNumber": "Document number",
+      "birthDate": "Date of birth",
+      "expiryDate": "Expiry date",
+      "provider": "Insurer",
+      "policyNumber": "Policy number",
+      "vehiclePlate": "Vehicle plate"
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "failed": "Failed"
+    }
+  },
+  "assistant": {
+    "title": "AI Assistant",
+    "subtitle": "Ask questions about this document: renewal, procedures, deadlines…",
+    "empty": "Ask a question about your document to get started.",
+    "placeholder": "When do I need to renew this document?",
+    "send": "Send",
+    "stop": "Stop",
+    "disclaimer": "The assistant can make mistakes. Check important information on service-public.fr.",
+    "errors": {
+      "noKey": "The AI service is not configured. Contact the administrator.",
+      "rateLimited": "You've reached the message limit. Try again in an hour.",
+      "upstream": "Something went wrong. Please try again shortly.",
+      "overloaded": "The service is overloaded. Please try again shortly."
     }
   }
 }

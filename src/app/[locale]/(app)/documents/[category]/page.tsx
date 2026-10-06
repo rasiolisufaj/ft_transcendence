@@ -79,7 +79,9 @@ export default async function CategoryPage({ params }: PageProps<"/[locale]/docu
                 {doc.fileType.includes("pdf") ? t("fileKind.pdf") : t("fileKind.image")}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{doc.fileName}</p>
+                <Link href={`/documents/view/${doc.id}`} className="truncate font-medium hover:underline">
+                  {doc.fileName}
+                </Link>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   {format.number(size.value, { maximumFractionDigits: 1 })}{" "}
                   {t(`size.${size.unit}`)} ·{" "}
