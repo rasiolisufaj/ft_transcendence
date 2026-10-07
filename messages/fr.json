@@ -2,6 +2,7 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Tableau de bord",
+    "admin": "Administration",
     "friends": "Amis",
     "addDocument": "Ajouter un document",
     "login": "Se connecter",
@@ -230,6 +231,32 @@
       "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter"
     }
+  },
+  "admin": {
+    "forbiddenTitle": "Accès refusé",
+    "forbiddenBody": "Cette page est réservée aux administrateurs.",
+    "title": "Utilisateurs",
+    "searchLabel": "Rechercher par nom ou e-mail",
+    "search": "Rechercher",
+    "columns": {
+      "user": "Utilisateur",
+      "role": "Rôle",
+      "documents": "Documents",
+      "sessions": "Sessions",
+      "reputation": "Réputation",
+      "createdAt": "Inscription",
+      "actions": "Actions"
+    },
+    "roles": {
+      "USER": "Utilisateur",
+      "ADMIN": "Administrateur"
+    },
+    "promote": "Rendre admin",
+    "demote": "Retirer admin",
+    "delete": "Supprimer",
+    "confirmDelete": "Confirmer",
+    "you": "Vous",
+    "empty": "Aucun utilisateur ne correspond à « {q} »."
   },
   "friends": {
     "title": "Mes amis",

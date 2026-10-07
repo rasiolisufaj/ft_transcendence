@@ -12,7 +12,7 @@ const idle = "text-zinc-600 dark:text-zinc-400";
 const current = "font-semibold text-zinc-900 dark:text-zinc-100";
 
 // The account menu of the desktop bar, built like LocaleSwitcher (disclosure, not role="menu").
-export function UserMenu({ name }: { name: string }) {
+export function UserMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -70,6 +70,7 @@ export function UserMenu({ name }: { name: string }) {
         {[
           { href: "/", label: t("dashboard") },
           { href: "/friends", label: t("friends") },
+          ...(isAdmin ? [{ href: "/admin/users", label: t("admin") }] : []),
         ].map((page) => {
           const active = pathname === page.href;
           return (
