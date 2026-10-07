@@ -2,6 +2,7 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Dashboard",
+    "admin": "Admin",
     "friends": "Friends",
     "addDocument": "Add a document",
     "login": "Sign in",
@@ -230,6 +231,32 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in"
     }
+  },
+  "admin": {
+    "forbiddenTitle": "Access denied",
+    "forbiddenBody": "This page is for administrators only.",
+    "title": "Users",
+    "searchLabel": "Search by name or email",
+    "search": "Search",
+    "columns": {
+      "user": "User",
+      "role": "Role",
+      "documents": "Documents",
+      "sessions": "Sessions",
+      "reputation": "Reputation",
+      "createdAt": "Joined",
+      "actions": "Actions"
+    },
+    "roles": {
+      "USER": "User",
+      "ADMIN": "Administrator"
+    },
+    "promote": "Make admin",
+    "demote": "Remove admin",
+    "delete": "Delete",
+    "confirmDelete": "Confirm",
+    "you": "You",
+    "empty": "No user matches “{q}”."
   },
   "friends": {
     "title": "My friends",

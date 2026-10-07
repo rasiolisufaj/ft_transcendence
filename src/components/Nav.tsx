@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { can } from "@/lib/auth/policy";
 import { getCurrentUser } from "@/lib/auth/session";
 import { logout } from "@/app/[locale]/(auth)/logout/actions";
 import { LocaleSwitcher } from "./LocaleSwitcher";
@@ -15,6 +16,8 @@ export async function Nav() {
   const t = await getTranslations("nav");
   const ctx = await getCurrentUser();
 
+  const isAdmin = ctx !== null && can(ctx, "user:manage", {});
+
   // The ☰ panel (below 768 px) lists everything; the bar groups the account links in UserMenu.
   const mobileLinks = ctx ? (
     <>
@@ -24,6 +27,11 @@ export async function Nav() {
       <Link href="/friends" className={link}>
         {t("friends")}
       </Link>
+      {isAdmin && (
+        <Link href="/admin/users" className={link}>
+          {t("admin")}
+        </Link>
+      )}
       <Link href="/documents/new" className={primary}>
         {t("addDocument")}
       </Link>
@@ -52,7 +60,7 @@ export async function Nav() {
       <Link href="/documents/new" className={primary}>
         {t("addDocument")}
       </Link>
-      <UserMenu name={ctx.user.displayName} />
+      <UserMenu name={ctx.user.displayName} isAdmin={isAdmin} />
     </>
   ) : (
     mobileLinks
