@@ -81,6 +81,34 @@ describe("admin user actions", () => {
     ]);
   });
 
+  it("refuses a role that is not USER or ADMIN, and changes nothing", async () => {
+    await createSession(user.id);
+    await signInAs(admin.id);
+
+    await expect(setGlobalRole(user.id, undefined as never)).rejects.toThrow();
+    expect(await prisma.session.count({ where: { userId: user.id } })).toBe(1);
+    expect(await auditRows(user.id)).toEqual([]);
+  });
+
+  it("does nothing when the user already has that role (a double click)", async () => {
+    await createSession(user.id);
+    await signInAs(admin.id);
+
+    await setGlobalRole(user.id, "USER");
+
+    expect(await prisma.session.count({ where: { userId: user.id } })).toBe(1);
+    expect(await auditRows(user.id)).toEqual([]);
+  });
+
+  it("does nothing when the user is already gone (a double click, another admin)", async () => {
+    await signInAs(admin.id);
+    await deleteUser(user.id);
+
+    await expect(deleteUser(user.id)).resolves.toBeUndefined();
+    await expect(setGlobalRole(user.id, "ADMIN")).resolves.toBeUndefined();
+    expect(await auditRows(user.id)).toHaveLength(1);
+  });
+
   it("deletes a user and audits it", async () => {
     await signInAs(admin.id);
 
