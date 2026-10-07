@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { logout } from "@/app/[locale]/(auth)/logout/actions";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { MobileMenu } from "./MobileMenu";
+import { UserMenu } from "./UserMenu";
 
 const link = "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100";
 const primary =
@@ -15,14 +16,18 @@ export async function Nav() {
   const t = await getTranslations("nav");
   const ctx = await getCurrentUser();
 
-  // Rendered twice: in the bar from 1024 px (lg), in the ☰ panel below. At 768 px
-  // the admin link and a long display name no longer fit on one row.
-  const links = ctx ? (
+  const isAdmin = ctx !== null && can(ctx, "user:manage", {});
+
+  // The ☰ panel (below 768 px) lists everything; the bar groups the account links in UserMenu.
+  const mobileLinks = ctx ? (
     <>
       <Link href="/" className={link}>
         {t("dashboard")}
       </Link>
-      {can(ctx, "user:manage", {}) && (
+      <Link href="/friends" className={link}>
+        {t("friends")}
+      </Link>
+      {isAdmin && (
         <Link href="/admin/users" className={link}>
           {t("admin")}
         </Link>
@@ -50,6 +55,17 @@ export async function Nav() {
     </>
   );
 
+  const barLinks = ctx ? (
+    <>
+      <Link href="/documents/new" className={primary}>
+        {t("addDocument")}
+      </Link>
+      <UserMenu name={ctx.user.displayName} isAdmin={isAdmin} />
+    </>
+  ) : (
+    mobileLinks
+  );
+
   return (
     <header className="relative border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
@@ -57,9 +73,9 @@ export async function Nav() {
           {t("brand")}
         </Link>
         <div className="flex items-center gap-6 text-sm">
-          <div className="hidden items-center gap-6 lg:flex">{links}</div>
+          <div className="hidden items-center gap-6 md:flex">{barLinks}</div>
           <LocaleSwitcher />
-          <MobileMenu>{links}</MobileMenu>
+          <MobileMenu>{mobileLinks}</MobileMenu>
         </div>
       </nav>
     </header>

@@ -1778,7 +1778,7 @@ git commit -m "chore(auth): drop the unused AUTH_STUB key and document the C5 ow
 
 > **As built (2026-10-07, not merged yet).** Where the code differs from the steps below, each with its ruling in the SDD ledger:
 > - **4.1:** all ten seeded users get the dev password `motdepasse123`, not only two; `rasiol@gmail.com` is the ADMIN. Step 1 (manual) was skipped.
-> - **4.2:** the 403 card is `mx-auto mt-12 max-w-xl`, like the document error pages. The nav switches to ☰ below **1024 px (`lg`)**, not 768: at 768 the admin's nav wrapped to two rows (`Nav.tsx`, `MobileMenu.tsx`).
+> - **4.2:** the 403 card is `mx-auto mt-12 max-w-xl`, like the document error pages. The nav switches to ☰ below **1024 px (`lg`)**, not 768: at 768 the admin's nav wrapped to two rows (`Nav.tsx`, `MobileMenu.tsx`). *Reverted to `md` when `main` was merged (2026-10-07): PR #23 moved the account links into a `UserMenu` dropdown, and the admin link went in there.*
 > - **4.3, security:** `page.tsx` checks `can(ctx, "user:manage")` itself and returns `null`. The layout's 403 card alone let the page run and ship every user's email in the RSC payload (shown with Playwright, then fixed; `CLAUDE.md` gotcha).
 > - **4.3, actions:** the delete is audited **after** it succeeds. A double click, a stale page or another admin acting first (Prisma P2025) changes nothing and throws nothing; setting a role the user already has is a no-op; a `role` other than USER/ADMIN is refused (final review, 2026-10-07). `actions.test.ts` has 7 DB tests.
 > - **4.3, UI:** the delete takes two steps (a native `<details>`: *Supprimer* → *Confirmer*), and the table hides columns below 640/768/1024 px instead of scrolling.
