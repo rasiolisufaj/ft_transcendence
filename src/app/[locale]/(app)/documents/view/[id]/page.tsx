@@ -48,7 +48,7 @@ export default async function DocumentPage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+      <div className="flex items-center gap-2 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
         <Link href="/" className="hover:text-zinc-900 hover:underline dark:hover:text-zinc-100">
           {t("nav.dashboard")}
         </Link>
@@ -60,17 +60,20 @@ export default async function DocumentPage({
           {t(`categories.${slug}.label`)}
         </Link>
         <span>/</span>
-        <span className="text-zinc-900 dark:text-zinc-100">{doc.fileName}</span>
+        <span className="min-w-0 truncate text-zinc-900 dark:text-zinc-100">{doc.fileName}</span>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      {/* grid-cols-1, not the implicit auto column: a long file name would widen the track. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left: document info + preview */}
         <div className="space-y-4">
           <Card>
-            <div className="space-y-3 p-4">
-              <div className="flex items-start justify-between gap-4">
-                <h1 className="text-lg font-semibold">{doc.fileName}</h1>
-                <Badge tone={statusTone[doc.extractionStatus]}>
+            <div className="space-y-3 sm:p-4">
+              <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:gap-4">
+                <h1 title={doc.fileName} className="min-w-0 max-w-full truncate text-lg font-semibold">
+                  {doc.fileName}
+                </h1>
+                <Badge tone={statusTone[doc.extractionStatus]} className="shrink-0 text-center">
                   {doc.extractionStatus === "CONFIRMED"
                     ? t("documentCategory.status.confirmed")
                     : doc.extractionStatus === "FAILED"
@@ -147,7 +150,7 @@ export default async function DocumentPage({
 
           {/* Document preview */}
           <Card>
-            <div className="p-4">
+            <div className="sm:p-4">
               {doc.fileType === "application/pdf" ? (
                 <iframe
                   src={`/api/documents/${doc.id}`}
