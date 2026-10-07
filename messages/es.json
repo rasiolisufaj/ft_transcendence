@@ -232,6 +232,28 @@
   },
   "admin": {
     "forbiddenTitle": "Acceso denegado",
-    "forbiddenBody": "Esta página está reservada a los administradores."
+    "forbiddenBody": "Esta página está reservada a los administradores.",
+    "title": "Usuarios",
+    "searchLabel": "Buscar por nombre o correo",
+    "search": "Buscar",
+    "columns": {
+      "user": "Usuario",
+      "role": "Rol",
+      "documents": "Documentos",
+      "sessions": "Sesiones",
+      "reputation": "Reputación",
+      "createdAt": "Registro",
+      "actions": "Acciones"
+    },
+    "roles": {
+      "USER": "Usuario",
+      "ADMIN": "Administrador"
+    },
+    "promote": "Hacer admin",
+    "demote": "Quitar admin",
+    "delete": "Eliminar",
+    "confirmDelete": "Confirmar",
+    "you": "Tú",
+    "empty": "Ningún usuario coincide con «{q}»."
   }
 }
