@@ -5,16 +5,16 @@ import { useTranslations } from "next-intl";
 import { logout } from "@/app/[locale]/(auth)/logout/actions";
 import { Link, usePathname } from "@/i18n/navigation";
 
-// Same rows as LocaleSwitcher: a ✓ column, then the label.
+// Same rows as LocaleSwitcher: a ✓ column, then the label. 44 px tall below md, where
+// only the ☰ panel shows them (touch); 36 px in the desktop dropdown.
 const item =
-  "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-zinc-100 focus-visible:bg-zinc-100 focus-visible:outline-none dark:hover:bg-zinc-800 dark:focus-visible:bg-zinc-800";
+  "flex w-full items-center gap-2 px-3 py-3 md:py-2 text-left text-sm hover:bg-zinc-100 focus-visible:bg-zinc-100 focus-visible:outline-none dark:hover:bg-zinc-800 dark:focus-visible:bg-zinc-800";
 const idle = "text-zinc-600 dark:text-zinc-400";
 const current = "font-semibold text-zinc-900 dark:text-zinc-100";
 
 // The account menu of the desktop bar, built like LocaleSwitcher (disclosure, not role="menu").
 export function UserMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) {
   const t = useTranslations("nav");
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -67,39 +67,51 @@ export function UserMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) 
         hidden={!open}
         className="absolute end-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
       >
-        {[
-          { href: "/", label: t("dashboard") },
-          { href: "/friends", label: t("friends") },
-          ...(isAdmin ? [{ href: "/admin/users", label: t("admin") }] : []),
-        ].map((page) => {
-          const active = pathname === page.href;
-          return (
-            <li key={page.href}>
-              <Link
-                href={page.href}
-                aria-current={active ? "page" : undefined}
-                onClick={() => setOpen(false)}
-                className={`${item} ${active ? current : idle}`}
-              >
-                <span aria-hidden="true" className="w-4 text-center">
-                  {active ? "✓" : ""}
-                </span>
-                {page.label}
-              </Link>
-            </li>
-          );
-        })}
-        {/* The separator is a border, not an empty <li>: a list may only hold list items. */}
-        <li className="mt-1 border-t border-zinc-200 pt-1 dark:border-zinc-800">
-          <form action={logout}>
-            <button type="submit" className={`${item} ${idle}`}>
-              <span aria-hidden="true" className="w-4" />
-              {t("logout")}
-            </button>
-          </form>
-        </li>
+        <AccountLinks isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
       </ul>
     </div>
+  );
+}
+
+// The account rows (<li>s), shared by this dropdown and the ☰ panel.
+export function AccountLinks({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
+  const t = useTranslations("nav");
+  const pathname = usePathname();
+
+  return (
+    <>
+      {[
+        { href: "/", label: t("dashboard") },
+        { href: "/friends", label: t("friends") },
+        ...(isAdmin ? [{ href: "/admin/users", label: t("admin") }] : []),
+      ].map((page) => {
+        const active = pathname === page.href;
+        return (
+          <li key={page.href}>
+            <Link
+              href={page.href}
+              aria-current={active ? "page" : undefined}
+              onClick={onNavigate}
+              className={`${item} ${active ? current : idle}`}
+            >
+              <span aria-hidden="true" className="w-4 text-center">
+                {active ? "✓" : ""}
+              </span>
+              {page.label}
+            </Link>
+          </li>
+        );
+      })}
+      {/* The separator is a border, not an empty <li>: a list may only hold list items. */}
+      <li className="mt-1 border-t border-zinc-200 pt-1 dark:border-zinc-800">
+        <form action={logout}>
+          <button type="submit" className={`${item} ${idle}`}>
+            <span aria-hidden="true" className="w-4" />
+            {t("logout")}
+          </button>
+        </form>
+      </li>
+    </>
   );
 }
 
