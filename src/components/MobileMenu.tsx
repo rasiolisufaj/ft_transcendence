@@ -6,12 +6,17 @@ import { useTranslations } from "next-intl";
 export function MobileMenu({ children }: { children: ReactNode }) {
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
 
   useEffect(() => {
     if (!open) return;
 
+    // A tap outside (or focus leaving, below) closes the panel, so it never covers the LocaleSwitcher's list.
+    function onPointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setOpen(false);
@@ -19,12 +24,22 @@ export function MobileMenu({ children }: { children: ReactNode }) {
       }
     }
 
+    document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [open]);
 
   return (
-    <div className="md:hidden">
+    <div
+      ref={rootRef}
+      className="md:hidden"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
+    >
       <button
         ref={buttonRef}
         type="button"
@@ -43,9 +58,9 @@ export function MobileMenu({ children }: { children: ReactNode }) {
         onClick={(event) => {
           if ((event.target as HTMLElement).closest("a, button")) setOpen(false);
         }}
-        className="absolute inset-x-0 top-full z-20 border-b border-zinc-200 bg-white px-6 py-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+        className="absolute inset-x-0 top-full z-20 border-b border-zinc-200 bg-white px-3 py-2 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
       >
-        <div className="flex flex-col items-start gap-4 text-sm">{children}</div>
+        <div className="flex flex-col text-sm">{children}</div>
       </div>
     </div>
   );
