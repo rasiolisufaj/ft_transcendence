@@ -75,7 +75,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/[loca
             <TableHead>
               <TableRow>
                 <TableHeaderCell>{t("columns.user")}</TableHeaderCell>
-                <TableHeaderCell className="hidden sm:table-cell">{t("columns.role")}</TableHeaderCell>
+                <TableHeaderCell className="hidden min-[480px]:table-cell">{t("columns.role")}</TableHeaderCell>
                 <TableHeaderCell className="hidden md:table-cell">{t("columns.documents")}</TableHeaderCell>
                 <TableHeaderCell className="hidden md:table-cell">{t("columns.sessions")}</TableHeaderCell>
                 <TableHeaderCell className="hidden lg:table-cell">{t("columns.reputation")}</TableHeaderCell>
@@ -92,14 +92,20 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/[loca
                 );
                 return (
                   <TableRow key={user.id}>
-                    <TableCell>
+                    <TableCell className="space-y-1">
                       <p id={`user-${user.id}`} className="font-medium">
                         {user.displayName}
                       </p>
-                      <p className="break-all text-xs text-zinc-500 dark:text-zinc-400">{user.email}</p>
-                      <div className="mt-1 sm:hidden">{role}</div>
+                      {/* <wbr> lets the address break after the @ rather than mid-word, and,
+                          unlike U+200B, is not copied with it. Below sm, anywhere is a last resort. */}
+                      <p className="text-xs text-zinc-500 wrap-anywhere sm:wrap-normal dark:text-zinc-400">
+                        {user.email.slice(0, user.email.indexOf("@") + 1)}
+                        <wbr />
+                        {user.email.slice(user.email.indexOf("@") + 1)}
+                      </p>
+                      <div className="min-[480px]:hidden">{role}</div>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell">{role}</TableCell>
+                    <TableCell className="hidden min-[480px]:table-cell">{role}</TableCell>
                     <TableCell className="hidden md:table-cell">{user._count.documents}</TableCell>
                     <TableCell className="hidden md:table-cell">{user._count.sessions}</TableCell>
                     <TableCell className="hidden lg:table-cell">{user.reputation}</TableCell>
@@ -123,7 +129,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/[loca
                               type="submit"
                               variant="secondary"
                               aria-describedby={`user-${user.id}`}
-                              className="whitespace-nowrap"
+                              className="whitespace-nowrap max-sm:px-3 max-sm:py-1.5 max-sm:text-xs"
                             >
                               {user.globalRole === "ADMIN" ? t("demote") : t("promote")}
                             </Button>
@@ -132,7 +138,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/[loca
                           <details className="text-right">
                             <summary
                               aria-describedby={`user-${user.id}`}
-                              className="cursor-pointer list-none whitespace-nowrap rounded-lg px-2 py-2 text-sm font-medium text-red-600 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 dark:text-red-400 [&::-webkit-details-marker]:hidden"
+                              className="cursor-pointer list-none whitespace-nowrap rounded-lg px-2 py-2 text-sm font-medium text-red-600 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 max-sm:px-0 max-sm:py-1 max-sm:text-xs dark:text-red-400 [&::-webkit-details-marker]:hidden"
                             >
                               {t("delete")}
                             </summary>
@@ -140,7 +146,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/[loca
                               <button
                                 type="submit"
                                 aria-describedby={`user-${user.id}`}
-                                className="whitespace-nowrap rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                                className="whitespace-nowrap rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 max-sm:px-2.5 max-sm:py-1.5 max-sm:text-xs"
                               >
                                 {t("confirmDelete")}
                               </button>

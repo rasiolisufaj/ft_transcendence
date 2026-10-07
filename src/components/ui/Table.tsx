@@ -31,10 +31,10 @@ export function TableRow({ className = "", ...props }: TableRowProps) {
 
 type TableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement>;
 export function TableHeaderCell({ className = "", ...props }: TableHeaderCellProps) {
-  return <th className={`px-4 py-3 font-medium ${className}`} {...props} />;
+  return <th className={`px-3 py-3 font-medium sm:px-4 ${className}`} {...props} />;
 }
 
 type TableCellProps = TdHTMLAttributes<HTMLTableCellElement>;
 export function TableCell({ className = "", ...props }: TableCellProps) {
-  return <td className={`px-4 py-3 ${className}`} {...props} />;
+  return <td className={`px-3 py-3 sm:px-4 ${className}`} {...props} />;
 }
