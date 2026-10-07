@@ -6,7 +6,7 @@
 
 **Architecture:** Database-backed opaque sessions (random token in an httpOnly cookie, only its SHA-256 stored), one synchronous default-deny `can()` policy function resolving three tiers (global admin → channel moderator → resource owner), and Server Actions that each call `requireUser()` then `assertCan()`. No auth in middleware, no auth library, no service layer — plain functions in `src/lib/auth/`.
 
-> **Status (revised 2026-10-05, evening):** phases **0, 1, 2.1–2.4 and 3 are done and merged** (PRs #10, #13 and #18, `main` = `2f9acc9`). **Task 2.5 is built and in review**: `60bbe07` on `feat/auth-ws-ticket`, PR #22 open; its boxes get ticked when it merges. **Next: phase 4**, then phase 5 (unblocked since `feat/channels` merged in PR #9). Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 4–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` on 2026-10-05. `handoff/WORKLOG.md` remains the day-to-day progress log.
+> **Status (revised 2026-10-05, evening):** phases **0, 1, 2.1–2.4 and 3 are done and merged** (PRs #10, #13 and #18, `main` = `2f9acc9`). **Task 2.5 is built and in review**: `60bbe07` on `feat/auth-ws-ticket`, PR #22 open; its boxes get ticked when it merges. **Phase 4 is built and reviewed** on `feat/admin-surface` (`58508e1`, `c920519` + the final-review fixes), no PR yet; its boxes get ticked when it merges. Next: phase 5 (unblocked since `feat/channels` merged in PR #9). Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 4–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` on 2026-10-05. `handoff/WORKLOG.md` remains the day-to-day progress log.
 
 **Tech Stack:** Next.js 16 App Router · React 19 · TypeScript strict · Prisma 6 (generator `prisma-client` → `src/generated/prisma/`) · PostgreSQL 17 · Vitest 5 · Zod 4 · `@node-rs/argon2` · `otpauth` · `node:crypto`
 
@@ -1775,6 +1775,14 @@ git commit -m "chore(auth): drop the unused AUTH_STUB key and document the C5 ow
 ---
 
 ## Phase 4 — Admin surface (C14, first half) — **Module 1 complete**
+
+> **As built (2026-10-07, not merged yet).** Where the code differs from the steps below, each with its ruling in the SDD ledger:
+> - **4.1:** all ten seeded users get the dev password `motdepasse123`, not only two; `rasiol@gmail.com` is the ADMIN. Step 1 (manual) was skipped.
+> - **4.2:** the 403 card is `mx-auto mt-12 max-w-xl`, like the document error pages. The nav switches to ☰ below **1024 px (`lg`)**, not 768: at 768 the admin's nav wrapped to two rows (`Nav.tsx`, `MobileMenu.tsx`).
+> - **4.3, security:** `page.tsx` checks `can(ctx, "user:manage")` itself and returns `null`. The layout's 403 card alone let the page run and ship every user's email in the RSC payload (shown with Playwright, then fixed; `CLAUDE.md` gotcha).
+> - **4.3, actions:** the delete is audited **after** it succeeds. A double click, a stale page or another admin acting first (Prisma P2025) changes nothing and throws nothing; setting a role the user already has is a no-op; a `role` other than USER/ADMIN is refused (final review, 2026-10-07). `actions.test.ts` has 7 DB tests.
+> - **4.3, UI:** the delete takes two steps (a native `<details>`: *Supprimer* → *Confirmer*), and the table hides columns below 640/768/1024 px instead of scrolling.
+> - No separate `c14a` expansion doc: these steps were already detailed enough.
 
 **Est:** 1d · **Entry gate:** phase 3 exit gate green.
 **Exit gate for phase 5:** a non-admin visiting `/fr/admin/users` sees a rendered 403, **not a blank page and not a redirect**, in all three locales; an admin can list, search, promote, demote and delete users; every mutation writes an `AuditLog` row; you cannot demote or delete yourself; only admins see the nav link; the admin page, the 403 card and the nav are usable with no horizontal scroll at 375, 768 and 1440 px.

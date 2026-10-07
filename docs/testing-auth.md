@@ -1,6 +1,6 @@
 # Testing the auth work (roadmap phases 0–4)
 
-How to check the auth code yourself: the session core, signup / login / logout, the route guard, the permission policy and the audit log. It covers roadmap tasks 0.4, 1.1–1.3, 2.1–2.4 and 3.1–3.3 (C1, C2, C3, C4, C6, and part of C5 and C11 in `PROJECT_PLAN.md` §7).
+How to check the auth code yourself: the session core, signup / login / logout, the route guard, the permission policy, the audit log and the admin surface. It covers roadmap tasks 0.4, 1.1–1.3, 2.1–2.4, 3.1–3.3 and 4.1–4.3 (C1, C2, C3, C4, C6, C14 for global roles, and part of C5 and C11 in `PROJECT_PLAN.md` §7).
 
 There are two parts:
 
@@ -26,7 +26,7 @@ npm test                                                                    # ev
 npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" --reporter=verbose    # auth only
 ```
 
-Expected: `npm test` reports **99 passed**. The auth part is 6 files and 67 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
+Expected: `npm test` reports **160 passed**. The auth part is 8 files and 79 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
 
 | File | What it proves |
 |---|---|
@@ -35,7 +35,7 @@ Expected: `npm test` reports **99 passed**. The auth part is 6 files and 67 test
 | [schemas.test.ts](../src/lib/auth/schemas.test.ts) | the signup and login rules; every error key exists in fr, en and es |
 | [login/actions.test.ts](<../src/app/[locale]/(auth)/login/actions.test.ts>) | the action returns the schema's errors; 6 failures lock an email for 15 minutes |
 | [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything except touch another user's documents (the vault is owner-only, even for an admin); a moderator acts only in their own channel, and moderation is never granted by ownership; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` and `channel:manageRoles` are admin-only, even on your own account. Plus the C4 truth table: one row per `Action` (23) with the resource its caller passes and the answer for admin, moderator, member, owner and stranger; a new `Action` without a row fails the typecheck |
-| [admin/users/actions.test.ts](<../src/app/[locale]/(app)/admin/users/actions.test.ts>) | a non-admin cannot change a role or delete a user; an admin cannot demote or delete themselves; a role change ends that user's sessions; every change writes one `AuditLog` row. Uses the real DB. |
+| [admin/users/actions.test.ts](<../src/app/[locale]/(app)/admin/users/actions.test.ts>) | a non-admin cannot change a role or delete a user; an admin cannot demote or delete themselves; a role change ends that user's sessions; every change writes one `AuditLog` row; a role other than USER/ADMIN is refused; a double click or a stale page (user already gone, role already set) changes nothing and does not throw. Uses the real DB. |
 | [audit.test.ts](../src/lib/audit.test.ts) | `writeAudit()` records the actor, action, target and channel; a failed write is logged and never throws. Uses the real DB. |
 
 To run one test by name: `npx vitest run -t "never extends"`.
@@ -286,7 +286,7 @@ Log in as `amir@gmail.com` (USER) in one browser and `rasiol@gmail.com` (ADMIN) 
 | Search `EMM` | Only Emma's row (case-insensitive, on name and email) |
 | Your own row | *Vous*, no buttons |
 | *Rendre admin* on Amir, then *Retirer admin* | The badge changes each time. In psql, Amir has **no** `Session` row left: a role change signs him out everywhere, so his browser is back on the login page at the next click |
-| *Supprimer* on a throwaway account, then *Confirmer* | The row disappears; the account and its sessions and documents are gone |
+| *Supprimer* on a throwaway account, then **double-click** *Confirmer* | The row disappears; the account and its sessions and documents are gone; one `user:delete` row, and the console stays empty (the second click finds nothing to delete) |
 | `select "actorUserId", action, "targetId", metadata from "AuditLog" order by "createdAt" desc limit 3;` | One row per change, newest first: `user:delete`, then two `user:setGlobalRole` with `{"role": "USER"}` and `{"role": "ADMIN"}`, all with rasiol's id as the actor |
 | Resize to 375, 768 and 1440 px | No sideways scroll; below 640 px the table keeps the user and the actions, the role badge moves under the email |
 
