@@ -2,10 +2,9 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { can } from "@/lib/auth/policy";
 import { getCurrentUser } from "@/lib/auth/session";
-import { logout } from "@/app/[locale]/(auth)/logout/actions";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { MobileMenu } from "./MobileMenu";
-import { UserMenu } from "./UserMenu";
+import { AccountLinks, UserMenu } from "./UserMenu";
 
 const link = "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100";
 const primary =
@@ -18,32 +17,9 @@ export async function Nav() {
 
   const isAdmin = ctx !== null && can(ctx, "user:manage", {});
 
-  // The ☰ panel (below 768 px) lists everything; the bar groups the account links in UserMenu.
-  const mobileLinks = ctx ? (
-    <>
-      <Link href="/" className={link}>
-        {t("dashboard")}
-      </Link>
-      <Link href="/friends" className={link}>
-        {t("friends")}
-      </Link>
-      {isAdmin && (
-        <Link href="/admin/users" className={link}>
-          {t("admin")}
-        </Link>
-      )}
-      <Link href="/documents/new" className={primary}>
-        {t("addDocument")}
-      </Link>
-      <span className="max-w-40 truncate text-zinc-600 dark:text-zinc-400">
-        {ctx.user.displayName}
-      </span>
-      <form action={logout}>
-        <button type="submit" className={link}>
-          {t("logout")}
-        </button>
-      </form>
-    </>
+  // The bar (from 768 px) groups the account links in UserMenu; the ☰ panel (below) lists the same rows.
+  const barLinks = ctx ? (
+    <UserMenu name={ctx.user.displayName} isAdmin={isAdmin} />
   ) : (
     <>
       <Link href="/login" className={link}>
@@ -55,15 +31,22 @@ export async function Nav() {
     </>
   );
 
-  const barLinks = ctx ? (
+  const panelLinks = ctx ? (
     <>
-      <Link href="/documents/new" className={primary}>
-        {t("addDocument")}
-      </Link>
-      <UserMenu name={ctx.user.displayName} isAdmin={isAdmin} />
+      <p className="truncate px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">{ctx.user.displayName}</p>
+      <ul>
+        <AccountLinks isAdmin={isAdmin} />
+      </ul>
     </>
   ) : (
-    mobileLinks
+    <>
+      <Link href="/login" className={`${link} px-3 py-3`}>
+        {t("login")}
+      </Link>
+      <Link href="/signup" className={`${primary} mx-3 my-2 self-start`}>
+        {t("signup")}
+      </Link>
+    </>
   );
 
   return (
@@ -75,7 +58,7 @@ export async function Nav() {
         <div className="flex items-center gap-6 text-sm">
           <div className="hidden items-center gap-6 md:flex">{barLinks}</div>
           <LocaleSwitcher />
-          <MobileMenu>{mobileLinks}</MobileMenu>
+          <MobileMenu>{panelLinks}</MobileMenu>
         </div>
       </nav>
     </header>
