@@ -3,12 +3,14 @@
     "brand": "MesPapiers",
     "dashboard": "Dashboard",
     "admin": "Admin",
+    "friends": "Friends",
     "addDocument": "Add a document",
     "login": "Sign in",
     "signup": "Sign up",
     "logout": "Sign out",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "account": "Account"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -197,7 +199,6 @@
       "cancel": "Cancel",
       "submit": "Delete channel"
     }
-    
   },
   "auth": {
     "errors": {
@@ -256,5 +257,44 @@
     "confirmDelete": "Confirm",
     "you": "You",
     "empty": "No user matches “{q}”."
+  },
+  "friends": {
+    "title": "My friends",
+    "subtitle": "Add people from the community with their email address.",
+    "add": {
+      "label": "Email address",
+      "submit": "Send request",
+      "pending": "Sending…",
+      "sent": "Request sent."
+    },
+    "sections": {
+      "incoming": "Requests received"
+    },
+    "tabs": {
+      "friends": "Friends",
+      "outgoing": "Sent",
+      "blocked": "Blocked",
+      "label": "Lists"
+    },
+    "empty": {
+      "friends": "You have no friends yet.",
+      "outgoing": "No pending requests.",
+      "blocked": "You haven't blocked anyone."
+    },
+    "actions": {
+      "accept": "Accept",
+      "decline": "Decline",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "block": "Block",
+      "unblock": "Unblock"
+    },
+    "errors": {
+      "emailInvalid": "Enter a valid email address.",
+      "notFound": "No account uses this email address.",
+      "self": "You can't add yourself.",
+      "blocked": "You can't send a request to this person.",
+      "notPending": "This request no longer exists."
+    }
   }
 }

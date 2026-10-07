@@ -282,7 +282,7 @@ Log in as `amir@gmail.com` (USER) in one browser and `rasiol@gmail.com` (ADMIN) 
 |---|---|
 | As amir, open `/fr/admin/users`, then `/en/…` and `/es/…` | The translated "Accès refusé" card, the URL unchanged, no *Administration* link in the nav |
 | As amir, view the page source (Ctrl+U) and search for `emma@gmail.com` | **Not found.** The page checks `can()` itself; without that, the layout shows the 403 card but the user list still ships in the RSC payload |
-| As rasiol, open the nav (☰ below 1024 px) | An *Administration* link, which opens the user table |
+| As rasiol, open the account menu (☰ below 768 px) | An *Administration* link, which opens the user table |
 | Search `EMM` | Only Emma's row (case-insensitive, on name and email) |
 | Your own row | *Vous*, no buttons |
 | *Rendre admin* on Amir, then *Retirer admin* | The badge changes each time. In psql, Amir has **no** `Session` row left: a role change signs him out everywhere, so his browser is back on the login page at the next click |

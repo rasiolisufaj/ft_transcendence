@@ -24,7 +24,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
   }, [open]);
 
   return (
-    <div className="lg:hidden">
+    <div className="md:hidden">
       <button
         ref={buttonRef}
         type="button"
