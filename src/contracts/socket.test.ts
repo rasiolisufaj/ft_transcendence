@@ -1,0 +1,28 @@
+import { describe, expect, it } from "vitest";
+import { parseTopic } from "@/contracts/socket";
+
+describe("parseTopic", () => {
+  it("reads a channel topic", () => {
+    expect(parseTopic("channel:12")).toEqual({ kind: "channel", channelId: 12 });
+  });
+
+  it("reads a user topic", () => {
+    expect(parseTopic("user:abc")).toEqual({ kind: "user", userId: "abc" });
+  });
+
+  it("returns null for an empty string", () => {
+    expect(parseTopic("")).toBeNull();
+  });
+
+  it("returns null for an invalid channel", () => {
+    expect(parseTopic("channel:NaN")).toBeNull();
+  });
+
+  it("returns null for a negative channel", () => {
+    expect(parseTopic("channel:-1")).toBeNull();
+  });
+
+  it("returns null for an empty user", () => {
+    expect(parseTopic("user:")).toBeNull();
+  });
+});
