@@ -2,8 +2,8 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Panel",
+    "admin": "Administración",
     "friends": "Amigos",
-    "addDocument": "Añadir un documento",
     "login": "Iniciar sesión",
     "signup": "Crear cuenta",
     "logout": "Cerrar sesión",
@@ -61,7 +61,9 @@
     },
     "status": {
       "pending": "Pendiente de clasificación",
-      "needsReview": "Requiere revisión"
+      "needsReview": "Requiere revisión",
+      "confirmed": "Confirmado",
+      "failed": "Error"
     },
     "delete": "Eliminar {fileName}",
     "view": "Abrir {fileName}"
@@ -231,6 +233,32 @@
       "loginLink": "Iniciar sesión"
     }
   },
+  "admin": {
+    "forbiddenTitle": "Acceso denegado",
+    "forbiddenBody": "Esta página está reservada a los administradores.",
+    "title": "Usuarios",
+    "searchLabel": "Buscar por nombre o correo",
+    "search": "Buscar",
+    "columns": {
+      "user": "Usuario",
+      "role": "Rol",
+      "documents": "Documentos",
+      "sessions": "Sesiones",
+      "reputation": "Reputación",
+      "createdAt": "Registro",
+      "actions": "Acciones"
+    },
+    "roles": {
+      "USER": "Usuario",
+      "ADMIN": "Administrador"
+    },
+    "promote": "Hacer admin",
+    "demote": "Quitar admin",
+    "delete": "Eliminar",
+    "confirmDelete": "Confirmar",
+    "you": "Tú",
+    "empty": "Ningún usuario coincide con «{q}»."
+  },
   "friends": {
     "title": "Mis amigos",
     "subtitle": "Añada personas de la comunidad con su dirección de correo electrónico.",
@@ -268,6 +296,42 @@
       "self": "No puede añadirse a sí mismo.",
       "blocked": "No puede enviar una solicitud a esta persona.",
       "notPending": "Esta solicitud ya no existe."
+    }
+  },
+  "documentDetail": {
+    "category": "Categoría",
+    "size": "Tamaño",
+    "type": "Tipo",
+    "deadline": "Tipo de plazo",
+    "expiry": "Fecha límite",
+    "extractedFields": "Campos extraídos",
+    "fields": {
+      "fullName": "Nombre completo",
+      "documentNumber": "Número de documento",
+      "birthDate": "Fecha de nacimiento",
+      "expiryDate": "Fecha de vencimiento",
+      "provider": "Aseguradora",
+      "policyNumber": "Número de póliza",
+      "vehiclePlate": "Matrícula"
+    },
+    "status": {
+      "confirmed": "Confirmado",
+      "failed": "Error"
+    }
+  },
+  "assistant": {
+    "title": "Asistente IA",
+    "subtitle": "Haga preguntas sobre este documento: renovación, trámites, plazos…",
+    "empty": "Haga una pregunta sobre su documento para empezar.",
+    "placeholder": "¿Cuándo debo renovar este documento?",
+    "send": "Enviar",
+    "stop": "Detener",
+    "disclaimer": "El asistente puede cometer errores. Verifique la información importante en service-public.fr.",
+    "errors": {
+      "noKey": "El servicio de IA no está configurado. Contacte al administrador.",
+      "rateLimited": "Ha alcanzado el límite de mensajes. Inténtelo de nuevo en una hora.",
+      "upstream": "Algo salió mal. Inténtelo de nuevo en unos instantes.",
+      "overloaded": "El servicio está sobrecargado. Inténtelo de nuevo en unos instantes."
     }
   }
 }

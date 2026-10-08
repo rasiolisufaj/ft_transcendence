@@ -2,8 +2,8 @@
   "nav": {
     "brand": "MesPapiers",
     "dashboard": "Tableau de bord",
+    "admin": "Administration",
     "friends": "Amis",
-    "addDocument": "Ajouter un document",
     "login": "Se connecter",
     "signup": "Créer un compte",
     "logout": "Se déconnecter",
@@ -61,7 +61,9 @@
     },
     "status": {
       "pending": "En attente de classement",
-      "needsReview": "À vérifier"
+      "needsReview": "À vérifier",
+      "confirmed": "Confirmé",
+      "failed": "Échec"
     },
     "delete": "Supprimer {fileName}",
     "view": "Ouvrir {fileName}"
@@ -220,16 +222,42 @@
       "title": "Connexion",
       "submit": "Se connecter",
       "pending": "Connexion…",
-      "noAccount": "Pas encore de compte ?",
+      "noAccount": "Pas encore de compte ?",
       "signupLink": "Créer un compte"
     },
     "signup": {
       "title": "Créer votre compte",
       "submit": "Créer mon compte",
       "pending": "Création du compte…",
-      "hasAccount": "Déjà un compte ?",
+      "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter"
     }
+  },
+  "admin": {
+    "forbiddenTitle": "Accès refusé",
+    "forbiddenBody": "Cette page est réservée aux administrateurs.",
+    "title": "Utilisateurs",
+    "searchLabel": "Rechercher par nom ou e-mail",
+    "search": "Rechercher",
+    "columns": {
+      "user": "Utilisateur",
+      "role": "Rôle",
+      "documents": "Documents",
+      "sessions": "Sessions",
+      "reputation": "Réputation",
+      "createdAt": "Inscription",
+      "actions": "Actions"
+    },
+    "roles": {
+      "USER": "Utilisateur",
+      "ADMIN": "Administrateur"
+    },
+    "promote": "Rendre admin",
+    "demote": "Retirer admin",
+    "delete": "Supprimer",
+    "confirmDelete": "Confirmer",
+    "you": "Vous",
+    "empty": "Aucun utilisateur ne correspond à « {q} »."
   },
   "friends": {
     "title": "Mes amis",
@@ -268,6 +296,42 @@
       "self": "Vous ne pouvez pas vous ajouter vous-même.",
       "blocked": "Impossible d'envoyer une demande à cette personne.",
       "notPending": "Cette demande n'existe plus."
+    }
+  },
+  "documentDetail": {
+    "category": "Catégorie",
+    "size": "Taille",
+    "type": "Type",
+    "deadline": "Type de deadline",
+    "expiry": "Date d'échéance",
+    "extractedFields": "Champs extraits",
+    "fields": {
+      "fullName": "Nom complet",
+      "documentNumber": "Numéro de document",
+      "birthDate": "Date de naissance",
+      "expiryDate": "Date d'expiration",
+      "provider": "Assureur",
+      "policyNumber": "Numéro de contrat",
+      "vehiclePlate": "Immatriculation"
+    },
+    "status": {
+      "confirmed": "Confirmé",
+      "failed": "Échec"
+    }
+  },
+  "assistant": {
+    "title": "Assistant IA",
+    "subtitle": "Posez vos questions sur ce document : renouvellement, démarches, délais…",
+    "empty": "Posez une question sur votre document pour commencer.",
+    "placeholder": "Quand dois-je renouveler ce document ?",
+    "send": "Envoyer",
+    "stop": "Arrêter",
+    "disclaimer": "L'assistant peut faire des erreurs. Vérifiez les informations importantes sur service-public.fr.",
+    "errors": {
+      "noKey": "Le service d'IA n'est pas configuré. Contactez l'administrateur.",
+      "rateLimited": "Vous avez atteint la limite de messages. Réessayez dans une heure.",
+      "upstream": "Une erreur est survenue. Réessayez dans quelques instants.",
+      "overloaded": "Le service est surchargé. Réessayez dans quelques instants."
     }
   }
 }
