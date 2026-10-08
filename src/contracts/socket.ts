@@ -16,9 +16,16 @@ export function parseTopic(name: string) {
 	const id = parts[1];
 	
 	if (kind === "channel") {
-		return { kind: "channel", channelId: Number(id) };
+		const channelId = Number(id);
+		if (!channelId || channelId < 0) {
+			return null;
+		}
+		return { kind: "channel", channelId };
 	}
 	if (kind === "user") {
+		if (!id) {
+			return null;
+		}
 		return { kind: "user", userId: id };
 	}
 	return null;
