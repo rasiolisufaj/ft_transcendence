@@ -1,7 +1,11 @@
 import "dotenv/config";
-import { PrismaClient, type User } from "../src/generated/prisma/client";
+import { PrismaClient, type GlobalRole, type User } from "../src/generated/prisma/client";
+import { hashPassword } from "../src/lib/auth/password";
 
 const prisma = new PrismaClient();
+
+// Mot de passe de dev de tous les comptes (docs/testing-auth.md)
+const DEV_PASSWORD = "motdepasse123";
 
 // Crée un channel avec son créateur (MODERATOR), ses membres (MEMBER) et sa question
 async function createChannel(
@@ -31,10 +35,16 @@ async function createChannel(
     return { channel, thread };
 }
 
-async function createUser(name: string)
+// Email en minuscules : le login met l'email saisi en minuscules avant de le chercher
+async function createUser(name: string, globalRole: GlobalRole = "USER")
 {
     return prisma.user.create({
-        data: { email: `${name}@gmail.com`, displayName: name },
+        data: {
+            email: `${name.toLowerCase()}@gmail.com`,
+            displayName: name,
+            passwordHash: await hashPassword(DEV_PASSWORD),
+            globalRole,
+        },
     });
 }
 
@@ -42,7 +52,7 @@ async function main()
 {
     const Amir = await createUser("Amir");
     const Adrien = await createUser("Adrien");
-    const Rasiol = await createUser("Rasiol");
+    const Rasiol = await createUser("Rasiol", "ADMIN");
     const Syu = await createUser("Syu");
     const Alexandre = await createUser("Alexandre");
     const Lina = await createUser("Lina");
@@ -129,7 +139,7 @@ async function main()
         ],
     });
 
-    console.log("Seed terminé : 10 utilisateurs, 5 channels, 4 invitations");
+    console.log(`Seed terminé : 10 utilisateurs (mot de passe "${DEV_PASSWORD}", rasiol@gmail.com est ADMIN), 5 channels, 4 invitations`);
 }
 
 main()
