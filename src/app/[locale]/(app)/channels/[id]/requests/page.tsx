@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth/session";
 import { Link } from "@/i18n/navigation";
 import { getChannelJoinRequests } from "./data";
 import { acceptJoinRequest, rejectJoinRequest } from "./action";
+import { getFormatter } from "next-intl/server";
 export default async function ChannelRequestsPage({
   params,
 }: {
@@ -31,7 +32,7 @@ export default async function ChannelRequestsPage({
   }
 
   const requests = await getChannelJoinRequests(id);
-
+  const format = await getFormatter();
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
@@ -64,7 +65,9 @@ export default async function ChannelRequestsPage({
                     {request.user.displayName}
                   </p>
                   <p className="text-xs text-zinc-400">
-                    {request.createdAt.toLocaleDateString()}
+                    {format.dateTime(request.createdAt, {
+                      dateStyle: "short",
+                    })}{" "}
                   </p>
                 </div>
 
