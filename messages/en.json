@@ -200,6 +200,14 @@
       "reminder": "This action cannot be undone.",
       "cancel": "Cancel",
       "submit": "Delete channel"
+    },
+    "requests": {
+      "back": "← Back to the channel",
+      "title": "Join requests",
+      "subtitle": "People who want to join this private channel.",
+      "empty": "You don't have any requests.",
+      "accept": "Accept",
+      "reject": "Reject"
     }
   },
   "auth": {

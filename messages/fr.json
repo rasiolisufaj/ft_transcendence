@@ -200,6 +200,14 @@
       "reminder": "Cette action est irréversible.",
       "cancel": "Annuler",
       "submit": "Supprimer le channel"
+    },
+    "requests": {
+      "back": "← Retour au channel",
+      "title": "Demandes d'adhésion",
+      "subtitle": "Les personnes qui veulent rejoindre ce channel privé.",
+      "empty": "Tu n'as aucune demande.",
+      "accept": "Accepter",
+      "reject": "Refuser"
     }
   },
   "auth": {

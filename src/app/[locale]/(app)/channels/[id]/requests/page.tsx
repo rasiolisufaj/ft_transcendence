@@ -6,7 +6,8 @@ import { requireUser } from "@/lib/auth/session";
 import { Link } from "@/i18n/navigation";
 import { getChannelJoinRequests } from "./data";
 import { acceptJoinRequest, rejectJoinRequest } from "./action";
-import { getFormatter } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
+
 export default async function ChannelRequestsPage({
   params,
 }: {
@@ -33,6 +34,7 @@ export default async function ChannelRequestsPage({
 
   const requests = await getChannelJoinRequests(id);
   const format = await getFormatter();
+  const t = await getTranslations("channels.requests");
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
@@ -40,19 +42,17 @@ export default async function ChannelRequestsPage({
           href={`/channels/${id}`}
           className="text-sm text-zinc-500 hover:underline dark:text-zinc-400"
         >
-          ← Back to the channel
+          {t("back")}
         </Link>
         <h1 className="mt-4 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          Join requests
+          {t("title")}
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          People who want to join this private channel.
+          {t("subtitle")}
         </p>
 
         {requests.length === 0 ? (
-          <p className="mt-6 text-sm italic text-zinc-400">
-            You don't have any requests.
-          </p>
+          <p className="mt-6 text-sm italic text-zinc-400">{t("empty")}</p>
         ) : (
           <div className="mt-6 flex flex-col gap-3">
             {requests.map((request) => (
@@ -79,7 +79,7 @@ export default async function ChannelRequestsPage({
                       type="submit"
                       className="rounded-md px-3 py-2 text-sm text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950"
                     >
-                      Accept
+                      {t("accept")}
                     </button>
                   </form>
                   <form action={rejectJoinRequest}>
@@ -89,7 +89,7 @@ export default async function ChannelRequestsPage({
                       type="submit"
                       className="rounded-md px-3 py-2 text-sm text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                     >
-                      Reject
+                      {t("reject")}
                     </button>
                   </form>
                 </div>
