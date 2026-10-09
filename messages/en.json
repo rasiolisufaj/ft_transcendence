@@ -9,6 +9,7 @@
     "logout": "Sign out",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
+    "channels": "Channels",
     "account": "Account"
   },
   "localeSwitcher": {
