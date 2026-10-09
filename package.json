@@ -28,6 +28,7 @@
     "@anthropic-ai/sdk": "^0.128.0",
     "@node-rs/argon2": "^2.2.1",
     "@prisma/client": "^6.19.3",
+    "jszip": "^3.10.2",
     "next": "16.3.4",
     "next-intl": "^4.14.7",
     "react": "19.2.8",

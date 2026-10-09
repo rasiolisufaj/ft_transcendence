@@ -9,7 +9,8 @@
     "logout": "Sign out",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "account": "Account"
+    "account": "Account",
+    "myData": "My data"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -333,5 +334,12 @@
       "upstream": "Something went wrong. Please try again shortly.",
       "overloaded": "The service is overloaded. Please try again shortly."
     }
+  },
+  "myData": {
+    "title": "My data",
+    "intro": "Under the GDPR, you can view and retrieve the data MesPapiers holds about you at any time.",
+    "exportTitle": "Export my data",
+    "exportDesc": "Download a copy of your personal data (profile, documents, messages and activity) as a JSON file.",
+    "exportButton": "Download my data"
   }
 }

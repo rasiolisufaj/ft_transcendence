@@ -9,7 +9,8 @@
     "logout": "Cerrar sesión",
     "openMenu": "Abrir el menú",
     "closeMenu": "Cerrar el menú",
-    "account": "Cuenta"
+    "account": "Cuenta",
+    "myData": "Mis datos"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -333,5 +334,12 @@
       "upstream": "Algo salió mal. Inténtelo de nuevo en unos instantes.",
       "overloaded": "El servicio está sobrecargado. Inténtelo de nuevo en unos instantes."
     }
+  },
+  "myData": {
+    "title": "Mis datos",
+    "intro": "De acuerdo con el RGPD, puede consultar y recuperar en cualquier momento los datos que MesPapiers conserva sobre usted.",
+    "exportTitle": "Exportar mis datos",
+    "exportDesc": "Descargue una copia de sus datos personales (perfil, documentos, mensajes y actividad) en formato JSON.",
+    "exportButton": "Descargar mis datos"
   }
 }

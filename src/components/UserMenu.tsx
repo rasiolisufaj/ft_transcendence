@@ -83,6 +83,7 @@ export function AccountLinks({ isAdmin, onNavigate }: { isAdmin: boolean; onNavi
       {[
         { href: "/", label: t("dashboard") },
         { href: "/friends", label: t("friends") },
+        { href: "/account/data", label: t("myData") },
         ...(isAdmin ? [{ href: "/admin/users", label: t("admin") }] : []),
       ].map((page) => {
         const active = pathname === page.href;
