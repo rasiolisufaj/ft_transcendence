@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 // server -> browser
 export type ServerMessage =
 	| { type: "hello"; userId: string }
@@ -31,10 +33,24 @@ export function parseTopic(name: string) {
 	return null;
 }
 
-export function parseClientMessage(raw: string) {
+const topicSchema = z.string().max(100).regex(/^(channel:[1-9]\d*|user:[A-Za-z0-9_-]+)$/);
+
+const clientMessageSchema = z.discriminatedUnion("type", [
+	z.object({ type: z.literal("subscribe"), topic: topicSchema }),
+	z.object({ type: z.literal("unsubscribe"), topic: topicSchema }),
+]);
+
+export function parseClientMessage(raw: string): ClientMessage | null {
+	let data: unknown;
 	try {
-		return JSON.parse(raw);
+		data = JSON.parse(raw);
 	} catch {
 		return null;
 	}
+
+	const result = clientMessageSchema.safeParse(data);
+	if (!result.success) {
+		return null;
+	}
+	return result.data;
 }

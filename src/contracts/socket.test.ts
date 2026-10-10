@@ -38,4 +38,20 @@ describe("parseClientMessage", () => {
   it("returns null for something that is not JSON", () => {
     expect(parseClientMessage("not json")).toBeNull();
   });
+
+  it("returns null for JSON that is not an object", () => {
+    expect(parseClientMessage("42")).toBeNull();
+  });
+
+  it("returns null for an unknown message type", () => {
+    expect(parseClientMessage('{"type":"publish","topic":"channel:12"}')).toBeNull();
+  });
+
+  it("returns null when the topic is missing", () => {
+    expect(parseClientMessage('{"type":"subscribe"}')).toBeNull();
+  });
+
+  it("returns null for a topic that is neither a channel nor a user", () => {
+    expect(parseClientMessage('{"type":"subscribe","topic":"admin"}')).toBeNull();
+  });
 });
