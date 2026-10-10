@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseTopic } from "@/contracts/socket";
+import { parseClientMessage, parseTopic } from "@/contracts/socket";
 
 describe("parseTopic", () => {
   it("reads a channel topic", () => {
@@ -24,5 +24,18 @@ describe("parseTopic", () => {
 
   it("returns null for an empty user", () => {
     expect(parseTopic("user:")).toBeNull();
+  });
+});
+
+describe("parseClientMessage", () => {
+  it("reads a JSON message", () => {
+    expect(parseClientMessage('{"type":"subscribe","topic":"channel:12"}')).toEqual({
+      type: "subscribe",
+      topic: "channel:12",
+    });
+  });
+
+  it("returns null for something that is not JSON", () => {
+    expect(parseClientMessage("not json")).toBeNull();
   });
 });
