@@ -30,3 +30,11 @@ export function parseTopic(name: string) {
 	}
 	return null;
 }
+
+export function parseClientMessage(raw: string) {
+	try {
+		return JSON.parse(raw);
+	} catch {
+		return null;
+	}
+}
