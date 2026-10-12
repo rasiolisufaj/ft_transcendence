@@ -8,8 +8,8 @@ _Last updated: 2026-10-12. Owner: Rasiol (auth, permissions, OAuth, 2FA). Plan: 
 ### What is left, in order
 1. **Finish `fix/nav-channels`** (cut from `main` = `e0e00df`; nothing committed yet, Rasiol commits):
    * ✅ Local setup after the pull (2026-10-12): `src/generated/` chowned back from root, migration `20261009120554` applied to the dev DB, client regenerated; `npm run lint` 0/0, `npm test` 180/180. Still to do: rerun `testing-auth.md` B10 (a foreign `deleteDocument` now redirects instead of a 500).
-   * Commit 1, the docs (conflicts already resolved): `CLAUDE.md`, the roadmap, this file.
-   * Commit 2, the nav fix: move the *Channels* link out of `Nav.tsx` (`barLinks`, both branches) into `AccountLinks` in `UserMenu.tsx`, so it shows in the dropdown and in the ☰ panel, signed-in only. Check at 375 and 1440 on mespapiers.local.
+   * ✅ Commit 1, the docs: `36d7d98` `docs: sync after PR #28`.
+   * Commit 2, the nav fix (done 2026-10-12, uncommitted): the *Channels* link left `Nav.tsx`'s `barLinks` (both branches, and the mis-indented fragment with it) for `AccountLinks` in `UserMenu.tsx`, between *Dashboard* and *Friends*. So it is in the dropdown (≥ 768 px) and the ☰ panel (< 768 px), signed-in only; on desktop it is one click deeper than PR #28's bar link. Checked: eslint and tsc clean, `nav.channels` still used; server HTML on mespapiers.local (curl pinned to 127.0.0.1, a throwaway session for amir, deleted after): signed in, the row is in both menus in fr/en/es with ✓ + `aria-current` on `/channels`; signed out, no channels link. **Not checked visually** at 375/1440 (no Playwright package and no `mespapiers.local` hosts entry in WSL): do it in the Windows browser.
    * Then drop the leftover `stash@{0}` (`docs sync 2026-10-12`: a pop that hits a conflict keeps the stash).
 2. ~~Review PR #28~~: reviewed and merged 2026-10-12. Follow-ups (not blockers) are in the roadmap's phase 5 review notes.
 3. **Owed to the team** (messages, no code):
