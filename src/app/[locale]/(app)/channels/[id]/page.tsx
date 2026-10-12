@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/Button";
 import {
   createAnswer,
   deleteAnswer,
-  kickMember,
   leaveChannel,
 } from "./actions";
 import { requireUser } from "@/lib/auth/session";
