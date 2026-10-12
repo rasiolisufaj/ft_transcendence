@@ -20,18 +20,11 @@ export async function Nav() {
 
   // The bar (from 768 px) groups the account links in UserMenu; the ☰ panel (below) lists the same rows.
   const barLinks = ctx ? (
- <>
-      <Link href="/channels" className={link}>
-        {t("channels")}
-      </Link>
-      <UserMenu name={ctx.user.displayName} isAdmin={isAdmin} />
-    </>  ) : (
+    <UserMenu name={ctx.user.displayName} isAdmin={isAdmin} />
+  ) : (
     <>
       <Link href="/login" className={link}>
         {t("login")}
-      </Link>
-      <Link href="/channels" className={link}>
-        {t("channels")}
       </Link>
       <Link href="/signup" className={primary}>
         {t("signup")}
