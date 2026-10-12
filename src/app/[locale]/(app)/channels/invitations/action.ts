@@ -2,8 +2,6 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { id } from "zod/locales";
-import { tr } from "zod/v4/locales";
 import { requireUser } from "@/lib/auth/session";
 
 
