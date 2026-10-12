@@ -9,6 +9,7 @@
     "logout": "Cerrar sesión",
     "openMenu": "Abrir el menú",
     "closeMenu": "Cerrar el menú",
+    "channels": "Canales",
     "account": "Cuenta"
   },
   "localeSwitcher": {
@@ -199,6 +200,14 @@
       "reminder": "Esta acción no se puede deshacer.",
       "cancel": "Cancelar",
       "submit": "Eliminar el canal"
+    },
+    "requests": {
+      "back": "← Volver al canal",
+      "title": "Solicitudes de acceso",
+      "subtitle": "Personas que quieren unirse a este canal privado.",
+      "empty": "No tienes ninguna solicitud.",
+      "accept": "Aceptar",
+      "reject": "Rechazar"
     }
   },
   "auth": {

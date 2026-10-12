@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/db";
 import { redirect } from "@/i18n/navigation";
 import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 
 export async function createChannel(formData: FormData) {
@@ -66,7 +65,7 @@ export async function createChannel(formData: FormData) {
     return;
   }
 
-  const newChannel = await prisma.channel.create({
+  await prisma.channel.create({
     data: {
       createdBy: user.id,
       title: trueNameChannel,
@@ -86,40 +85,3 @@ export async function createChannel(formData: FormData) {
   });
   redirect({ href: "/channels", locale: await getLocale() });
 }
-
-export async function deleteChannel(formData: FormData) {
-  const idChannel = formData.get("deletechannel");
-  // id doit etre un texte non vide
-  if (typeof idChannel !== "string" || !idChannel) {
-    return;
-  }
-
-  // transforme le texte en nombre et check que cest un vrai id
-  const trueId = parseInt(idChannel, 10);
-  if (Number.isNaN(trueId) || trueId <= 0 || String(trueId) !== idChannel) {
-    return;
-  }
-  // trouve le user
-  const { user } = await requireUser();
-
-  // verifie que le user est bien membre du channel
-  // et qu'il est bien moderateur
-  const member = await prisma.channelMember.findFirst({
-    where: {
-      channelId: trueId,
-      userId: user.id,
-      role: "MODERATOR",
-    },
-  });
-  if (!member) {
-    return;
-  }
-
-  await prisma.channel.delete({
-    where: {
-      id: trueId,
-    },
-  });
-  revalidatePath("/channels");
-}
-
