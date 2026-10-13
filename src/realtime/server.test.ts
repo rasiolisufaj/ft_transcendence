@@ -19,6 +19,9 @@ async function start(heartbeatMs = 1000) {
   return { ...realtime, url: `ws://localhost:${port}` };
 }
 
+// The server only accepts a client that brings a valid ticket.
+const withTicket = (url: string, userId = "user-1") => `${url}?ticket=${mintTicket(userId)}`;
+
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 beforeEach(() => {
@@ -34,18 +37,9 @@ afterEach(async () => {
 });
 
 describe("realtime server", () => {
-  it("says hello to a client that connects", async () => {
-    const { url } = await start();
-    const client = new WebSocket(url);
-
-    const [data] = await once(client, "message");
-
-    expect(JSON.parse(data.toString())).toEqual({ type: "hello" });
-  });
-
   it("closes clients with 1001 when it stops", async () => {
     const { url, stop } = await start();
-    const client = new WebSocket(url);
+    const client = new WebSocket(withTicket(url));
     await once(client, "message");
 
     const closed = once(client, "close");
@@ -59,7 +53,7 @@ describe("realtime server", () => {
 describe("heartbeat", () => {
   it("keeps a client that answers the pings", async () => {
     const { url } = await start(50);
-    const client = new WebSocket(url);
+    const client = new WebSocket(withTicket(url));
     await once(client, "message");
 
     await wait(300); // about 6 heartbeats
@@ -69,7 +63,7 @@ describe("heartbeat", () => {
 
   it("cuts a client that never answers", async () => {
     const { url } = await start(50);
-    const client = new WebSocket(url, { autoPong: false });
+    const client = new WebSocket(withTicket(url), { autoPong: false });
     await once(client, "message");
 
     const [code] = await once(client, "close");
@@ -99,7 +93,7 @@ describe("ticket", () => {
 
   it("says hello with the user id of a valid ticket", async () => {
     const { url } = await start();
-    const client = new WebSocket(`${url}?ticket=${mintTicket("user-1")}`);
+    const client = new WebSocket(withTicket(url));
 
     const [data] = await once(client, "message");
 
