@@ -2,7 +2,10 @@ import { once } from "node:events";
 import type { AddressInfo } from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
+import { mintTicket } from "@/lib/auth/ticket";
 import { startServer } from "@/realtime/server";
+
+process.env.WS_TICKET_SECRET = "test-secret";
 
 // Every server a test started, stopped after the test.
 let running: { stop: () => Promise<void> }[] = [];
@@ -72,5 +75,34 @@ describe("heartbeat", () => {
     const [code] = await once(client, "close");
 
     expect(code).toBe(1006); // closed without a goodbye: cut by terminate()
+  });
+});
+
+describe("ticket", () => {
+  it("refuses a client without a ticket", async () => {
+    const { url } = await start();
+    const client = new WebSocket(url);
+
+    const [, response] = await once(client, "unexpected-response");
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  it("refuses a client with a bad ticket", async () => {
+    const { url } = await start();
+    const client = new WebSocket(`${url}?ticket=nimportequoi`);
+
+    const [, response] = await once(client, "unexpected-response");
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  it("says hello with the user id of a valid ticket", async () => {
+    const { url } = await start();
+    const client = new WebSocket(`${url}?ticket=${mintTicket("user-1")}`);
+
+    const [data] = await once(client, "message");
+
+    expect(JSON.parse(data.toString())).toEqual({ type: "hello", userId: "user-1" });
   });
 });
