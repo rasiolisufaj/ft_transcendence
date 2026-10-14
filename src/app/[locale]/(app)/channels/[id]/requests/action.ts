@@ -1,10 +1,12 @@
 "use server"
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { writeAudit } from "@/lib/audit";
+import { assertCan } from "@/lib/auth/policy";
 import { requireUser } from "@/lib/auth/session";
 
 export async function acceptJoinRequest(formData: FormData) {
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
   const idChannel = formData.get("channelId");
   const idUser = formData.get("userId");
@@ -13,13 +15,7 @@ export async function acceptJoinRequest(formData: FormData) {
   const id = parseInt(idChannel, 10);
   if (Number.isNaN(id) || id <= 0 || String(id) !== idChannel) return;
 
-  const userMember = await prisma.channelMember.findFirst({
-    where: {
-      userId: user.id,
-      channelId: id,
-    },
-  });
-  if (!userMember || userMember.role !== "MODERATOR") return;
+  assertCan(ctx, "channel:moderate", { channelId: id });
 
   const joinRequest = await prisma.channelJoinRequest.findFirst({
     where: {
@@ -44,11 +40,19 @@ export async function acceptJoinRequest(formData: FormData) {
     },
   });
 
+  await writeAudit({
+    actorUserId: ctx.user.id,
+    action: "channel:acceptRequest",
+    targetType: "User",
+    targetId: idUser,
+    channelId: id,
+  });
+
   revalidatePath("/[locale]/channels/[id]/requests", "page");
 }
 
 export async function rejectJoinRequest(formData: FormData) {
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
   const idChannel = formData.get("channelId");
   const idUser = formData.get("userId");
@@ -57,20 +61,22 @@ export async function rejectJoinRequest(formData: FormData) {
   const id = parseInt(idChannel, 10);
   if (Number.isNaN(id) || id <= 0 || String(id) !== idChannel) return;
 
-  const userMember = await prisma.channelMember.findFirst({
-    where: {
-      userId: user.id,
-      channelId: id,
-    },
-  });
-  if (!userMember || userMember.role !== "MODERATOR") return;
+  assertCan(ctx, "channel:moderate", { channelId: id });
 
-  await prisma.channelJoinRequest.deleteMany({
+  const { count } = await prisma.channelJoinRequest.deleteMany({
     where: {
       channelId: id,
       userId: idUser,
     },
   });
+  if (count > 0)
+    await writeAudit({
+      actorUserId: ctx.user.id,
+      action: "channel:rejectRequest",
+      targetType: "User",
+      targetId: idUser,
+      channelId: id,
+    });
 
   revalidatePath("/[locale]/channels/[id]/requests", "page");
 }

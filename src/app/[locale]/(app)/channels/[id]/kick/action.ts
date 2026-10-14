@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { writeAudit } from "@/lib/audit";
+import { assertCan } from "@/lib/auth/policy";
 import { requireUser } from "@/lib/auth/session";
 
 export async function kickMembers(formData: FormData) {
@@ -20,16 +22,14 @@ export async function kickMembers(formData: FormData) {
   if (Number.isNaN(intChannelId) || intChannelId <= 0 || String(intChannelId) !== channelIdTrim)
     return;
 
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
-  if (targetUserIdTrim === user.id)
+  if (targetUserIdTrim === ctx.user.id)
     return;
 
-  const moderator = await prisma.channelMember.findFirst({
-    where: { channelId: intChannelId, userId: user.id, role: "MODERATOR" },
-  });
-  if (!moderator)
-    return;
+  // A moderator of THIS channel, or an admin (§C-16): can() reads the caller's role
+  // in the channel the form names, so a moderator of another channel is refused.
+  assertCan(ctx, "channel:moderate", { channelId: intChannelId });
 
   // seul un MEMBER peut etre retire, jamais un autre moderateur
   const target = await prisma.channelMember.findFirst({
@@ -38,9 +38,18 @@ export async function kickMembers(formData: FormData) {
   if (!target)
     return;
 
-  await prisma.channelMember.deleteMany({
+  const { count } = await prisma.channelMember.deleteMany({
     where: { channelId: intChannelId, userId: targetUserIdTrim },
   });
+  // Only a kick that happened is recorded.
+  if (count > 0)
+    await writeAudit({
+      actorUserId: ctx.user.id,
+      action: "channel:kick",
+      targetType: "User",
+      targetId: targetUserIdTrim,
+      channelId: intChannelId,
+    });
 
   revalidatePath("/[locale]/(app)/channels/[id]/kick", "page");
   revalidatePath("/[locale]/(app)/channels/[id]", "page");
