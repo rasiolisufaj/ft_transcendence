@@ -32,8 +32,9 @@ export default async function ChannelRequestsPage({
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+        {/* The channel page 404s for a non-member (an admin), so their way back is the list */}
         <Link
-          href={`/channels/${id}`}
+          href={ctx.memberships.some((m) => m.channelId === id) ? `/channels/${id}` : "/channels"}
           className="text-sm text-zinc-500 hover:underline dark:text-zinc-400"
         >
           {t("back")}

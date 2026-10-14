@@ -80,5 +80,7 @@ export async function editChannel(formData: FormData) {
   });
 
   revalidatePath(`/channels/${intId}`);
-  redirect({ href: `/channels/${intId}`, locale: await getLocale() });
+  // The channel page 404s for a non-member (an admin), so send them back to the list.
+  const isMember = ctx.memberships.some((m) => m.channelId === intId);
+  redirect({ href: isMember ? `/channels/${intId}` : "/channels", locale: await getLocale() });
 }
