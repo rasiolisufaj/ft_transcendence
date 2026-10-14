@@ -7,6 +7,8 @@ import { prisma } from "@/lib/db";
 import { kickMembers } from "./[id]/kick/action";
 import { acceptJoinRequest, rejectJoinRequest } from "./[id]/requests/action";
 import { inviteUser } from "./[id]/invite/action";
+import { editChannel } from "./[id]/edit/action";
+import { deleteChannel } from "./[id]/delete/action";
 
 // requireUser() reads the cookie, and revalidatePath(), getLocale() and the localised
 // redirect() need a Next request, so the four are replaced. The context the actions
@@ -150,5 +152,55 @@ describe("moderation actions (channel:moderate)", () => {
       expect.objectContaining({ actorUserId: mod.id, action: "channel:rejectRequest", targetType: "User", targetId: bob.id }),
       expect.objectContaining({ actorUserId: mod.id, action: "channel:invite", targetType: "User", targetId: carol.id }),
     ]));
+  });
+});
+
+describe("editing and deleting a channel", () => {
+  const editForm = (channelId: number, questionId: number) =>
+    form({ channelId, questionId, name: "Nouveau titre", description: "Nouvelle description", question: "Nouvelle question" });
+
+  it("refuses a plain member's edit; a moderator who is not the creator edits, audited", async () => {
+    const creator = await newUser();
+    const mod = await newUser();
+    const member = await newUser();
+    const a = await newChannel({ [creator.id]: "MODERATOR", [mod.id]: "MODERATOR", [member.id]: "MEMBER" }, creator.id);
+
+    await signInAs(member.id);
+    await expect(editChannel(editForm(a.id, a.threadId))).rejects.toBeInstanceOf(ForbiddenError);
+    expect((await prisma.channel.findUnique({ where: { id: a.id } }))?.title).not.toBe("Nouveau titre");
+
+    await signInAs(mod.id);
+    await editChannel(editForm(a.id, a.threadId));
+
+    expect((await prisma.channel.findUnique({ where: { id: a.id } }))?.title).toBe("Nouveau titre");
+    expect(await auditRows(a.id)).toEqual([
+      expect.objectContaining({ actorUserId: mod.id, action: "channel:update", targetType: "Channel", targetId: String(a.id) }),
+    ]);
+  });
+
+  it("refuses a delete by a moderator who is not the creator", async () => {
+    const creator = await newUser();
+    const mod = await newUser();
+    const c = await newChannel({ [creator.id]: "MODERATOR", [mod.id]: "MODERATOR" }, creator.id);
+    await signInAs(mod.id);
+
+    await expect(deleteChannel(form({ deletechannel: c.id }))).rejects.toBeInstanceOf(ForbiddenError);
+
+    expect(await prisma.channel.findUnique({ where: { id: c.id } })).not.toBeNull();
+    expect(await auditRows(c.id)).toEqual([]);
+  });
+
+  it("lets the creator delete the channel, audited once, after the delete", async () => {
+    const creator = await newUser();
+    const c = await newChannel({ [creator.id]: "MODERATOR" }, creator.id);
+    await signInAs(creator.id);
+
+    await deleteChannel(form({ deletechannel: c.id }));
+    await expect(deleteChannel(form({ deletechannel: c.id }))).resolves.toBeUndefined();   // a double click
+
+    expect(await prisma.channel.findUnique({ where: { id: c.id } })).toBeNull();
+    expect(await auditRows(c.id)).toEqual([
+      expect.objectContaining({ actorUserId: creator.id, action: "channel:delete", targetType: "Channel", targetId: String(c.id) }),
+    ]);
   });
 });

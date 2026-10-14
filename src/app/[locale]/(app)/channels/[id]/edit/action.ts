@@ -5,9 +5,11 @@ import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { writeAudit } from "@/lib/audit";
+import { assertCan } from "@/lib/auth/policy";
 
 export async function editChannel(formData: FormData) {
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
   const strId = formData.get("channelId");
   const newNameChannel = formData.get("name");
@@ -41,15 +43,14 @@ export async function editChannel(formData: FormData) {
 
   const channel = await prisma.channel.findUnique({
     where: { id: intId },
-    select: { createdBy: true }, 
+    select: { id: true },
   });
   if (!channel) {
     return;
   }
 
-  if (channel.createdBy !== user.id) {
-   return;
-  }
+  // A moderator of this channel, or an admin. No longer "the creator only".
+  assertCan(ctx, "channel:update", { channelId: intId });
 
   await prisma.channel.update({
     where: { id: intId },
@@ -69,6 +70,14 @@ export async function editChannel(formData: FormData) {
       });
     }
   }
+
+  await writeAudit({
+    actorUserId: ctx.user.id,
+    action: "channel:update",
+    targetType: "Channel",
+    targetId: String(intId),
+    channelId: intId,
+  });
 
   revalidatePath(`/channels/${intId}`);
   redirect({ href: `/channels/${intId}`, locale: await getLocale() });
