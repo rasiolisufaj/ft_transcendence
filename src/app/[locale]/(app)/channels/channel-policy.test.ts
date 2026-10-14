@@ -9,6 +9,7 @@ import { acceptJoinRequest, rejectJoinRequest } from "./[id]/requests/action";
 import { inviteUser } from "./[id]/invite/action";
 import { editChannel } from "./[id]/edit/action";
 import { deleteChannel } from "./[id]/delete/action";
+import { createAnswer, deleteAnswer, modifAnswerUser } from "./[id]/actions";
 
 // requireUser() reads the cookie, and revalidatePath(), getLocale() and the localised
 // redirect() need a Next request, so the four are replaced. The context the actions
@@ -202,5 +203,50 @@ describe("editing and deleting a channel", () => {
     expect(await auditRows(c.id)).toEqual([
       expect.objectContaining({ actorUserId: creator.id, action: "channel:delete", targetType: "Channel", targetId: String(c.id) }),
     ]);
+  });
+});
+
+describe("answers", () => {
+  const newAnswer = async (threadId: number, userId: string) =>
+    prisma.answer.create({ data: { threadId, userId, content: "Réponse" } });
+
+  it("refuses a plain member's delete of another answer; a moderator's delete is audited, an author's own is not", async () => {
+    const mod = await newUser();
+    const author = await newUser();
+    const member = await newUser();
+    const a = await newChannel({ [mod.id]: "MODERATOR", [author.id]: "MEMBER", [member.id]: "MEMBER" }, mod.id);
+    const a1 = await newAnswer(a.threadId, author.id);
+    const a2 = await newAnswer(a.threadId, author.id);
+
+    await signInAs(member.id);
+    await expect(deleteAnswer(form({ answerId: a1.id }))).rejects.toBeInstanceOf(ForbiddenError);
+
+    await signInAs(mod.id);
+    await deleteAnswer(form({ answerId: a1.id }));
+
+    await signInAs(author.id);
+    await deleteAnswer(form({ answerId: a2.id }));
+
+    expect(await prisma.answer.count({ where: { id: { in: [a1.id, a2.id] } } })).toBe(0);
+    expect(await auditRows(a.id)).toEqual([
+      expect.objectContaining({ actorUserId: mod.id, action: "answer:delete", targetType: "Answer", targetId: String(a1.id) }),
+    ]);
+  });
+
+  it("refuses an answer from a non-member, and an edit of someone else's answer", async () => {
+    const mod = await newUser();
+    const author = await newUser();
+    const stranger = await newUser();
+    const c = await newChannel({ [mod.id]: "MODERATOR", [author.id]: "MEMBER" }, mod.id);
+    const a1 = await newAnswer(c.threadId, author.id);
+
+    await signInAs(stranger.id);
+    await expect(createAnswer(form({ threadId: c.threadId, content: "Intrus" }))).rejects.toBeInstanceOf(ForbiddenError);
+
+    await signInAs(mod.id);
+    await expect(modifAnswerUser(form({ answerId: a1.id, channelId: c.id, content: "Réécrit" }))).rejects.toBeInstanceOf(ForbiddenError);
+
+    expect(await prisma.answer.count({ where: { threadId: c.threadId } })).toBe(1);
+    expect((await prisma.answer.findUnique({ where: { id: a1.id } }))?.content).toBe("Réponse");
   });
 });
