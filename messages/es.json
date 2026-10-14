@@ -9,8 +9,8 @@
     "logout": "Cerrar sesión",
     "openMenu": "Abrir el menú",
     "closeMenu": "Cerrar el menú",
-    "account": "Cuenta",
-    "myData": "Mis datos"
+    "channels": "Canales",
+    "account": "Cuenta"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -200,6 +200,14 @@
       "reminder": "Esta acción no se puede deshacer.",
       "cancel": "Cancelar",
       "submit": "Eliminar el canal"
+    },
+    "requests": {
+      "back": "← Volver al canal",
+      "title": "Solicitudes de acceso",
+      "subtitle": "Personas que quieren unirse a este canal privado.",
+      "empty": "No tienes ninguna solicitud.",
+      "accept": "Aceptar",
+      "reject": "Rechazar"
     }
   },
   "auth": {
@@ -318,6 +326,146 @@
     "status": {
       "confirmed": "Confirmado",
       "failed": "Error"
+    }
+  },
+  "footer": {
+    "nav": "Enlaces legales",
+    "privacy": "Política de privacidad",
+    "terms": "Condiciones de uso"
+  },
+  "privacy": {
+    "title": "Política de privacidad",
+    "lastUpdated": "Última actualización: octubre de 2026",
+    "intro": {
+      "heading": "Introducción",
+      "body": "MesPapiers es un servicio diseñado para ayudarle con los trámites administrativos franceses. Esta política describe qué datos personales recopilamos, cómo los utilizamos y cuáles son sus derechos. El servicio está alojado en Francia y sujeto al Reglamento General de Protección de Datos (RGPD)."
+    },
+    "dataCollected": {
+      "heading": "Datos recopilados",
+      "account": {
+        "heading": "Datos de cuenta",
+        "body": "Al registrarse, recopilamos su dirección de correo electrónico, un nombre visible y una contraseña (almacenada como hash Argon2id). También registramos las sesiones de inicio de sesión con fines de seguridad."
+      },
+      "documents": {
+        "heading": "Documentos",
+        "body": "Puede importar documentos (PDF, PNG, JPEG) en su caja fuerte personal. Los archivos se almacenan en la base de datos del servicio. Solo usted, como propietario, puede acceder a sus documentos: ni siquiera los administradores pueden consultarlos."
+      },
+      "community": {
+        "heading": "Contenido comunitario",
+        "body": "Los mensajes publicados en los canales, las preguntas, las respuestas y los votos son visibles para los demás miembros del canal correspondiente. Su nombre visible está asociado a sus contribuciones."
+      }
+    },
+    "aiProcessing": {
+      "heading": "Procesamiento por inteligencia artificial",
+      "body": "MesPapiers utiliza los servicios de Anthropic (anthropic.com) como subencargado del tratamiento para el procesamiento de documentos mediante IA. Los siguientes datos pueden enviarse a los servidores de Anthropic:",
+      "items": {
+        "classification": "El contenido de sus documentos (texto extraído o imagen) para la clasificación automática y la extracción de campos (nombre, número de documento, fechas de vencimiento, etc.).",
+        "assistant": "El contenido de sus documentos y las preguntas que hace al asistente de IA, para proporcionarle respuestas personalizadas sobre sus trámites."
+      },
+      "noTraining": "De acuerdo con la política de uso de la API de Anthropic, sus datos no se utilizan para entrenar sus modelos de IA. Anthropic elimina los datos de la API en un plazo de 30 días, salvo que deba conservarlos más tiempo para hacer cumplir sus políticas o por motivos legales."
+    },
+    "retention": {
+      "heading": "Conservación de datos",
+      "body": "Sus datos se conservan mientras su cuenta esté activa:",
+      "items": {
+        "account": "Datos de cuenta: conservados hasta que elimine su cuenta.",
+        "documents": "Documentos: conservados hasta que los elimine o elimine su cuenta.",
+        "community": "Contenido comunitario: conservado mientras exista el canal. Si elimina su cuenta, sus mensajes se anonimizan.",
+        "sessions": "Sesiones de inicio de sesión: caducan automáticamente a los 30 días."
+      }
+    },
+    "sharing": {
+      "heading": "Compartición de datos",
+      "body": "Sus datos personales nunca se venden ni se comparten con fines publicitarios. Solo se transmiten a Anthropic en el marco estricto del tratamiento de IA descrito anteriormente. Ningún otro tercero tiene acceso a sus datos, salvo obligación legal."
+    },
+    "rights": {
+      "heading": "Sus derechos",
+      "body": "De conformidad con el RGPD, usted dispone de los siguientes derechos sobre sus datos personales:",
+      "items": {
+        "access": "Derecho de acceso: consultar todos sus datos personales.",
+        "rectification": "Derecho de rectificación: modificar su información de perfil.",
+        "deletion": "Derecho de supresión: eliminar su cuenta y todos los datos asociados.",
+        "export": "Derecho a la portabilidad: exportar sus datos en un formato estructurado.",
+        "objection": "Derecho de oposición: eliminar un documento para detener su procesamiento, o contactarnos."
+      },
+      "howTo": "Para ejercer estos derechos, escríbanos a la dirección indicada a continuación. Responderemos en un plazo de 30 días."
+    },
+    "cookies": {
+      "heading": "Cookies",
+      "body": "MesPapiers utiliza dos cookies, ambas estrictamente necesarias para el funcionamiento del servicio: mp_session mantiene su sesión iniciada (30 días) y NEXT_LOCALE recuerda su idioma (hasta que se cierra el navegador). No utilizamos ninguna cookie de seguimiento, análisis ni publicidad."
+    },
+    "contact": {
+      "heading": "Contacto",
+      "body": "Para cualquier pregunta sobre la protección de datos, contáctenos por correo electrónico: privacy@mespapiers.fr"
+    }
+  },
+  "terms": {
+    "title": "Condiciones generales de uso",
+    "lastUpdated": "Última actualización: octubre de 2026",
+    "acceptance": {
+      "heading": "Aceptación de las condiciones",
+      "body": "Al crear una cuenta o utilizar MesPapiers, acepta las presentes condiciones generales de uso. Si no acepta estas condiciones, le rogamos que no utilice el servicio."
+    },
+    "service": {
+      "heading": "Descripción del servicio",
+      "body": "MesPapiers es una herramienta de ayuda para los trámites administrativos franceses que ofrece:",
+      "items": {
+        "vault": "Una caja fuerte digital personal para almacenar y organizar sus documentos administrativos (DNI, seguros, etc.).",
+        "ai": "Un asistente basado en inteligencia artificial para analizar sus documentos y responder a sus preguntas sobre los trámites.",
+        "community": "Un espacio comunitario (canales, preguntas y respuestas) para intercambiar con otros usuarios sobre los trámites administrativos."
+      }
+    },
+    "accounts": {
+      "heading": "Cuentas de usuario",
+      "body": "Para utilizar MesPapiers, debe crear una cuenta. Se compromete a:",
+      "items": {
+        "accuracy": "Proporcionar información exacta al registrarse.",
+        "security": "Proteger la confidencialidad de su contraseña y no compartir su cuenta.",
+        "onePerPerson": "Crear una sola cuenta por persona."
+      }
+    },
+    "documents": {
+      "heading": "Documentos personales",
+      "body": "Sus documentos son privados y solo usted puede acceder a ellos. Usted es responsable de los documentos que importa. No importe documentos de los que no sea el titular legítimo. Los formatos aceptados son PDF, PNG o JPEG, con un tamaño máximo de 10 MB."
+    },
+    "ai": {
+      "heading": "Inteligencia artificial",
+      "body": "El asistente de IA proporciona información únicamente a título indicativo. Las respuestas no constituyen en ningún caso un asesoramiento jurídico, financiero o administrativo profesional. Verifique siempre la información importante en las fuentes oficiales (service-public.fr). Las comparaciones de precios o de mercado son indicativas, provienen de fuentes públicas y no constituyen asesoramiento financiero."
+    },
+    "community": {
+      "heading": "Reglas de la comunidad",
+      "body": "Al participar en los canales y debates, se compromete a:",
+      "items": {
+        "respectful": "Ser respetuoso con los demás usuarios.",
+        "noSpam": "No publicar contenido promocional ni spam.",
+        "noIllegal": "No publicar contenido ilegal ni que incite a actividades ilegales.",
+        "noPersonalData": "No compartir datos personales de terceros sin su consentimiento."
+      },
+      "moderation": "Los moderadores pueden ocultar o eliminar contenido que infrinja estas reglas. Las cuentas que infrinjan repetidamente pueden ser suspendidas."
+    },
+    "intellectualProperty": {
+      "heading": "Propiedad intelectual",
+      "body": "El código fuente, el diseño y los contenidos de MesPapiers están protegidos por derechos de autor. Usted conserva la plena propiedad de sus documentos personales y de sus contribuciones comunitarias."
+    },
+    "liability": {
+      "heading": "Limitación de responsabilidad",
+      "body": "MesPapiers se proporciona «tal cual». Nos esforzamos por garantizar la disponibilidad y seguridad del servicio, pero no garantizamos un funcionamiento ininterrumpido. No somos responsables de los daños derivados del uso de la información proporcionada por el asistente de IA o por otros usuarios en la comunidad."
+    },
+    "termination": {
+      "heading": "Rescisión",
+      "body": "Puede solicitarnos por correo electrónico la eliminación de su cuenta. Nos reservamos el derecho de suspender o eliminar una cuenta en caso de incumplimiento de las presentes condiciones, previa notificación."
+    },
+    "modifications": {
+      "heading": "Modificaciones de las condiciones",
+      "body": "Podemos modificar estas condiciones en cualquier momento. Los usuarios serán informados de cualquier modificación sustancial. El uso continuado del servicio tras la notificación constituye la aceptación de las nuevas condiciones."
+    },
+    "law": {
+      "heading": "Legislación aplicable",
+      "body": "Las presentes condiciones se rigen por el derecho francés. Cualquier litigio será sometido a los tribunales competentes de París."
+    },
+    "contact": {
+      "heading": "Contacto",
+      "body": "Para cualquier pregunta, contáctenos por correo electrónico: contact@mespapiers.fr"
     }
   },
   "assistant": {
