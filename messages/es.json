@@ -10,7 +10,8 @@
     "openMenu": "Abrir el menú",
     "closeMenu": "Cerrar el menú",
     "channels": "Canales",
-    "account": "Cuenta"
+    "account": "Cuenta",
+    "myData": "Mis datos"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -488,6 +489,12 @@
     "intro": "De acuerdo con el RGPD, puede consultar y recuperar en cualquier momento los datos que MesPapiers conserva sobre usted.",
     "exportTitle": "Exportar mis datos",
     "exportDesc": "Descargue una copia de sus datos personales (perfil, documentos, mensajes y actividad) en formato JSON.",
-    "exportButton": "Descargar mis datos"
+    "exportButton": "Descargar mis datos",
+    "deleteTitle": "Eliminar mi cuenta",
+    "deleteDesc": "Su cuenta y sus documentos se eliminarán de forma definitiva. Sus respuestas en los canales se mantendrán, pero sin su nombre.",
+    "passwordLabel": "Contraseña",
+    "deleteButton": "Eliminar mi cuenta",
+    "deletePending": "Eliminando…",
+    "wrongPassword": "Contraseña incorrecta."
   }
 }
