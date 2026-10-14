@@ -142,6 +142,7 @@ export async function modifAnswerUser(formData: FormData) {
 
   const answer = await prisma.answer.findFirst({
     where: { id: intAnswerId },
+    include: { thread: { select: { channelId: true } } },
   });
 
   // vérifie que la réponse existe
@@ -155,7 +156,19 @@ export async function modifAnswerUser(formData: FormData) {
     where: { id: intAnswerId },
     data: { content: newanswerTrim },
   });
-redirect({ href: `/channels/${intChannelId}`, locale: await getLocale() });
+  // An admin rewriting someone else's words is moderation: audited, as deleteAnswer does.
+  if (answer.userId !== ctx.user.id) {
+    await writeAudit({
+      actorUserId: ctx.user.id,
+      action: "answer:update",
+      targetType: "Answer",
+      targetId: String(intAnswerId),
+      channelId: answer.thread.channelId,
+    });
+  }
+  // The channel page 404s for a non-member (an admin), so send them back to the list.
+  const isMember = ctx.memberships.some((m) => m.channelId === intChannelId);
+  redirect({ href: isMember ? `/channels/${intChannelId}` : "/channels", locale: await getLocale() });
 }
 
 

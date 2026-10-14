@@ -10,6 +10,7 @@ import { inviteUser } from "./[id]/invite/action";
 import { editChannel } from "./[id]/edit/action";
 import { deleteChannel } from "./[id]/delete/action";
 import { createAnswer, deleteAnswer, modifAnswerUser } from "./[id]/actions";
+import { redirect } from "@/i18n/navigation";
 
 // requireUser() reads the cookie, and revalidatePath(), getLocale() and the localised
 // redirect() need a Next request, so the four are replaced. The context the actions
@@ -179,6 +180,21 @@ describe("editing and deleting a channel", () => {
     ]);
   });
 
+  it("sends a non-member admin back to /channels after an edit, a member to the channel", async () => {
+    const admin = await newUser("ADMIN");
+    const creator = await newUser();
+    const c = await newChannel({ [creator.id]: "MODERATOR" }, creator.id);
+
+    await signInAs(admin.id);
+    await editChannel(editForm(c.id, c.threadId));
+    // The channel page 404s for a non-member, so sending the admin there would look like a failure.
+    expect(vi.mocked(redirect)).toHaveBeenLastCalledWith({ href: "/channels", locale: "fr" });
+
+    await signInAs(creator.id);
+    await editChannel(editForm(c.id, c.threadId));
+    expect(vi.mocked(redirect)).toHaveBeenLastCalledWith({ href: `/channels/${c.id}`, locale: "fr" });
+  });
+
   it("refuses a delete by a moderator who is not the creator", async () => {
     const creator = await newUser();
     const mod = await newUser();
@@ -248,5 +264,26 @@ describe("answers", () => {
 
     expect(await prisma.answer.count({ where: { threadId: c.threadId } })).toBe(1);
     expect((await prisma.answer.findUnique({ where: { id: a1.id } }))?.content).toBe("Réponse");
+  });
+
+  it("audits an admin's rewrite of someone else's answer and sends the non-member admin to /channels; an author's own edit is not audited", async () => {
+    const admin = await newUser("ADMIN");
+    const mod = await newUser();
+    const author = await newUser();
+    const c = await newChannel({ [mod.id]: "MODERATOR", [author.id]: "MEMBER" }, mod.id);
+    const a1 = await newAnswer(c.threadId, author.id);
+
+    await signInAs(admin.id);
+    await modifAnswerUser(form({ answerId: a1.id, channelId: c.id, content: "Corrigé" }));
+    expect(vi.mocked(redirect)).toHaveBeenLastCalledWith({ href: "/channels", locale: "fr" });
+
+    await signInAs(author.id);
+    await modifAnswerUser(form({ answerId: a1.id, channelId: c.id, content: "Ma version" }));
+    expect(vi.mocked(redirect)).toHaveBeenLastCalledWith({ href: `/channels/${c.id}`, locale: "fr" });
+
+    expect((await prisma.answer.findUnique({ where: { id: a1.id } }))?.content).toBe("Ma version");
+    expect(await auditRows(c.id)).toEqual([
+      expect.objectContaining({ actorUserId: admin.id, action: "answer:update", targetType: "Answer", targetId: String(a1.id) }),
+    ]);
   });
 });
