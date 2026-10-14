@@ -328,6 +328,146 @@
       "failed": "Échec"
     }
   },
+  "footer": {
+    "nav": "Liens légaux",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation"
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "lastUpdated": "Dernière mise à jour : octobre 2026",
+    "intro": {
+      "heading": "Introduction",
+      "body": "MesPapiers est un service conçu pour vous aider dans vos démarches administratives françaises. La présente politique décrit quelles données personnelles nous collectons, comment nous les utilisons et quels sont vos droits. Le service est hébergé en France et soumis au Règlement Général sur la Protection des Données (RGPD)."
+    },
+    "dataCollected": {
+      "heading": "Données collectées",
+      "account": {
+        "heading": "Données de compte",
+        "body": "Lors de votre inscription, nous collectons votre adresse e-mail, un nom d'affichage et un mot de passe (stocké sous forme de hash Argon2id). Nous enregistrons également les sessions de connexion à des fins de sécurité."
+      },
+      "documents": {
+        "heading": "Documents",
+        "body": "Vous pouvez importer des documents (PDF, PNG, JPEG) dans votre coffre-fort personnel. Les fichiers sont stockés dans la base de données du service. Seul vous, en tant que propriétaire, pouvez accéder à vos documents : même les administrateurs ne peuvent pas les consulter."
+      },
+      "community": {
+        "heading": "Contenus communautaires",
+        "body": "Les messages publiés dans les channels, les questions, les réponses et les votes sont visibles par les autres membres du channel concerné. Votre nom d'affichage est associé à vos contributions."
+      }
+    },
+    "aiProcessing": {
+      "heading": "Traitement par intelligence artificielle",
+      "body": "MesPapiers utilise les services d'Anthropic (anthropic.com) comme sous-traitant pour le traitement de vos documents par IA. Les données suivantes peuvent être envoyées aux serveurs d'Anthropic :",
+      "items": {
+        "classification": "Le contenu de vos documents (texte extrait ou image) pour la classification automatique et l'extraction de champs (nom, numéro de document, dates d'expiration, etc.).",
+        "assistant": "Le contenu de vos documents et vos questions posées à l'assistant IA, afin de vous fournir des réponses personnalisées sur vos démarches."
+      },
+      "noTraining": "Conformément à la politique d'Anthropic pour les utilisateurs de l'API, vos données ne sont pas utilisées pour entraîner leurs modèles d'IA. Anthropic supprime les données transmises via l'API sous 30 jours, sauf si elle doit les conserver plus longtemps pour faire respecter ses règles d'utilisation ou pour des raisons légales."
+    },
+    "retention": {
+      "heading": "Durée de conservation",
+      "body": "Vos données sont conservées aussi longtemps que votre compte est actif :",
+      "items": {
+        "account": "Données de compte : conservées jusqu'à la suppression de votre compte.",
+        "documents": "Documents : conservés jusqu'à leur suppression par vos soins ou la suppression de votre compte.",
+        "community": "Contenus communautaires : conservés tant que le channel existe. En cas de suppression de votre compte, vos messages sont anonymisés.",
+        "sessions": "Sessions de connexion : expiration automatique après 30 jours."
+      }
+    },
+    "sharing": {
+      "heading": "Partage des données",
+      "body": "Vos données personnelles ne sont jamais vendues ni partagées à des fins publicitaires. Elles ne sont transmises qu'à Anthropic dans le cadre strict du traitement IA décrit ci-dessus. Aucun autre tiers n'a accès à vos données, sauf obligation légale."
+    },
+    "rights": {
+      "heading": "Vos droits",
+      "body": "Conformément au RGPD, vous disposez des droits suivants sur vos données personnelles :",
+      "items": {
+        "access": "Droit d'accès : consulter l'ensemble de vos données personnelles.",
+        "rectification": "Droit de rectification : modifier vos informations de profil.",
+        "deletion": "Droit à l'effacement : supprimer votre compte et toutes vos données associées.",
+        "export": "Droit à la portabilité : exporter vos données dans un format structuré.",
+        "objection": "Droit d'opposition : supprimer un document pour mettre fin à son traitement, ou nous contacter."
+      },
+      "howTo": "Pour exercer ces droits, écrivez-nous à l'adresse indiquée ci-dessous. Nous répondrons dans un délai de 30 jours."
+    },
+    "cookies": {
+      "heading": "Cookies",
+      "body": "MesPapiers utilise deux cookies, tous deux strictement nécessaires au fonctionnement du service : mp_session maintient votre connexion (30 jours) et NEXT_LOCALE mémorise votre langue (jusqu'à la fermeture du navigateur). Nous n'utilisons aucun cookie de suivi, d'analyse ou de publicité."
+    },
+    "contact": {
+      "heading": "Contact",
+      "body": "Pour toute question relative à la protection de vos données, contactez-nous par e-mail : privacy@mespapiers.fr"
+    }
+  },
+  "terms": {
+    "title": "Conditions générales d'utilisation",
+    "lastUpdated": "Dernière mise à jour : octobre 2026",
+    "acceptance": {
+      "heading": "Acceptation des conditions",
+      "body": "En créant un compte ou en utilisant MesPapiers, vous acceptez les présentes conditions générales d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser le service."
+    },
+    "service": {
+      "heading": "Description du service",
+      "body": "MesPapiers est un outil d'aide aux démarches administratives françaises qui propose :",
+      "items": {
+        "vault": "Un coffre-fort numérique personnel pour stocker et organiser vos documents administratifs (carte d'identité, assurances, etc.).",
+        "ai": "Un assistant basé sur l'intelligence artificielle pour analyser vos documents et répondre à vos questions sur les démarches.",
+        "community": "Un espace communautaire (channels, questions-réponses) pour échanger avec d'autres utilisateurs sur les démarches administratives."
+      }
+    },
+    "accounts": {
+      "heading": "Comptes utilisateurs",
+      "body": "Pour utiliser MesPapiers, vous devez créer un compte. Vous vous engagez à :",
+      "items": {
+        "accuracy": "Fournir des informations exactes lors de votre inscription.",
+        "security": "Protéger la confidentialité de votre mot de passe et ne pas partager votre compte.",
+        "onePerPerson": "Ne créer qu'un seul compte par personne."
+      }
+    },
+    "documents": {
+      "heading": "Documents personnels",
+      "body": "Vos documents sont privés et accessibles uniquement par vous. Vous êtes responsable des documents que vous importez. N'importez pas de documents dont vous n'êtes pas le détenteur légitime. Les documents acceptés sont au format PDF, PNG ou JPEG, d'une taille maximale de 10 Mo."
+    },
+    "ai": {
+      "heading": "Intelligence artificielle",
+      "body": "L'assistant IA fournit des informations à titre indicatif uniquement. Les réponses ne constituent en aucun cas un conseil juridique, financier ou administratif professionnel. Vérifiez toujours les informations importantes auprès des sources officielles (service-public.fr). Les comparaisons de prix ou de marché sont indicatives, proviennent de sources publiques et ne constituent pas un conseil financier."
+    },
+    "community": {
+      "heading": "Règles de la communauté",
+      "body": "En participant aux channels et discussions, vous vous engagez à :",
+      "items": {
+        "respectful": "Rester respectueux envers les autres utilisateurs.",
+        "noSpam": "Ne pas publier de contenu promotionnel ou de spam.",
+        "noIllegal": "Ne pas publier de contenu illégal ou incitant à des activités illégales.",
+        "noPersonalData": "Ne pas partager de données personnelles d'autrui sans son consentement."
+      },
+      "moderation": "Les modérateurs peuvent masquer ou supprimer du contenu qui enfreint ces règles. Les comptes contrevenant de manière répétée peuvent être suspendus."
+    },
+    "intellectualProperty": {
+      "heading": "Propriété intellectuelle",
+      "body": "Le code source, le design et les contenus de MesPapiers sont protégés par le droit d'auteur. Vous conservez la pleine propriété de vos documents personnels et de vos contributions communautaires."
+    },
+    "liability": {
+      "heading": "Limitation de responsabilité",
+      "body": "MesPapiers est fourni « en l'état ». Nous nous efforçons d'assurer la disponibilité et la sécurité du service, mais ne garantissons pas un fonctionnement ininterrompu. Nous ne sommes pas responsables des dommages résultant de l'utilisation des informations fournies par l'assistant IA ou par d'autres utilisateurs dans la communauté."
+    },
+    "termination": {
+      "heading": "Résiliation",
+      "body": "Vous pouvez nous demander par e-mail de supprimer votre compte. Nous nous réservons le droit de suspendre ou de supprimer un compte en cas de violation des présentes conditions, après notification."
+    },
+    "modifications": {
+      "heading": "Modifications des conditions",
+      "body": "Nous pouvons modifier ces conditions à tout moment. Les utilisateurs seront informés de toute modification substantielle. La poursuite de l'utilisation du service après notification vaut acceptation des nouvelles conditions."
+    },
+    "law": {
+      "heading": "Droit applicable",
+      "body": "Les présentes conditions sont régies par le droit français. Tout litige sera soumis aux tribunaux compétents de Paris."
+    },
+    "contact": {
+      "heading": "Contact",
+      "body": "Pour toute question, contactez-nous par e-mail : contact@mespapiers.fr"
+    }
+  },
   "assistant": {
     "title": "Assistant IA",
     "subtitle": "Posez vos questions sur ce document : renouvellement, démarches, délais…",
