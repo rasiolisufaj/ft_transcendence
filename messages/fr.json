@@ -362,7 +362,7 @@
         "classification": "Le contenu de vos documents (texte extrait ou image) pour la classification automatique et l'extraction de champs (nom, numéro de document, dates d'expiration, etc.).",
         "assistant": "Le contenu de vos documents et vos questions posées à l'assistant IA, afin de vous fournir des réponses personnalisées sur vos démarches."
       },
-      "noTraining": "Conformément à la politique d'Anthropic pour les utilisateurs de l'API, vos données ne sont pas utilisées pour entraîner leurs modèles d'IA. Le traitement est effectué à la demande et aucune donnée de document n'est conservée par Anthropic au-delà du traitement de la requête."
+      "noTraining": "Conformément à la politique d'Anthropic pour les utilisateurs de l'API, vos données ne sont pas utilisées pour entraîner leurs modèles d'IA. Anthropic supprime les données transmises via l'API sous 30 jours, sauf si elle doit les conserver plus longtemps pour faire respecter ses règles d'utilisation ou pour des raisons légales."
     },
     "retention": {
       "heading": "Durée de conservation",
@@ -386,13 +386,13 @@
         "rectification": "Droit de rectification : modifier vos informations de profil.",
         "deletion": "Droit à l'effacement : supprimer votre compte et toutes vos données associées.",
         "export": "Droit à la portabilité : exporter vos données dans un format structuré.",
-        "objection": "Droit d'opposition : vous opposer au traitement IA de vos documents."
+        "objection": "Droit d'opposition : supprimer un document pour mettre fin à son traitement, ou nous contacter."
       },
-      "howTo": "Pour exercer ces droits, utilisez la page de paramètres de votre compte ou contactez-nous à l'adresse indiquée ci-dessous. Nous répondrons dans un délai de 30 jours."
+      "howTo": "Pour exercer ces droits, écrivez-nous à l'adresse indiquée ci-dessous. Nous répondrons dans un délai de 30 jours."
     },
     "cookies": {
       "heading": "Cookies",
-      "body": "MesPapiers utilise un seul cookie de session (mp_session) strictement nécessaire au fonctionnement du service. Ce cookie permet de maintenir votre connexion. Nous n'utilisons aucun cookie de suivi, d'analyse ou de publicité."
+      "body": "MesPapiers utilise deux cookies, tous deux strictement nécessaires au fonctionnement du service : mp_session maintient votre connexion (30 jours) et NEXT_LOCALE mémorise votre langue (jusqu'à la fermeture du navigateur). Nous n'utilisons aucun cookie de suivi, d'analyse ou de publicité."
     },
     "contact": {
       "heading": "Contact",
@@ -453,7 +453,7 @@
     },
     "termination": {
       "heading": "Résiliation",
-      "body": "Vous pouvez supprimer votre compte à tout moment. Nous nous réservons le droit de suspendre ou de supprimer un compte en cas de violation des présentes conditions, après notification."
+      "body": "Vous pouvez nous demander par e-mail de supprimer votre compte. Nous nous réservons le droit de suspendre ou de supprimer un compte en cas de violation des présentes conditions, après notification."
     },
     "modifications": {
       "heading": "Modifications des conditions",

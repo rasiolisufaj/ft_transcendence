@@ -362,7 +362,7 @@
         "classification": "The content of your documents (extracted text or image) for automatic classification and field extraction (name, document number, expiry dates, etc.).",
         "assistant": "The content of your documents and questions you ask the AI assistant, in order to provide personalised answers about your paperwork."
       },
-      "noTraining": "In accordance with Anthropic's API usage policy, your data is not used to train their AI models. Processing is performed on demand and no document data is retained by Anthropic beyond the processing of the request."
+      "noTraining": "In accordance with Anthropic's API usage policy, your data is not used to train their AI models. Anthropic deletes API data within 30 days, unless it must keep it longer for policy enforcement or legal reasons."
     },
     "retention": {
       "heading": "Data retention",
@@ -386,13 +386,13 @@
         "rectification": "Right of rectification: correct your profile information.",
         "deletion": "Right to erasure: delete your account and all associated data.",
         "export": "Right to data portability: export your data in a structured format.",
-        "objection": "Right to object: object to AI processing of your documents."
+        "objection": "Right to object: delete a document to stop its processing, or contact us."
       },
-      "howTo": "To exercise these rights, use your account settings page or contact us at the address below. We will respond within 30 days."
+      "howTo": "To exercise these rights, email us at the address below. We will respond within 30 days."
     },
     "cookies": {
       "heading": "Cookies",
-      "body": "MesPapiers uses a single session cookie (mp_session) strictly necessary for the service to function. This cookie maintains your login. We do not use any tracking, analytics or advertising cookies."
+      "body": "MesPapiers uses two cookies, both strictly necessary for the service to function: mp_session keeps you logged in (30 days), and NEXT_LOCALE remembers your language (until the browser closes). We do not use any tracking, analytics or advertising cookies."
     },
     "contact": {
       "heading": "Contact",
@@ -453,7 +453,7 @@
     },
     "termination": {
       "heading": "Termination",
-      "body": "You can delete your account at any time. We reserve the right to suspend or delete an account in case of a breach of these terms, after notification."
+      "body": "You can ask us by email to delete your account. We reserve the right to suspend or delete an account in case of a breach of these terms, after notification."
     },
     "modifications": {
       "heading": "Changes to the terms",

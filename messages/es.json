@@ -362,7 +362,7 @@
         "classification": "El contenido de sus documentos (texto extraído o imagen) para la clasificación automática y la extracción de campos (nombre, número de documento, fechas de vencimiento, etc.).",
         "assistant": "El contenido de sus documentos y las preguntas que hace al asistente de IA, para proporcionarle respuestas personalizadas sobre sus trámites."
       },
-      "noTraining": "De acuerdo con la política de uso de la API de Anthropic, sus datos no se utilizan para entrenar sus modelos de IA. El procesamiento se realiza bajo demanda y Anthropic no conserva ningún dato de documento más allá del procesamiento de la solicitud."
+      "noTraining": "De acuerdo con la política de uso de la API de Anthropic, sus datos no se utilizan para entrenar sus modelos de IA. Anthropic elimina los datos de la API en un plazo de 30 días, salvo que deba conservarlos más tiempo para hacer cumplir sus políticas o por motivos legales."
     },
     "retention": {
       "heading": "Conservación de datos",
@@ -386,13 +386,13 @@
         "rectification": "Derecho de rectificación: modificar su información de perfil.",
         "deletion": "Derecho de supresión: eliminar su cuenta y todos los datos asociados.",
         "export": "Derecho a la portabilidad: exportar sus datos en un formato estructurado.",
-        "objection": "Derecho de oposición: oponerse al procesamiento de IA de sus documentos."
+        "objection": "Derecho de oposición: eliminar un documento para detener su procesamiento, o contactarnos."
       },
-      "howTo": "Para ejercer estos derechos, utilice la página de configuración de su cuenta o contáctenos en la dirección indicada a continuación. Responderemos en un plazo de 30 días."
+      "howTo": "Para ejercer estos derechos, escríbanos a la dirección indicada a continuación. Responderemos en un plazo de 30 días."
     },
     "cookies": {
       "heading": "Cookies",
-      "body": "MesPapiers utiliza una única cookie de sesión (mp_session) estrictamente necesaria para el funcionamiento del servicio. Esta cookie mantiene su sesión iniciada. No utilizamos ninguna cookie de seguimiento, análisis ni publicidad."
+      "body": "MesPapiers utiliza dos cookies, ambas estrictamente necesarias para el funcionamiento del servicio: mp_session mantiene su sesión iniciada (30 días) y NEXT_LOCALE recuerda su idioma (hasta que se cierra el navegador). No utilizamos ninguna cookie de seguimiento, análisis ni publicidad."
     },
     "contact": {
       "heading": "Contacto",
@@ -453,7 +453,7 @@
     },
     "termination": {
       "heading": "Rescisión",
-      "body": "Puede eliminar su cuenta en cualquier momento. Nos reservamos el derecho de suspender o eliminar una cuenta en caso de incumplimiento de las presentes condiciones, previa notificación."
+      "body": "Puede solicitarnos por correo electrónico la eliminación de su cuenta. Nos reservamos el derecho de suspender o eliminar una cuenta en caso de incumplimiento de las presentes condiciones, previa notificación."
     },
     "modifications": {
       "heading": "Modificaciones de las condiciones",
