@@ -2,7 +2,6 @@ import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
-import { createAnswer, deleteAnswer } from "../actions";
 import { editChannel } from "./action";
 import { requireUser } from "@/lib/auth/session";
 

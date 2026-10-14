@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { getUserChannels } from "./create/data";
@@ -22,9 +23,11 @@ export default async function ChannelsHomePage() {
             href="/channels/create"
             className="flex items-center gap-4 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-500 dark:hover:bg-zinc-800/50"
           >
-            <img
+            <Image
               src="/icons/channel/channel-create.svg"
               alt=""
+              width={24}
+              height={24}
               className="h-6 w-6 shrink-0"
             />
             <div>
@@ -41,9 +44,11 @@ export default async function ChannelsHomePage() {
             href="/channels/join"
             className="flex items-center gap-4 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-500 dark:hover:bg-zinc-800/50"
           >
-            <img
+            <Image
               src="/icons/channel/channel-join.svg"
               alt=""
+              width={24}
+              height={24}
               className="h-6 w-6 shrink-0"
             />
             <div>
@@ -60,9 +65,11 @@ export default async function ChannelsHomePage() {
             href="/channels/invitations"
             className="flex items-center gap-4 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-500 dark:hover:bg-zinc-800/50"
           >
-            <img
+            <Image
               src="/icons/channel/channel-invite.svg"
               alt=""
+              width={24}
+              height={24}
               className="h-6 w-6 shrink-0"
             />
             <div>

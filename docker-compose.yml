@@ -24,25 +24,15 @@ services:
       - "3000"
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
-      # Document classification on upload. Absent = documents stay PENDING
-      # instead of the upload failing, so the app runs without a key.
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
-      # Signs WebSocket tickets (POST /api/auth/ws-ticket). Absent = that route
-      # answers 500; the rest of the app runs.
       WS_TICKET_SECRET: "${WS_TICKET_SECRET:-}"
+      SMTP_HOST: "${SMTP_HOST:-mailpit}"   
+      SMTP_PORT: "${SMTP_PORT:-1025}"      
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./src:/app/src
-      - ./public:/app/public
-      - ./prisma:/app/prisma
-      # Le Dockerfile fait `COPY . .`, donc tout fichier de config a la racine est
-      # figé dans l'image : l'éditer n'a aucun effet sans rebuild. On monte celui-ci
-      # parce que `next dev` redémarre tout seul quand il change.
-      - ./next.config.ts:/app/next.config.ts
-      - ./messages:/app/messages
-
+      mailpit:                             
+        condition: service_started        
   # ── PostgreSQL database ────────────────────────────────────────────────────
   db:
     image: postgres:17-alpine
@@ -61,6 +51,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+  # ── Mailpit (fake mail server for dev) ─────────────────────────────────────
+  mailpit:
+    image: axllent/mailpit
+    container_name: mespapiers_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
 
 volumes:
   postgres-data:

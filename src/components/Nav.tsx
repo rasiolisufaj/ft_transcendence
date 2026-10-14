@@ -6,7 +6,8 @@ import { LocaleSwitcher } from "./LocaleSwitcher";
 import { MobileMenu } from "./MobileMenu";
 import { AccountLinks, UserMenu } from "./UserMenu";
 
-const link = "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100";
+const link =
+  "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100";
 const primary =
   "rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
 
@@ -33,7 +34,9 @@ export async function Nav() {
 
   const panelLinks = ctx ? (
     <>
-      <p className="truncate px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">{ctx.user.displayName}</p>
+      <p className="truncate px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+        {ctx.user.displayName}
+      </p>
       <ul>
         <AccountLinks isAdmin={isAdmin} />
       </ul>
