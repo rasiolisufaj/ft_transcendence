@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { routing } from "@/i18n/routing";
 import { enableStaticRendering } from "@/i18n/static";
@@ -52,6 +53,7 @@ export default async function LocaleLayout({
           <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
             {children}
           </main>
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

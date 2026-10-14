@@ -328,6 +328,146 @@
       "failed": "Failed"
     }
   },
+  "footer": {
+    "nav": "Legal links",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: October 2026",
+    "intro": {
+      "heading": "Introduction",
+      "body": "MesPapiers is a service designed to help you with French administrative paperwork. This policy describes what personal data we collect, how we use it and what your rights are. The service is hosted in France and subject to the General Data Protection Regulation (GDPR)."
+    },
+    "dataCollected": {
+      "heading": "Data collected",
+      "account": {
+        "heading": "Account data",
+        "body": "When you sign up, we collect your email address, a display name and a password (stored as an Argon2id hash). We also record login sessions for security purposes."
+      },
+      "documents": {
+        "heading": "Documents",
+        "body": "You can upload documents (PDF, PNG, JPEG) to your personal vault. Files are stored in the service's database. Only you, as the owner, can access your documents — even administrators cannot view them."
+      },
+      "community": {
+        "heading": "Community content",
+        "body": "Messages posted in channels, questions, answers and votes are visible to other members of the relevant channel. Your display name is associated with your contributions."
+      }
+    },
+    "aiProcessing": {
+      "heading": "Artificial intelligence processing",
+      "body": "MesPapiers uses Anthropic (anthropic.com) as a subprocessor for AI-based document processing. The following data may be sent to Anthropic's servers:",
+      "items": {
+        "classification": "The content of your documents (extracted text or image) for automatic classification and field extraction (name, document number, expiry dates, etc.).",
+        "assistant": "The content of your documents and questions you ask the AI assistant, in order to provide personalised answers about your paperwork."
+      },
+      "noTraining": "In accordance with Anthropic's API usage policy, your data is not used to train their AI models. Anthropic deletes API data within 30 days, unless it must keep it longer for policy enforcement or legal reasons."
+    },
+    "retention": {
+      "heading": "Data retention",
+      "body": "Your data is kept for as long as your account is active:",
+      "items": {
+        "account": "Account data: retained until you delete your account.",
+        "documents": "Documents: retained until you delete them or delete your account.",
+        "community": "Community content: retained as long as the channel exists. If you delete your account, your messages are anonymised.",
+        "sessions": "Login sessions: automatically expire after 30 days."
+      }
+    },
+    "sharing": {
+      "heading": "Data sharing",
+      "body": "Your personal data is never sold or shared for advertising purposes. It is only transmitted to Anthropic within the strict scope of the AI processing described above. No other third party has access to your data, except where required by law."
+    },
+    "rights": {
+      "heading": "Your rights",
+      "body": "Under the GDPR, you have the following rights over your personal data:",
+      "items": {
+        "access": "Right of access: view all your personal data.",
+        "rectification": "Right of rectification: correct your profile information.",
+        "deletion": "Right to erasure: delete your account and all associated data.",
+        "export": "Right to data portability: export your data in a structured format.",
+        "objection": "Right to object: delete a document to stop its processing, or contact us."
+      },
+      "howTo": "To exercise these rights, email us at the address below. We will respond within 30 days."
+    },
+    "cookies": {
+      "heading": "Cookies",
+      "body": "MesPapiers uses two cookies, both strictly necessary for the service to function: mp_session keeps you logged in (30 days), and NEXT_LOCALE remembers your language (until the browser closes). We do not use any tracking, analytics or advertising cookies."
+    },
+    "contact": {
+      "heading": "Contact",
+      "body": "For any question about data protection, contact us by email: privacy@mespapiers.fr"
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: October 2026",
+    "acceptance": {
+      "heading": "Acceptance of terms",
+      "body": "By creating an account or using MesPapiers, you accept these terms of service. If you do not accept these terms, please do not use the service."
+    },
+    "service": {
+      "heading": "Description of the service",
+      "body": "MesPapiers is a tool to help with French administrative paperwork, offering:",
+      "items": {
+        "vault": "A personal digital vault to store and organise your administrative documents (ID card, insurance, etc.).",
+        "ai": "An AI-powered assistant to analyse your documents and answer questions about procedures.",
+        "community": "A community space (channels, Q&A) to discuss administrative procedures with other users."
+      }
+    },
+    "accounts": {
+      "heading": "User accounts",
+      "body": "To use MesPapiers, you must create an account. You agree to:",
+      "items": {
+        "accuracy": "Provide accurate information when signing up.",
+        "security": "Keep your password confidential and not share your account.",
+        "onePerPerson": "Create only one account per person."
+      }
+    },
+    "documents": {
+      "heading": "Personal documents",
+      "body": "Your documents are private and accessible only by you. You are responsible for the documents you upload. Do not upload documents that you are not the legitimate holder of. Accepted formats are PDF, PNG or JPEG, with a maximum size of 10 MB."
+    },
+    "ai": {
+      "heading": "Artificial intelligence",
+      "body": "The AI assistant provides information for guidance only. Responses do not constitute professional legal, financial or administrative advice. Always verify important information from official sources (service-public.fr). Price or market comparisons are indicative, sourced from public data, and do not constitute financial advice."
+    },
+    "community": {
+      "heading": "Community rules",
+      "body": "By participating in channels and discussions, you agree to:",
+      "items": {
+        "respectful": "Be respectful towards other users.",
+        "noSpam": "Not post promotional content or spam.",
+        "noIllegal": "Not post illegal content or content encouraging illegal activities.",
+        "noPersonalData": "Not share other people's personal data without their consent."
+      },
+      "moderation": "Moderators may hide or remove content that violates these rules. Accounts that repeatedly breach them may be suspended."
+    },
+    "intellectualProperty": {
+      "heading": "Intellectual property",
+      "body": "The source code, design and content of MesPapiers are protected by copyright. You retain full ownership of your personal documents and community contributions."
+    },
+    "liability": {
+      "heading": "Limitation of liability",
+      "body": "MesPapiers is provided \"as is\". We strive to ensure the availability and security of the service, but do not guarantee uninterrupted operation. We are not liable for damages resulting from the use of information provided by the AI assistant or by other users in the community."
+    },
+    "termination": {
+      "heading": "Termination",
+      "body": "You can ask us by email to delete your account. We reserve the right to suspend or delete an account in case of a breach of these terms, after notification."
+    },
+    "modifications": {
+      "heading": "Changes to the terms",
+      "body": "We may modify these terms at any time. Users will be notified of any substantial changes. Continued use of the service after notification constitutes acceptance of the new terms."
+    },
+    "law": {
+      "heading": "Governing law",
+      "body": "These terms are governed by French law. Any dispute shall be submitted to the competent courts of Paris."
+    },
+    "contact": {
+      "heading": "Contact",
+      "body": "For any questions, contact us by email: contact@mespapiers.fr"
+    }
+  },
   "assistant": {
     "title": "AI Assistant",
     "subtitle": "Ask questions about this document: renewal, procedures, deadlines…",
