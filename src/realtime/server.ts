@@ -1,5 +1,8 @@
+import type { IncomingMessage } from "node:http";
 import type { AddressInfo } from "node:net";
 import { WebSocketServer, type WebSocket } from "ws";
+import { verifyTicket } from "@/lib/auth/ticket";
+import { readTicket } from "./handshake";
 import { log } from "./log";
 
 type Options = {
@@ -8,7 +11,21 @@ type Options = {
 };
 
 export function startServer({ port, heartbeatMs }: Options) {
-  const server = new WebSocketServer({ port });
+  // verifyClient can only say yes or no: the user id waits here until "connection".
+  const users = new WeakMap<IncomingMessage, string>();
+
+  const server = new WebSocketServer({
+    port,
+    verifyClient: ({ req }: { req: IncomingMessage }) => {
+      const ticket = readTicket(req.url);
+      const result = ticket ? verifyTicket(ticket) : null;
+      if (!result) {
+        return false; // ws answers 401
+      }
+      users.set(req, result.userId);
+      return true;
+    },
+  });
 
   server.on("listening", () => {
     log("info", "realtime server listening", { port: (server.address() as AddressInfo).port });
@@ -20,10 +37,11 @@ export function startServer({ port, heartbeatMs }: Options) {
 
   const alive = new Set<WebSocket>();
 
-  server.on("connection", (socket) => {
+  server.on("connection", (socket, request) => {
+    const userId = users.get(request);
     alive.add(socket);
-    log("info", "client connected", { clients: server.clients.size });
-    socket.send(JSON.stringify({ type: "hello" }));
+    log("info", "client connected", { userId, clients: server.clients.size });
+    socket.send(JSON.stringify({ type: "hello", userId }));
 
     socket.on("pong", () => {
       alive.add(socket);
