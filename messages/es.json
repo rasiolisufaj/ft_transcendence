@@ -488,7 +488,7 @@
     "title": "Mis datos",
     "intro": "De acuerdo con el RGPD, puede consultar y recuperar en cualquier momento los datos que MesPapiers conserva sobre usted.",
     "exportTitle": "Exportar mis datos",
-    "exportDesc": "Descargue una copia de sus datos personales (perfil, documentos, mensajes y actividad) en formato JSON.",
+    "exportDesc": "Descargue una copia de sus datos personales (perfil, documentos, mensajes y actividad) en un archivo ZIP (sus datos en JSON + sus archivos originales).",
     "exportButton": "Descargar mis datos",
     "deleteTitle": "Eliminar mi cuenta",
     "deleteDesc": "Su cuenta y sus documentos se eliminarán de forma definitiva. Sus respuestas en los canales se mantendrán, pero sin su nombre.",

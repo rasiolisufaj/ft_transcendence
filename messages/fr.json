@@ -488,7 +488,7 @@
     "title": "Mes données",
     "intro": "Conformément au RGPD, vous pouvez consulter et récupérer à tout moment les données que MesPapiers conserve sur vous.",
     "exportTitle": "Exporter mes données",
-    "exportDesc": "Téléchargez une copie de vos données personnelles (profil, documents, messages et activité) au format JSON.",
+    "exportDesc": "Téléchargez une copie de vos données personnelles (profil, documents, messages et activité) dans un fichier ZIP (données en JSON + vos fichiers originaux).",
     "exportButton": "Télécharger mes données",
     "deleteTitle": "Supprimer mon compte",
     "deleteDesc": "Votre compte et vos documents seront effacés définitivement. Vos réponses dans les channels resteront, mais sans votre nom.",

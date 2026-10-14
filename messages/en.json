@@ -488,7 +488,7 @@
     "title": "My data",
     "intro": "Under the GDPR, you can view and retrieve the data MesPapiers holds about you at any time.",
     "exportTitle": "Export my data",
-    "exportDesc": "Download a copy of your personal data (profile, documents, messages and activity) as a JSON file.",
+    "exportDesc": "Download a copy of your personal data (profile, documents, messages and activity) as a ZIP file (your data as JSON + your original files).",
     "exportButton": "Download my data",
     "deleteTitle": "Delete my account",
     "deleteDesc": "Your account and your documents will be deleted forever. Your answers in channels will stay, but without your name.",
