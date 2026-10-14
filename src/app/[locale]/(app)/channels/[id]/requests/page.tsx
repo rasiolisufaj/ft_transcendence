@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 
-import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { can } from "@/lib/auth/policy";
 import { Link } from "@/i18n/navigation";
 import { getChannelJoinRequests } from "./data";
 import { acceptJoinRequest, rejectJoinRequest } from "./action";
@@ -20,15 +20,9 @@ export default async function ChannelRequestsPage({
     notFound();
   }
 
-  const { user } = await requireUser();
-
-  const userMember = await prisma.channelMember.findFirst({
-    where: {
-      userId: user.id,
-      channelId: id,
-    },
-  });
-  if (!userMember || userMember.role !== "MODERATOR") {
+  const ctx = await requireUser();
+  // The same check as acceptJoinRequest / rejectJoinRequest.
+  if (!can(ctx, "channel:moderate", { channelId: id })) {
     notFound();
   }
 
