@@ -23,10 +23,10 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 npm run db:generate
 
 npm test                                                                    # everything
-npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" --reporter=verbose    # auth only
+npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" "src/app/[locale]/(app)/channels" --reporter=verbose    # auth only
 ```
 
-Expected: `npm test` reports **160 passed**. The auth part is 8 files and 79 tests; the rest is the documents code. The verbose run prints each test name with a ✓.
+Expected: `npm test` reports **208 passed** (17 files). The auth part is 9 files and 90 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓.
 
 | File | What it proves |
 |---|---|
@@ -36,6 +36,7 @@ Expected: `npm test` reports **160 passed**. The auth part is 8 files and 79 tes
 | [login/actions.test.ts](<../src/app/[locale]/(auth)/login/actions.test.ts>) | the action returns the schema's errors; 6 failures lock an email for 15 minutes |
 | [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything except touch another user's documents (the vault is owner-only, even for an admin); a moderator acts only in their own channel, and moderation is never granted by ownership; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` and `channel:manageRoles` are admin-only, even on your own account. Plus the C4 truth table: one row per `Action` (23) with the resource its caller passes and the answer for admin, moderator, member, owner and stranger; a new `Action` without a row fails the typecheck |
 | [admin/users/actions.test.ts](<../src/app/[locale]/(app)/admin/users/actions.test.ts>) | a non-admin cannot change a role or delete a user; an admin cannot demote or delete themselves; a role change ends that user's sessions; every change writes one `AuditLog` row; a role other than USER/ADMIN is refused; a double click or a stale page (user already gone, role already set) changes nothing and does not throw. Uses the real DB. |
+| [channels/channel-policy.test.ts](<../src/app/[locale]/(app)/channels/channel-policy.test.ts>) | phase 5, the policy in the channel actions: a plain member is refused every moderation action; a moderator of another channel cannot kick there; an admin kicks in a channel with no moderator; a member cannot edit a channel, a moderator who is not the creator can; that moderator cannot delete it, the creator can; a member cannot delete someone else's answer, a moderator can; a non-member cannot post; a moderator cannot rewrite someone else's answer, an admin's rewrite is audited; a non-member admin is sent back to `/channels` after an edit; every privileged action writes one `AuditLog` row, once, after it happened. Uses the real DB. |
 | [audit.test.ts](../src/lib/audit.test.ts) | `writeAudit()` records the actor, action, target and channel; a failed write is logged and never throws. Uses the real DB. |
 
 To run one test by name: `npx vitest run -t "never extends"`.
@@ -289,6 +290,24 @@ Log in as `amir@gmail.com` (USER) in one browser and `rasiol@gmail.com` (ADMIN) 
 | *Supprimer* on a throwaway account, then **double-click** *Confirmer* | The row disappears; the account and its sessions and documents are gone; one `user:delete` row, and the console stays empty (the second click finds nothing to delete) |
 | `select "actorUserId", action, "targetId", metadata from "AuditLog" order by "createdAt" desc limit 3;` | One row per change, newest first: `user:delete`, then two `user:setGlobalRole` with `{"role": "USER"}` and `{"role": "ADMIN"}`, all with rasiol's id as the actor |
 | Resize to 375, 768 and 1440 px | No sideways scroll; below 640 px the table keeps the user and the actions, the role badge moves under the email |
+
+### B12. The policy in the channels (phase 5)
+
+Start from a fresh seed (`npm run db:reset`, which destroys local data and re-seeds), and take the channel ids from the URLs (after a reset: 1 *Assurance auto*, 4 *Carte d'identité*, 5 *Impôts*). Every login uses `motdepasse123`.
+
+Seed: *Assurance auto* is moderated by Amir (members Adrien, Lina, Karim; answers by Adrien and Karim). *Carte d'identité* is moderated by Syu (members Alexandre, Lina). *Impôts* is moderated by Alexandre (Karim is a member). Rasiol is the ADMIN.
+
+| As | Action | Expected |
+|---|---|---|
+| lina (member of *Assurance auto*) | open `/fr/channels/<auto>/kick`, `/edit`, `/delete`, `/requests`, `/invite` | 404 on each (5.3: a plain member is refused) |
+| amir (moderator of *Assurance auto*) | the channel page | a delete button (no edit) on Adrien's and Karim's answers; delete Karim's: it disappears |
+| amir | on `/fr/channels/<auto>/kick`, change the hidden `channelId` of **Karim's** form to *Impôts*' id in DevTools (Karim is in both channels), then click *Kick* | refused (5.3: cross-channel): Next's error overlay `Forbidden: channel:moderate` and one console error, expected only for a forged request; Karim stays in both channels |
+| rasiol (ADMIN) | in `/fr/admin/users`, delete Syu (creator and only moderator of *Carte d'identité*); then open `/fr/channels/<identite>/kick` and kick Lina | she disappears (5.3: an admin moderates a channel with no moderator, §C-19) |
+| rasiol | open `/fr/channels/<identite>/edit`, change the title and save; then open `/delete` (do not confirm) | the save lands on `/fr/channels` with the new title (the channel page would 404 for a non-member); the delete page opens: no moderator and no creator are left, so only an admin may |
+| any | `select actor."displayName", a.action, target."displayName", a."channelId" from "AuditLog" a left join "User" actor on actor.id = a."actorUserId" left join "User" target on target.id = a."targetId" order by a."createdAt" desc limit 5;` | newest first: `channel:update` (Rasiol, empty target: it is the channel), `channel:kick` (Rasiol, Lina), `user:delete` (Rasiol, empty target: Syu is gone), `answer:delete` (Amir); no row for the forged kick (5.2) |
+| any | the pages above at 375, 768 and 1440 px | no sideways scroll; the console stays empty except for the forged submit (graded) |
+
+Afterwards, `npm run db:reset` restores the seed.
 
 ### Cleanup
 
