@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { modifAnswerUser } from "../../../actions";
 import { requireUser } from "@/lib/auth/session";
+import { can } from "@/lib/auth/policy";
 
 export default async function EditAnswerPage({
   params,
@@ -33,7 +34,7 @@ export default async function EditAnswerPage({
   )
     return;
 
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
   const channel = await prisma.channel.findFirst({
     where: { id: trueIdChannel },
@@ -42,18 +43,12 @@ export default async function EditAnswerPage({
     return;
   }
 
-  const member = await prisma.channelMember.findFirst({
-    where: { channelId: channel.id, userId: user.id },
-  });
-  if (!member) {
-    return;
-  }
-
   const answer = await prisma.answer.findFirst({
     where: { id: trueAnswerId },
   });
 
-  if (!answer || answer.userId !== user.id) {
+  // The same check as modifAnswerUser.
+  if (!answer || !can(ctx, "answer:update", { ownerUserId: answer.userId })) {
     return;
   }
 
