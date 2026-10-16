@@ -30,9 +30,14 @@ services:
       # Signs WebSocket tickets (POST /api/auth/ws-ticket). Absent = that route
       # answers 500; the rest of the app runs.
       WS_TICKET_SECRET: "${WS_TICKET_SECRET:-}"
+      # Mailpit catches every email in dev (web UI on http://localhost:8025).
+      SMTP_HOST: "${SMTP_HOST:-mailpit}"
+      SMTP_PORT: "${SMTP_PORT:-1025}"
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     volumes:
       - ./src:/app/src
       - ./public:/app/public
@@ -61,6 +66,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mespapiers_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
 
 volumes:
   postgres-data:
