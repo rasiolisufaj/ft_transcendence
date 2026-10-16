@@ -6,7 +6,7 @@
 
 **Architecture:** Database-backed opaque sessions (random token in an httpOnly cookie, only its SHA-256 stored), one synchronous default-deny `can()` policy function resolving three tiers (global admin → channel moderator → resource owner), and Server Actions that each call `requireUser()` then `assertCan()`. No auth in middleware, no auth library, no service layer — plain functions in `src/lib/auth/`.
 
-> **Status (revised 2026-10-12):** phases **0–4 and task 2.5 are done and merged** (PRs #10, #13, #18, #22 and #24; `main` = `e0e00df`). **Module 1 is complete.** PRs #26 and #27 followed up on phase 4's nav and responsive layout. Next: phase 5 (its gate has been open since `feat/channels` merged in PR #9). Amir's **PR #28** (`chore/review-fixes`, merged 2026-10-12) removed the duplicate kick and delete actions that phase 5's table listed. Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 5–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` and the open branches on 2026-10-12. `handoff/WORKLOG.md` remains the day-to-day progress log.
+> **Status (revised 2026-10-14):** phases **0–4 and task 2.5 are done and merged** (PRs #10, #13, #18, #22 and #24; `main` = `e4f597d`). **Module 1 is complete.** PRs #26, #27 and #29 followed up on phase 4's nav and responsive layout. Since PR #31 (2026-10-14), Alexandre's realtime server verifies task 2.5's ticket on connect. **Phase 5 is built on `feat/channel-policy`** (Tasks 1–3 committed; its final review and PR are still to come; see its *As built* note). Amir's **PR #28** (`chore/review-fixes`, merged 2026-10-12) removed the duplicate kick and delete actions that phase 5's table listed. Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 5–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` and the open branches on 2026-10-14. `handoff/WORKLOG.md` remains the day-to-day progress log.
 
 **Tech Stack:** Next.js 16 App Router · React 19 · TypeScript strict · Prisma 6 (generator `prisma-client` → `src/generated/prisma/`) · PostgreSQL 17 · Vitest 5 · Zod 4 · `@node-rs/argon2` · `otpauth` · `node:crypto`
 
@@ -39,22 +39,24 @@ Copied from `PROJECT_PLAN.md` §0. Every task's definition of done implicitly in
 
 ## A. Dependency analysis — why this order
 
-### What exists today (2026-10-12, `main` = `e0e00df`, after PR #28)
+### What exists today (2026-10-14, `main` = `e4f597d`, after PRs #31 and #32)
 
 - **Auth core, merged:** `src/lib/auth/password.ts` (argon2id), `session.ts` (§5's interface plus `memberships`, 30-day sessions that never slide, cookie `mp_session` always `Secure`), `schemas.ts` (shared Zod, error messages are `auth.errors.*` keys), `ticket.ts` (task 2.5, PR #22). Tests: `password`, `session`, `schemas`, `ticket`, `login/actions.test.ts` (rate limit) and `admin/users/actions.test.ts`.
-- **Policy and audit, merged (PR #18):** `policy.ts` (`can`, `assertCan`, `ForbiddenError`, 23 actions) and `audit.ts` (`writeAudit`). **The only call sites are phase 4's:** the admin layout, page and actions, and `Nav.tsx` (the admin link). Amir's channel actions still check inline.
+- **Policy and audit, merged (PR #18):** `policy.ts` (`can`, `assertCan`, `ForbiddenError`, 23 actions) and `audit.ts` (`writeAudit`). **Call sites:** phase 4's (the admin layout, page and actions, and `Nav.tsx`'s admin link) and, on `feat/channel-policy` (phase 5), Amir's channel actions and the pages that hold their forms.
 - **Routes:** `src/app/[locale]/(auth)/{login,signup,logout}`, and the `(app)` group whose `layout.tsx` calls `requireUser()`. The dashboard, the category page, the document page (`documents/view/[id]`), `uploadDocument`, `deleteDocument` (`src/app/[locale]/action.ts`), `GET /api/documents/[id]` and `POST /api/documents/[id]/assistant` each call `requireUser()`/`getCurrentUser()` and scope by `ownerId`. A foreign document id gives 404. The admin surface (phase 4) is at `/[locale]/admin/users`. The account links are in Alexandre's `UserMenu` dropdown and the ☰ panel.
 - **i18n:** `next-intl`, `fr`/`en`/`es`, `localePrefix: "always"`, `src/middleware.ts` (locale routing only). `Locale` is exported from `src/i18n/config.ts`.
-- **WS ticket, merged (PR #22):** `POST /api/auth/ws-ticket`. Nothing calls `verifyTicket()` yet: that is Alexandre's handshake. His `realtime-handshake` branch (not merged) has started the protocol in `src/contracts/socket.ts`.
+- **WS ticket, merged (PR #22) and in use (PR #31):** `POST /api/auth/ws-ticket`. Since Alexandre's PR #31 (2026-10-14), `src/realtime/server.ts` reads `?ticket=` from the upgrade URL in `verifyClient` and calls `verifyTicket()`: no ticket, a forged one or a replay gets a 401.
 - **Missing:** OAuth, TOTP. `AUTH_STUB` was never built, and phase 3 removed it from `.env.example`. No `error.tsx` and no `not-found.tsx` anywhere, so an unknown URL gets Next's default English 404 with no nav.
 - **Merged from teammates:**
   - Amir's `feat/channels` (PR #9, 2026-10-05) covers most of E9: channel create/edit/delete, public join, private channels with invites and join requests, kick, leave, plus answer create/edit/delete. It added three migrations (`ChannelInvite`, `ChannelJoinRequest`, `Channel.isPrivate`) and **rewrote `prisma/seed.ts`**. Every check in it is inline (`role === "MODERATOR"`, `createdBy !== user.id`), and a refusal is a silent `return`. Unchanged since. E10 (votes) and E11 (hide/mute) are not started.
-  - Alexandre's `src/contracts/events.ts` (PR #15) and a bare `ws` server in `src/realtime/` (PR #16): **no authentication on connect**, no topics, and `src/lib/realtime/publish.ts` is a stub. His friends feature (PR #23, 2026-10-06): `src/lib/friends/`, `(app)/friends/`, and the `UserMenu` account dropdown.
+  - Alexandre's `src/contracts/events.ts` (PR #15) and a `ws` server in `src/realtime/` (PR #16), authenticated on connect since PR #31 (below). Still no topics, and `src/lib/realtime/publish.ts` is a stub. His friends feature (PR #23, 2026-10-06): `src/lib/friends/`, `(app)/friends/`, and the `UserMenu` account dropdown.
   - Adrien's `src/lib/ai/extract.ts` (PR #20), called by `classifyDocument()` on upload, and the `add_document_deadline` migration. His assistant (PR #25, 2026-10-07): `src/lib/ai/assistant.ts` (`streamAssistant()`), the SSE route `POST /api/documents/[id]/assistant`, and the document page with its chat. The route loads the document with an owner-scoped `findFirst`, not `assertCan` (see §B).
-- **Merged on 2026-10-12:** **PR #28** (Amir, `chore/review-fixes`, squash-merged by Rasiol as `e0e00df`): answers phase 5's review notes. One kick action (`[id]/kick/action.ts` `kickMembers`, with the stricter checks of the removed `kickMember`) and one `deleteChannel` (`[id]/delete/action.ts`); a migration adding `updatedAt` to `ChannelInvite` and `ChannelJoinRequest`; the join-requests page translated (lint goes to zero); `deleteDocument` stops throwing (owner-scoped `deleteMany`, then a redirect); a *Channels* link in the nav (bar only; Rasiol adds it to the ☰ panel on `fix/nav-channels`). Review findings are in phase 5.
-- **In flight, not merged (checked 2026-10-12):**
-  - **`feat/gdpr`** (Amir, 2026-10-09, no PR): E12's export as `GET /api/account/export` (a ZIP of `data.json` plus the original files, `getCurrentUser()`, 401 without a session), a `/[locale]/account/data` page linked from `UserMenu`, and a `deleteAccount` action that re-asks the password but is not wired to any form yet. Adds `jszip`. Relevant to phases 8 and 11.3.
-  - **`realtime-handshake`** (Alexandre, last commit 2026-10-11): `src/contracts/socket.ts` (`ServerMessage`, `ClientMessage`, `parseTopic`, a Zod `parseClientMessage`) and `src/realtime/handshake.ts` (`readTicket()` reads `?ticket=` from the upgrade URL), with tests. Still **no `verifyTicket()` call**, and the server is not wired to these yet.
+- **Merged on 2026-10-12:** **PR #28** (Amir, `chore/review-fixes`, squash-merged by Rasiol as `e0e00df`): answers phase 5's review notes. One kick action (`[id]/kick/action.ts` `kickMembers`, with the stricter checks of the removed `kickMember`) and one `deleteChannel` (`[id]/delete/action.ts`); a migration adding `updatedAt` to `ChannelInvite` and `ChannelJoinRequest`; the join-requests page translated (lint goes to zero); `deleteDocument` stops throwing (owner-scoped `deleteMany`, then a redirect); a *Channels* link in the nav (bar only; **PR #29**, Rasiol, `9ba37f2`, moved it into `AccountLinks`, so it is in the dropdown and the ☰ panel). Review findings are in phase 5.
+- **Merged on 2026-10-14:**
+  - **PR #31** (Alexandre, `realtime-handshake`, `0a06314`): `src/contracts/socket.ts` (`ServerMessage`, `ClientMessage`, `parseTopic`, a Zod `parseClientMessage`), `src/realtime/handshake.ts` (`readTicket()`), and the ticket check in `verifyClient`; a connected client gets `{ type: "hello", userId }`. `main.ts` loads `.env` through `dotenv` and exits at startup without `WS_TICKET_SECRET`; `.env.example` gains `REALTIME_PORT` and `HEARTBEAT_MS`. Still his to do: the server ignores client messages (`parseClientMessage` is not wired, so no subscribe), there is no `realtime` service in compose, and nginx has no `/ws` block.
+  - **PR #32** (Adrien, `admin/privacy-and-terms`, `e4f597d`): `/[locale]/privacy` and `/[locale]/terms` in a `(public)` group, open signed out, and `src/components/Footer.tsx` in the root layout linking both. The graded "accessible Privacy Policy and Terms pages" line is met. The policy says rights (deletion, export) are exercised by e-mail, because `feat/gdpr` is not merged.
+- **In flight, not merged (checked 2026-10-14):**
+  - **`feat/gdpr`, PR #30** (Amir, opened 2026-10-12; **work in progress, not ready for review** as of 2026-10-14): E12's export as `GET /api/account/export` (a ZIP of `data.json` plus the original files, `getCurrentUser()`, 401 without a session), a `/[locale]/account/data` page linked from `UserMenu`, and a `deleteAccount` action, now behind a form, that re-asks the password. Adds `jszip`. Merges into `e4f597d` without conflicts. Relevant to phases 8 and 11.3. Once it merges, PR #32's policy should point at `/account/data` instead of e-mail.
 
 ### The blocking dependencies, in order
 
@@ -63,7 +65,7 @@ Copied from `PROJECT_PLAN.md` §0. Every task's definition of done implicitly in
 | 1 | Vitest + `zod` + `@node-rs/argon2` | every task | ✅ phase 0 |
 | 2 | `session.ts`: `requireUser()` and friends | everything, and 3 teammates | ✅ phase 1, used by Amir's branch |
 | 3 | Login / signup + the `(app)` guard | phases 3–11 | ✅ phase 2 |
-| 4 | **`policy.ts`: `can()` / `assertCan()`** | modules 1–2, and 3 teammates | ✅ phase 3 (PR #18). Used by the admin surface (phase 4). Amir's merged actions still check inline, which phase 5 converts. |
+| 4 | **`policy.ts`: `can()` / `assertCan()`** | modules 1–2, and 3 teammates | ✅ phase 3 (PR #18). Used by the admin surface (phase 4), and by Amir's channel actions since phase 5 (`feat/channel-policy`). |
 | 5 | **`writeAudit()`** | admin surface, moderation | ✅ phase 3 (PR #18) |
 | 6 | Amir's `feat/channels` merged | phase 5 (policy in his actions), phase 6 (channel roles) | ✅ PR #9 (2026-10-05) |
 | 7 | Amir's E10 (votes, reputation) and E11 (hide/mute) | phase 6's Helper badge, phase 7 | not started |
@@ -79,7 +81,7 @@ Phase 4    admin surface (C14a) ✅                      merged (PR #24) → MOD
    │
    ├──────────────────────────────────────┬──────────────────────────────────────
    │ Track A — waits on Amir's merges     │ Track B — no outside dependency
-   │ Phase 5   policy in channel  NEXT    │ Phase 8   OAuth Google (C7)
+   │ Phase 5   policy in channel  BUILT   │ Phase 8   OAuth Google (C7)
    │ Phase 6   channel roles + Helper     │ Phase 9   OAuth GitHub (C8)  → MODULE 3
    │ Phase 7   moderation sign-off (E11)  │ Phase 10  TOTP (C9)
    │           → MODULE 2 done            │ Phase 11  step-up (C10)      → MODULE 4
@@ -99,7 +101,7 @@ Phase 4    admin surface (C14a) ✅                      merged (PR #24) → MOD
 |---|---|---|---|
 | `requireUser()` / `getCurrentUser()` | 1 | Amir, Adrien, Alexandre | ✅ merged, and already in use on `feat/channels` |
 | `can()` / `assertCan()` | 3 | Amir (his channel actions), Alexandre (WS topic authz), Adrien (assistant context) | ✅ PR #18. Still owed: the standup announcement (§C-17 and §C-18 change what a published interface means) and the phase 5 mapping table for Amir. Adrien's assistant (PR #25) loads its document with `findFirst({ where: { id, ownerId } })` instead of `assertCan`. Since §C-17 both refuse exactly the same callers (§C-14's reasoning), so nothing is owed there. |
-| WS ticket + `verifyTicket()` | 2 (task 2.5) | Alexandre (D2 handshake) | ✅ PR #22 (2026-10-06). Still owed, unless he already has it: the contract (task 2.5 step 7), that `realtime` needs the same `WS_TICKET_SECRET` (`npm run realtime` does not load `.env`), and that nginx has no `/ws` block yet. His `realtime-handshake` branch reads the ticket from the upgrade URL's `?ticket=` since 2026-10-11 (`readTicket()`; task 2.5 left the transport to him) but does not call `verifyTicket()` yet. |
+| WS ticket + `verifyTicket()` | 2 (task 2.5) | Alexandre (D2 handshake) | ✅ PR #22 (2026-10-06), in use since his PR #31 (2026-10-14): `verifyClient` calls `verifyTicket()` on the upgrade URL's `?ticket=`, and `main.ts` loads `.env` itself. Nothing owed. A `realtime` service in compose (forward `WS_TICKET_SECRET` to it) and the nginx `/ws` block are his. |
 | Channel-role management (C14b) | 6 | Amir's moderators can only be the channel creator until it exists | unblocked (PR #9 merged) |
 
 ### What you need from them
@@ -110,8 +112,8 @@ Phase 4    admin surface (C14a) ✅                      merged (PR #24) → MOD
 | `app/[locale]/` + `next-intl` (D10, D11) | Alexandre | — | ✅ PR #12. All new routes go under `[locale]`; §C-3 is obsolete. |
 | `DocumentCategory` | Amir | — | ✅ PR #11. `Document.version` is still missing, and nothing of yours needs it. |
 | `feat/channels` merged | Amir | phases 5 and 6 | ✅ PR #9 (2026-10-05). The review notes still open are in phase 5. |
-| E10 votes/reputation, E11 hide/mute | Amir | phase 6's Helper part, phase 7 | not started (checked 2026-10-12) |
-| E12 GDPR export, E13 deletion | Amir | 11.3 (step-up on the export) | started on `feat/gdpr` (2026-10-09, no PR): §A, *In flight* |
+| E10 votes/reputation, E11 hide/mute | Amir | phase 6's Helper part, phase 7 | not started (checked 2026-10-14) |
+| E12 GDPR export, E13 deletion | Amir | 11.3 (step-up on the export) | PR #30 (`feat/gdpr`), work in progress as of 2026-10-14: §A, *In flight* |
 | Redis | Adrien | nothing of yours | The login limiter and the WS nonce set are in-process Maps. |
 
 ### Ownership: E9–E11 are Amir's (resolved in practice; write it down)
@@ -1279,7 +1281,7 @@ Not part of your four modules; it is C12, and it blocks Alexandre's WebSocket ha
 > - The route uses `Response.json`, like `GET /api/documents/[id]`, so it does not import `next/server`.
 > - Compose forwards `WS_TICKET_SECRET: "${WS_TICKET_SECRET:-}"`, so `docker compose up` does not warn when the key is missing from `.env`.
 > - Evidence: `npm test` 153/153 (ticket 5/5, three mutants each caught), build and tsc clean. On mespapiers.local: 401 without a cookie, 405 on GET, 200 with a ticket that verifies once and is `null` on replay.
-> - **Still to confirm (step 7):** that Alexandre has been told the contract below, that `realtime` needs the same `WS_TICKET_SECRET` (`npm run realtime` does not load `.env`; in compose, forward it to the `realtime` service when he adds one), and that nginx has no `/ws` block yet.
+> - **Step 7, resolved by PR #31 (2026-10-14):** Alexandre calls `verifyTicket()` in `verifyClient`, and `main.ts` loads `.env` and exits without `WS_TICKET_SECRET`. Still his when he adds them: forward `WS_TICKET_SECRET` to a `realtime` compose service, and an nginx `/ws` block.
 
 **Design:** an HMAC-signed `userId.expiry.nonce` string. No Redis, no table, no `jose`. The `realtime` process verifies the HMAC and keeps used nonces in a `Set` — single-use, and a restart only invalidates tickets younger than 60 seconds.
 
@@ -1950,26 +1952,26 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 
 ### Phase 5 — The policy in the channel actions (C5, C6 in Amir's merged code) · 1d
 
-**Expand into:** `docs/plans/<date>-c5-c6-channel-policy.md`
-**Entry gate:** phase 3 merged **and** `feat/channels` merged: **both met on 2026-10-05** (PRs #18 and #9). Phase 4 has merged too (PR #24). His PR merged with every check still inline, and they still are (checked 2026-10-12), so the whole table below is still to do. **Amir's PR #28** (merged 2026-10-12, `e0e00df`) deleted `kickMember` and the `deleteChannel` copy in `create/action.ts`, and rewrote `kickMembers`; cut `feat/channel-policy` from `main` after it.
+**Expanded into:** [`2026-10-14-c5-c6-channel-policy.md`](2026-10-14-c5-c6-channel-policy.md) (2026-10-14), on `feat/channel-policy`. **Rasiol's decisions (2026-10-14):** the page checks are part of this phase (each page that holds a form asks `can()` the same question as its action, so admins can reach what the actions now allow and no page offers an action that throws); Amir is asked about the behaviour changes after the PR is open; every audit row, `deleteChannel`'s included, is written after the mutation and only when it happened; after task 1, *keep only what is necessary*: the three self-service rows below are dropped (their `assertCan` always passes for a signed-in user), and so are two test assertions; the final whole-branch review is kept. The expansion's *Departures* table lists where it differs from this section.
+**Entry gate:** phase 3 merged **and** `feat/channels` merged: **both met on 2026-10-05** (PRs #18 and #9). Phase 4 has merged too (PR #24). His PR merged with every check still inline; phase 5 converts them (see *As built* below). **Amir's PR #28** (merged 2026-10-12, `e0e00df`) deleted `kickMember` and the `deleteChannel` copy in `create/action.ts`, and rewrote `kickMembers`; cut `feat/channel-policy` from `main` after it.
 **Schema:** none. **Files:** Amir's, under `src/app/[locale]/(app)/channels/`. If you write the change, open `feat/channel-policy` and tag him.
 
 **The mapping.** Validation failures (bad id, empty text) can keep their silent `return`. Authorization becomes `assertCan`, called after loading the row it needs.
 
 | Action (file) | Today's check | `assertCan(ctx, …)` | `writeAudit` |
 |---|---|---|---|
-| `createChannel` (`create/action.ts`) | session only | `"channel:create", {}` | — |
+| `createChannel` (`create/action.ts`) | session only | ~~`"channel:create", {}`~~ **dropped 2026-10-14**: always passes for a signed-in user | — |
 | `editChannel` (`[id]/edit/action.ts`) | `createdBy === user.id` | `"channel:update", { channelId }`. Moderators may edit too, a behaviour change to agree with Amir | yes |
-| `deleteChannel` (`[id]/delete/action.ts`; PR #28 removed the duplicate in `create/action.ts`) | MODERATOR membership | `"channel:delete", { channelId, ownerUserId: channel.createdBy }`: creator or admin (phase 3 test) | yes, **before** the delete |
-| `joinChannel` (`join/actions.ts`) | `!isPrivate` | `"channel:join", { channelId }`; keep the `isPrivate` check | — |
-| `requestJoinChannel` (`join/actions.ts`, default export) | session user, not already a member | `"channel:join", { channelId }` | — |
+| `deleteChannel` (`[id]/delete/action.ts`; PR #28 removed the duplicate in `create/action.ts`) | MODERATOR membership | `"channel:delete", { channelId, ownerUserId: channel.createdBy }`: creator or admin (phase 3 test) | yes, **after** the delete, only when it removed the row (decided 2026-10-14: `AuditLog.channelId` has no foreign key, so the row outlives the channel) |
+| `joinChannel` (`join/actions.ts`) | `!isPrivate` | ~~`"channel:join", { channelId }`~~ **dropped 2026-10-14**: always passes; the `isPrivate` check stays | — |
+| `requestJoinChannel` (`join/actions.ts`, default export) | session user, not already a member | ~~`"channel:join", { channelId }`~~ **dropped 2026-10-14**: always passes | — |
 | `acceptJoinRequest` / `rejectJoinRequest` (`[id]/requests/action.ts`) | MODERATOR membership | `"channel:moderate", { channelId }` (§C-16) | yes |
 | `inviteUser` (`[id]/invite/action.ts`) | MODERATOR membership | `"channel:moderate", { channelId }` | yes |
 | `kickMembers` (`[id]/kick/action.ts`; PR #28 removed the duplicate `kickMember` in `[id]/actions.ts`) | MODERATOR membership; since PR #28 it also refuses kicking yourself or a MODERATOR | `"channel:moderate", { channelId }`; keep both refusals | yes |
 | `acceptInvite` / `declineInvite` (`invitations/action.ts`) | the invite row for `user.id` | none: the caller's own invite row is the authorization | — |
 | `leaveChannel` (`[id]/actions.ts`) | own membership | none: the caller's own row | — |
 | `createAnswer` (`[id]/actions.ts`) | membership in the query | `"answer:create", { channelId: thread.channelId }` | — |
-| `modifAnswerUser` (`[id]/actions.ts`) | author | `"answer:update", { ownerUserId: answer.userId }` | — |
+| `modifAnswerUser` (`[id]/actions.ts`) | author | `"answer:update", { ownerUserId: answer.userId }` | when actor ≠ author, i.e. an admin (added by the final review, 2026-10-14) |
 | `deleteAnswer` (`[id]/actions.ts`) | author only, in the query | `"answer:delete", { channelId, ownerUserId: answer.userId }`: the author, **or a moderator of that channel** (§5) | when actor ≠ author |
 
 | Task | Deliverable | Done when |
@@ -1977,6 +1979,8 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 | 5.1 | Every row of the table applied | no action under `channels/` authorizes with `role === "MODERATOR"`, `role: "MODERATOR"` in a `where`, or `createdBy !==` (role reads for *display* are fine) |
 | 5.2 | Audit writes | every "yes" row writes one `AuditLog` row with `channelId` and the target |
 | 5.3 | Cross-channel check by hand | a moderator of channel A who replays a kick form with channel B's id is refused; a plain member's kick in A is refused; an admin kicks a member in a channel that has **no moderator** (§C-19: delete its only moderator in the admin surface first) and succeeds; recorded in `docs/testing-auth.md` |
+
+**As built (2026-10-14, `feat/channel-policy`, not merged yet):** Tasks 1–3 of the expansion, committed by Rasiol as `07dc37b` (kick, join requests, invite), `34275cd` (edit, delete) and `cbe363d` (answers); the create/join rows are dropped (decision 4). **5.1:** the grep finds 4 lines, none of them an authorization check: `leaveChannel`'s moderator-cannot-leave rule, `createChannel`'s `MODERATOR` write, and the `/channels` options menu twice (display, moved to 6.2). **5.2:** each "yes" row writes its `AuditLog` row after the change, only when it happened; pinned by `channels/channel-policy.test.ts` (9 DB tests, each watched failing first). **5.3:** B12 in `docs/testing-auth.md`. The page checks were verified server-side on mespapiers.local with throwaway sessions (deleted after): lina gets 404 on the five management pages of *Assurance auto*; rasiol (admin, not a member) gets 200 on them and 404 on the channel page; amir sees 2 answer *delete* buttons and no *edit* link on others' answers, and 3 *Kick* buttons. The forged kick, the console and the 375/768/1440 check are Rasiol's browser run of B12. **Final review (2026-10-14, fresh Opus reviewer):** "with fixes", 0 Critical, 2 Important, both fixed with a failing test first: a non-member admin is sent to `/channels` after `editChannel` / `modifAnswerUser` (the channel page 404s for them; the requests page's back link too), and an admin's rewrite of someone else's answer writes `answer:update`. The 5 Minor findings are deferred (worklog). **Gates:** `npm test` 208/208 (17 files, after the fixes), build, typecheck, lint 0/0, `i18n:check` unchanged (the 5 known unused keys). **Departures:** the expansion's *Departures* table and decision 4.
 
 **Review notes for Amir's code** (PR #9 merged; status checked 2026-10-12, after PR #28 merged). Send them with the table:
 - ✅ **Fixed before merge:** `requestJoinChannel` now takes `user.id` from `requireUser()`, parses the channel id from `channelId` and awaits the `create`.
@@ -1994,7 +1998,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 | Task | Deliverable | Done when |
 |---|---|---|
 | 6.1 | `setChannelRole(channelId, userId, role)` action | `assertCan(ctx, "channel:manageRoles", { channelId })`: admins only, in any channel (§C-18). Refuses to demote a channel's **last** MODERATOR (Amir's `leaveChannel` refuses every moderator, so leaving never empties a channel). That guard covers demotion only: deleting a user can still leave a channel with **zero** moderators (§C-19), so promoting must work there, and neither the action nor the buttons may assume a moderator exists. Writes `channel:setRole` to the audit log. **Invalidates no sessions:** `validateSessionToken()` re-reads memberships on every request, so the change applies on the target's next request |
-| 6.2 | Promote/demote buttons | next to Amir's kick buttons on the channel's member list (`/channels/[id]/kick` today), shown only when `can(ctx, "channel:manageRoles", { channelId })`. Strings go in his `channels` namespace. Agree the placement with him |
+| 6.2 | Promote/demote buttons | next to Amir's kick buttons on the channel's member list (`/channels/[id]/kick` today), shown only when `can(ctx, "channel:manageRoles", { channelId })`. Strings go in his `channels` namespace. Agree the placement with him. **Also (deferred from phase 5):** the `/channels` options menu (`channels/page.tsx`) still shows the management links on `members[0]?.role === "MODERATOR"`. Once a moderator can be promoted, a moderator is no longer always the creator, so switch each link to the `can()` its page asks (`channel:update`, `channel:delete`, `channel:moderate`) |
 | 6.3 | **C14 Done-when, scoped** | an ADMIN promotes a member to MODERATOR in channel A; that user can now kick and accept requests in A, and is refused in B (forged form). Hide/mute join this check in phase 7, once E11 exists |
 | 6.4 | Helper badge | `reputation >= HELPER_THRESHOLD`, **derived at render**: no column, no "threshold job" (C14's wording), so it cannot drift. Agree the constant with Alexandre (D14 profile) and Amir (answer list); whoever renders it first owns it. Never in `policy.ts`. "Grants no action" is already phase 3's reputation test |
 
@@ -2032,7 +2036,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 
 **Watch for:** `sameSite: "lax"` on the state cookie, not `strict` — Google's redirect is a cross-site navigation and `strict` drops the cookie, giving a state mismatch on every attempt.
 
-**Watch for (2026-10-12):** 8.4 creates users with `passwordHash: null`. Amir's `deleteAccount` on `feat/gdpr` confirms with the password and refuses when there is none, so an OAuth-only user could never delete their account (E13). Agree with Amir what they confirm with instead, before either PR merges; phase 11's fresh-TOTP check only helps users who enabled 2FA.
+**Watch for (2026-10-12, still true 2026-10-14):** 8.4 creates users with `passwordHash: null`. Amir's `deleteAccount` on `feat/gdpr` (PR #30, work in progress) confirms with the password and refuses when there is none, so an OAuth-only user could never delete their account (E13). Agree with Amir what they confirm with instead, before either PR merges; phase 11's fresh-TOTP check only helps users who enabled 2FA.
 
 ### Phase 9 — OAuth 2.0 GitHub + linking edge cases (C8) · 1d — **Module 3 complete**
 
@@ -2111,7 +2115,7 @@ Every "To Do" from the four modules (`PROJECT_PLAN.md` §6), mapped to the phase
 | *(Domain C hygiene)* | C11 rate limit · CSRF · rotation on login | 2 ✅ |
 | | C11 rotation on privilege change | 4 ✅ (`invalidateAllSessions` on a global-role change) |
 | | C5 ownership guards on documents | 2 ✅ (owner-scoped queries), 3.3 ✅ (evidence, §C-14) |
-| *(teammate unblock)* | WS ticket endpoint (C12) | 2.5 ✅ (PR #22) |
+| *(teammate unblock)* | WS ticket endpoint (C12) | 2.5 ✅ (PR #22; verified by `realtime` since PR #31) |
 | *(Amir's module)* | Organization system: E9 channels, E10 threads/votes, E11 moderation | Amir; policy hooks in 5–7 |
 
 **Deliberately out of scope of this plan:** C13 (the OWASP / `npm audit` / `gitleaks` security review) is a week-5 task with no code dependency. Findings to carry into it: there is no `.dockerignore`, so the Dockerfile's `COPY . .` bakes `.env` and its secrets into the `web` image.

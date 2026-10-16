@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "@/i18n/navigation";
 import { getLocale } from "next-intl/server";
 import { requireUser } from "@/lib/auth/session";
+import { writeAudit } from "@/lib/audit";
+import { assertCan } from "@/lib/auth/policy";
 // repasser sur les commentaires plus tard
 
 export async function createAnswer(formData: FormData) {
@@ -29,25 +31,24 @@ export async function createAnswer(formData: FormData) {
     return;
   }
 
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
-  // verifie que la question existe et le user est menbre du channel
-  const thread = await prisma.thread.findFirst({
-    where: {
-      id: threadId,
-      channel: {
-        members: { some: { userId: user.id } },
-      },
-    },
+  const thread = await prisma.thread.findUnique({
+    where: { id: threadId },
+    select: { channelId: true },
   });
   if (!thread) {
     return;
   }
+  // Members of the thread's channel only (§C-15). The channel comes from the
+  // thread row, never from the form.
+  assertCan(ctx, "answer:create", { channelId: thread.channelId });
+
   await prisma.answer.create({
     data: {
       content: trueAnswer,
       threadId: threadId,
-      userId: user.id,
+      userId: ctx.user.id,
     },
   });
   revalidatePath(`/channels/${thread.channelId}`);
@@ -65,26 +66,35 @@ export async function deleteAnswer(formData: FormData) {
     return;
   }
 
-  // va recupere le user dans la basse de donnee
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
-  const answer = await prisma.answer.findFirst({
-    where: {
-      id: trueId,
-      userId: user.id,
-    },
-    include: { thread: { select: { channelId: true } } },
+  const answer = await prisma.answer.findUnique({
+    where: { id: trueId },
+    select: { userId: true, thread: { select: { channelId: true } } },
   });
   if (!answer) {
-    throw new Error("Utilisateur introuvable");
+    return;
   }
+  const channelId = answer.thread.channelId;
+  // The author, a moderator of the answer's own channel, or an admin (§5).
+  assertCan(ctx, "answer:delete", { channelId, ownerUserId: answer.userId });
 
-  await prisma.answer.delete({
+  const { count } = await prisma.answer.deleteMany({
     where: {
       id: trueId,
     },
   });
-  revalidatePath(`/channels/${answer.thread.channelId}`);
+  // An author removing their own answer is not moderation: only someone else's is audited.
+  if (count > 0 && answer.userId !== ctx.user.id) {
+    await writeAudit({
+      actorUserId: ctx.user.id,
+      action: "answer:delete",
+      targetType: "Answer",
+      targetId: String(trueId),
+      channelId,
+    });
+  }
+  revalidatePath(`/channels/${channelId}`);
 }
 
 // fonction pour modifier un user
@@ -128,10 +138,11 @@ export async function modifAnswerUser(formData: FormData) {
     return;
   }
   // reucupere le user
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
   const answer = await prisma.answer.findFirst({
     where: { id: intAnswerId },
+    include: { thread: { select: { channelId: true } } },
   });
 
   // vérifie que la réponse existe
@@ -139,15 +150,25 @@ export async function modifAnswerUser(formData: FormData) {
     return;
   }
 
-  // vérifie que l'utilisateur est l'auteur de la réponse
-  if (answer.userId !== user.id) {
-    return;
-  }
+  // The author, or an admin. Moderators delete answers, they do not rewrite them.
+  assertCan(ctx, "answer:update", { ownerUserId: answer.userId });
   await prisma.answer.update({
     where: { id: intAnswerId },
     data: { content: newanswerTrim },
   });
-redirect({ href: `/channels/${intChannelId}`, locale: await getLocale() });
+  // An admin rewriting someone else's words is moderation: audited, as deleteAnswer does.
+  if (answer.userId !== ctx.user.id) {
+    await writeAudit({
+      actorUserId: ctx.user.id,
+      action: "answer:update",
+      targetType: "Answer",
+      targetId: String(intAnswerId),
+      channelId: answer.thread.channelId,
+    });
+  }
+  // The channel page 404s for a non-member (an admin), so send them back to the list.
+  const isMember = ctx.memberships.some((m) => m.channelId === intChannelId);
+  redirect({ href: isMember ? `/channels/${intChannelId}` : "/channels", locale: await getLocale() });
 }
 
 
