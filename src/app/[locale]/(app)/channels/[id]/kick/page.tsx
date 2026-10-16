@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { can } from "@/lib/auth/policy";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { kickMembers } from "./action";
@@ -18,15 +19,9 @@ export default async function kickUser({
   if (Number.isNaN(id) || id <= 0 || String(id) !== idChannel) {
     notFound();
   }
-  const { user } = await requireUser();
-
-  const userMember = await prisma.channelMember.findFirst({
-    where: {
-      userId: user.id,
-      channelId: id,
-    },
-  });
-  if (!userMember || userMember.role !== "MODERATOR") return;
+  const ctx = await requireUser();
+  // The same check as kickMembers: a moderator of this channel, or an admin.
+  if (!can(ctx, "channel:moderate", { channelId: id })) notFound();
 
   const channel = await prisma.channel.findFirst({
     where: {
@@ -80,12 +75,15 @@ export default async function kickUser({
                 </h1>
                 <p className="mt-1 text-xs text-zinc-400">{membre.role}</p>
               </div>
-              <button
-                type="submit"
-                className="shrink-0 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-              >
-                {t("kick")}
-              </button>
+              {/* kickMembers refuses yourself and moderators: no button that does nothing */}
+              {membre.role === "MEMBER" && membre.userId !== ctx.user.id && (
+                <button
+                  type="submit"
+                  className="shrink-0 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                >
+                  {t("kick")}
+                </button>
+              )}
             </form>
           </div>
         ))}
