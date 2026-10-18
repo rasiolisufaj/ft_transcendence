@@ -191,7 +191,11 @@
     "kick": {
       "back": "← Back to channels",
       "membersCount": "{count, plural, one {# member} other {# members}}",
-      "kick": "Remove"
+      "kick": "Remove",
+      "member": "member",
+      "moderator": "moderator",
+      "promote": "Make moderator",
+      "demote": "Make member"
     },
     "delete": {
       "back": "← Back to channels",
