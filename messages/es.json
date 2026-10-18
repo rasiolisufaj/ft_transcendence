@@ -191,7 +191,11 @@
     "kick": {
       "back": "← Volver a los canales",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
-      "kick": "Expulsar"
+      "kick": "Expulsar",
+      "member": "miembro",
+      "moderator": "moderador",
+      "promote": "Nombrar moderador",
+      "demote": "Volver a miembro"
     },
     "delete": {
       "back": "← Volver a los canales",

@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/policy";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
-import { kickMembers } from "./action";
+import { kickMembers, setChannelRole } from "./action";
 
 export default async function kickUser({
   params,
@@ -22,6 +22,8 @@ export default async function kickUser({
   const ctx = await requireUser();
   // The same check as kickMembers: a moderator of this channel, or an admin.
   if (!can(ctx, "channel:moderate", { channelId: id })) notFound();
+  // The same check as setChannelRole: admins only (§C-18).
+  const canManageRoles = can(ctx, "channel:manageRoles", { channelId: id });
 
   const channel = await prisma.channel.findFirst({
     where: {
@@ -73,17 +75,33 @@ export default async function kickUser({
                 <h1 className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
                   {membre.user.displayName}
                 </h1>
-                <p className="mt-1 text-xs text-zinc-400">{membre.role}</p>
+                <p className="mt-1 text-xs text-zinc-400">
+                  {membre.role === "MODERATOR" ? t("moderator") : t("member")}
+                </p>
               </div>
-              {/* kickMembers refuses yourself and moderators: no button that does nothing */}
-              {membre.role === "MEMBER" && membre.userId !== ctx.user.id && (
-                <button
-                  type="submit"
-                  className="shrink-0 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-                >
-                  {t("kick")}
-                </button>
-              )}
+              <div className="flex shrink-0 gap-2">
+                {/* Same form, other action: the button's name and value add the new role. */}
+                {canManageRoles && (
+                  <button
+                    type="submit"
+                    formAction={setChannelRole}
+                    name="role"
+                    value={membre.role === "MODERATOR" ? "MEMBER" : "MODERATOR"}
+                    className="rounded-lg px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  >
+                    {membre.role === "MODERATOR" ? t("demote") : t("promote")}
+                  </button>
+                )}
+                {/* kickMembers refuses yourself and moderators: no button that does nothing */}
+                {membre.role === "MEMBER" && membre.userId !== ctx.user.id && (
+                  <button
+                    type="submit"
+                    className="rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                  >
+                    {t("kick")}
+                  </button>
+                )}
+              </div>
             </form>
           </div>
         ))}
