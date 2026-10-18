@@ -31,6 +31,9 @@ export default async function kickUser({
     },
     include: {
       members: {
+        // A fixed order: Postgres returns an updated row last, so without it a role
+        // change moves the rows under the admin's cursor. userId breaks joinedAt ties.
+        orderBy: [{ joinedAt: "asc" }, { userId: "asc" }],
         include: {
           user: { select: { displayName: true } },
         },
@@ -71,6 +74,9 @@ export default async function kickUser({
             >
               <input type="hidden" name="channelId" value={channel.id} />
               <input type="hidden" name="userId" value={membre.userId} />
+              {/* Read by setChannelRole only. Not on the button: React overrides the name of a
+                  button whose formAction is a function, to encode which action to invoke. */}
+              <input type="hidden" name="role" value={membre.role === "MODERATOR" ? "MEMBER" : "MODERATOR"} />
               <div className="min-w-0">
                 <h1 className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
                   {membre.user.displayName}
@@ -80,13 +86,11 @@ export default async function kickUser({
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
-                {/* Same form, other action: the button's name and value add the new role. */}
+                {/* Same form, other action. */}
                 {canManageRoles && (
                   <button
                     type="submit"
                     formAction={setChannelRole}
-                    name="role"
-                    value={membre.role === "MODERATOR" ? "MEMBER" : "MODERATOR"}
                     className="rounded-lg px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
                   >
                     {membre.role === "MODERATOR" ? t("demote") : t("promote")}
