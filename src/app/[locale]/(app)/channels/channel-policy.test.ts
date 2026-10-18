@@ -9,7 +9,7 @@ import { acceptJoinRequest, rejectJoinRequest } from "./[id]/requests/action";
 import { inviteUser } from "./[id]/invite/action";
 import { editChannel } from "./[id]/edit/action";
 import { deleteChannel } from "./[id]/delete/action";
-import { createAnswer, deleteAnswer, modifAnswerUser } from "./[id]/actions";
+import { createAnswer, deleteAnswer, leaveChannel, modifAnswerUser } from "./[id]/actions";
 import { redirect } from "@/i18n/navigation";
 
 // requireUser() reads the cookie, and revalidatePath(), getLocale() and the localised
@@ -355,5 +355,21 @@ describe("channel roles (channel:manageRoles)", () => {
     await signInAs(creator.id);
     await expect(kickMembers(form({ channelId: c.id, userId: member.id }))).rejects.toBeInstanceOf(ForbiddenError);
     expect(await isMember(c.id, member.id)).toBe(true);
+  });
+});
+
+describe("leaving a channel", () => {
+  it("lets a moderator leave, the creator included (vision §3: a moderator can do everything a member can)", async () => {
+    const creator = await newUser();
+    const appointed = await newUser();
+    const c = await newChannel({ [creator.id]: "MODERATOR", [appointed.id]: "MODERATOR" }, creator.id);
+
+    await signInAs(appointed.id);
+    await leaveChannel(form({ channelId: c.id }));
+    await signInAs(creator.id);
+    await leaveChannel(form({ channelId: c.id }));
+
+    expect(await isMember(c.id, appointed.id)).toBe(false);
+    expect(await isMember(c.id, creator.id)).toBe(false);   // §C-19/§C-20: a channel may be left with no moderator
   });
 });

@@ -248,32 +248,30 @@ export default async function ChannelsHomePage() {
                       {t("kick")}
                     </Link>
                   )}
-                  {/* leaveChannel refuses moderators: no button that does nothing */}
-                  {channel.members[0]?.role !== "MODERATOR" && (
-                    <form action={leaveChannel}>
-                      <input type="hidden" name="channelId" value={channel.id} />
-                      <button
-                        type="submit"
-                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                  {/* Everyone listed here is a member, and every member may leave. */}
+                  <form action={leaveChannel}>
+                    <input type="hidden" name="channelId" value={channel.id} />
+                    <button
+                      type="submit"
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-4"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="size-4"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
-                          />
-                        </svg>
-                        {t("leave")}
-                      </button>
-                    </form>
-                  )}
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+                        />
+                      </svg>
+                      {t("leave")}
+                    </button>
+                  </form>
                 </div>
               </details>
             </div>

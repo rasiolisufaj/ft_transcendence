@@ -456,7 +456,7 @@ git commit -m "feat(channels): promote and demote buttons on the member list, tr
 - Consumes: `can()` from `@/lib/auth/policy`; `getUserChannels()` returns each channel's scalar fields (its `include` keeps them), so `channel.createdBy` and `channel.isPrivate` are available. Each link asks the same question as its page: invite and requests `channel:moderate` (private channels only, as before), delete `channel:delete` with `ownerUserId: channel.createdBy`, edit `channel:update`, kick `channel:moderate`. *Leave* keeps `leaveChannel`'s own rule (a moderator cannot leave).
 - Produces: the message key `channels.home.requests`.
 
-Behaviour, by who opens the menu: a creator who moderates sees exactly what they saw before. A promoted moderator sees everything except *Delete*. An admin who is a member sees every link and *Leave*. A demoted creator sees *Delete* and *Leave* (§C-20). A plain member sees *Leave*. No one gets an empty menu, because every moderator can edit and everyone else can leave.
+Behaviour, by who opens the menu: a creator who moderates sees exactly what they saw before. A promoted moderator sees everything except *Delete*. An admin who is a member sees every link and *Leave*. A demoted creator sees *Delete* and *Leave* (§C-20). A plain member sees *Leave*. No one gets an empty menu, because everyone listed is a member. **As built, after the final review (Rasiol, 2026-10-18):** *Leave* is shown to every member, moderators included, because `leaveChannel` no longer refuses moderators (§C-20); the `members[0]?.role !== "MODERATOR"` condition in the snippet below was removed with it.
 
 - [ ] **Step 1: Add the key, `fr.json` first**
 
@@ -660,7 +660,7 @@ git commit -m "feat(channels): the channel menu asks can() for each link"
 - [ ] **Step 1: No authorization reads a role**
 
 Run: `grep -rnE 'role [!=]== "MODERATOR"|role: "MODERATOR"|createdBy !==' "src/app/[locale]/(app)/channels"`
-Expected (as run on 2026-10-18): 12 hits, none of them an authorization check. Five are form fields in `channel-policy.test.ts`, one is `setChannelRole`'s input check (`[id]/kick/action.ts`, `role !== "MEMBER" && role !== "MODERATOR"`), and these six:
+Expected (as run on 2026-10-18, before the final review): 12 hits, none of them an authorization check. After the final review dropped `leaveChannel`'s moderator check and the menu condition that mirrored it, the first and third bullets below are gone: 10 hits. Five are form fields in `channel-policy.test.ts`, one is `setChannelRole`'s input check (`[id]/kick/action.ts`, `role !== "MEMBER" && role !== "MODERATOR"`), and these six:
 - `[id]/actions.ts`, `leaveChannel`: `membership.role === "MODERATOR"` (the business rule: a moderator cannot leave);
 - `create/action.ts`: `role: "MODERATOR"` (the creator's membership, a write);
 - `page.tsx`: `channel.members[0]?.role !== "MODERATOR"` (shows *Leave*, mirroring that rule);
@@ -669,7 +669,7 @@ Expected (as run on 2026-10-18): 12 hits, none of them an authorization check. F
 - [ ] **Step 2: The whole suite and the gates**
 
 Run: `npm test`, then `npm run build && npm run typecheck`, then `npm run lint`, then `npm run i18n:check`.
-Expected: `npm test` 211 passed (17 files: 208 + 3). Build and typecheck green. Lint 0 errors, 0 warnings. `i18n:check` the same 5 unused keys as on `main`.
+Expected: `npm test` 211 passed (17 files: 208 + 3); 212 after the final review's `leaveChannel` test. Build and typecheck green. Lint 0 errors, 0 warnings. `i18n:check` the same 5 unused keys as on `main`.
 
 - [ ] **Step 3: B13 by hand** — add it to `docs/testing-auth.md` after B12, then run it
 
@@ -684,7 +684,7 @@ Start from a fresh seed (`npm run db:reset`). *Assurance auto* (id 1, public) is
 | rasiol (ADMIN) | `/fr/channels/join`, join *Assurance auto*; then `/fr/channels`, ⋯ | *Supprimer*, *Modifier*, *Retirer un membre* and *Quitter* (an admin passes every `can()`) |
 | rasiol | ⋯ → *Retirer un membre* | each row shows *membre* or *modérateur*; every row has *Nommer modérateur* or *Repasser membre*; Amir's has *Repasser membre* |
 | rasiol | *Nommer modérateur* on Adrien | his row now says *modérateur* and offers *Repasser membre*; his *Retirer* disappears |
-| adrien (still signed in from row 1) | reload `/fr/channels`, ⋯ | *Modifier* and *Retirer un membre*, no *Supprimer* (he is not the creator) and no *Quitter* (6.2). No re-login was needed (6.1) |
+| adrien (still signed in from row 1) | reload `/fr/channels`, ⋯ | *Modifier*, *Retirer un membre* and *Quitter*, no *Supprimer* (he is not the creator; 6.2). No re-login was needed (6.1) |
 | adrien | *Retirer un membre*, then *Retirer* on Lina | she disappears (6.3); no promote/demote buttons on his page (§C-18) |
 | amir | open `/fr/channels/1/kick` | *Retirer* on members, no promote/demote buttons: a moderator does not manage roles (§C-18) |
 | rasiol | *Repasser membre* on Adrien, then on Amir | both work, even though the channel is left with no moderator (§C-20) |
@@ -740,6 +740,7 @@ Title: `feat(channels): admins promote and demote channel moderators (phase 6)`.
 - The kick page prints the role translated (*membre* / *modérateur*) instead of `MEMBER`.
 - The `/channels` menu: a moderator who is not the creator no longer sees *Delete* (the page would 404); an admin who is a member sees every management link plus *Leave*; a demoted creator sees *Delete* and *Leave*, because deleting is the creator's right, not the moderator's (§C-20). The *requests* link's label is translated (it read `the text after`).
 - Demoting a channel's last moderator is allowed (§C-20): an admin can still moderate the channel and promote someone else.
+- **Moderators can leave a channel** (final review, Rasiol's decision): `leaveChannel` no longer refuses them, so an admin-appointed moderator is not stuck, and the channel page's *Leave* button no longer does nothing for a moderator. Vision §3: a moderator can do everything a member can. The creator may leave too; the channel can end with no moderator (§C-19, §C-20).
 
 **Not changed, still open from phase 5:** the bare `revalidatePath("/channels…")` calls; the double-click 500s on *Accept* and *Request to join*; the invite page listing every user's email; the `requestJoinChannel` label in `join/page.tsx`.
 
