@@ -111,6 +111,7 @@
       "delete": "Supprimer",
       "kick": "Retirer un membre",
       "leave": "Quitter",
+      "requests": "Demandes d'adhésion",
       "public": "channel public",
       "private": "channel privé"
     },

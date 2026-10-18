@@ -111,6 +111,7 @@
       "delete": "Delete",
       "kick": "Remove a member",
       "leave": "Leave",
+      "requests": "Join requests",
       "public": "public channel",
       "private": "private channel"
     },

@@ -111,6 +111,7 @@
       "delete": "Eliminar",
       "kick": "Expulsar a un miembro",
       "leave": "Salir",
+      "requests": "Solicitudes de acceso",
       "public": "canal público",
       "private": "canal privado"
     },
