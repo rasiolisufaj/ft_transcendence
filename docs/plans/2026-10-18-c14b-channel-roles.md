@@ -291,7 +291,7 @@ git commit -m "feat(channels): let admins set a member's channel role, audited"
 - Modify: `messages/fr.json`, `messages/en.json`, `messages/es.json` (`channels.kick`)
 
 **Interfaces:**
-- Consumes: `setChannelRole(formData)` from Task 1, which reads `channelId`, `userId` and `role`. The row's form already carries the hidden `channelId` and `userId`; the button adds `role` through its `name` / `value` (React builds the form data with the clicked button, `createFormDataWithSubmitter` in `react-dom`).
+- Consumes: `setChannelRole(formData)` from Task 1, which reads `channelId`, `userId` and `role`. The row's form already carries the hidden `channelId` and `userId`; a third hidden input carries `role`. **Not** the button's `name` / `value`: React overrides the `name` of a button whose `formAction` is a function (`$ACTION_ID_…`, to encode which action to invoke), so `role` never arrives (found by B13, 2026-10-18; see *As built* below).
 - Produces: the message keys `channels.kick.member`, `channels.kick.moderator`, `channels.kick.promote`, `channels.kick.demote`.
 
 Pages are not unit-tested in this project; the build, the typecheck (it checks every `t()` key against `fr.json`) and B13 cover this task.
@@ -396,24 +396,28 @@ Replace
               )}
 ```
 
-with
+with the code below. **As built (2026-10-18), two corrections to the first version of this step:** `t(cond ? "a" : "b")` became `cond ? t("a") : t("b")`, because `src/i18n/check.ts` only counts literal `t("key")` calls and reported the 4 keys unused (commit `4155e50`); and the button's `name="role"` / `value` moved into a hidden input, because React replaced that `name` with `$ACTION_ID_…`, so a click changed nothing (B13 found it in Chromium; the fix commit follows Task 3). Also add, after the hidden `userId` input:
+
+```tsx
+              {/* Read by setChannelRole only. Not on the button: React overrides the name of a
+                  button whose formAction is a function, to encode which action to invoke. */}
+              <input type="hidden" name="role" value={membre.role === "MODERATOR" ? "MEMBER" : "MODERATOR"} />
+```
 
 ```tsx
                 <p className="mt-1 text-xs text-zinc-400">
-                  {t(membre.role === "MODERATOR" ? "moderator" : "member")}
+                  {membre.role === "MODERATOR" ? t("moderator") : t("member")}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
-                {/* Same form, other action: the button's name and value add the new role. */}
+                {/* Same form, other action. */}
                 {canManageRoles && (
                   <button
                     type="submit"
                     formAction={setChannelRole}
-                    name="role"
-                    value={membre.role === "MODERATOR" ? "MEMBER" : "MODERATOR"}
                     className="rounded-lg px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
                   >
-                    {t(membre.role === "MODERATOR" ? "demote" : "promote")}
+                    {membre.role === "MODERATOR" ? t("demote") : t("promote")}
                   </button>
                 )}
                 {/* kickMembers refuses yourself and moderators: no button that does nothing */}
@@ -656,11 +660,11 @@ git commit -m "feat(channels): the channel menu asks can() for each link"
 - [ ] **Step 1: No authorization reads a role**
 
 Run: `grep -rnE 'role [!=]== "MODERATOR"|role: "MODERATOR"|createdBy !==' "src/app/[locale]/(app)/channels"`
-Expected: 6 hits, none of them an authorization check:
+Expected (as run on 2026-10-18): 12 hits, none of them an authorization check. Five are form fields in `channel-policy.test.ts`, one is `setChannelRole`'s input check (`[id]/kick/action.ts`, `role !== "MEMBER" && role !== "MODERATOR"`), and these six:
 - `[id]/actions.ts`, `leaveChannel`: `membership.role === "MODERATOR"` (the business rule: a moderator cannot leave);
 - `create/action.ts`: `role: "MODERATOR"` (the creator's membership, a write);
 - `page.tsx`: `channel.members[0]?.role !== "MODERATOR"` (shows *Leave*, mirroring that rule);
-- `[id]/kick/page.tsx`, three times: the role label, the button's `value`, the button's label (display).
+- `[id]/kick/page.tsx`, three times: the hidden `role` input's value, the role label, the button's label (display).
 
 - [ ] **Step 2: The whole suite and the gates**
 
