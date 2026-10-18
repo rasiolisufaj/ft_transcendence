@@ -676,7 +676,7 @@ Expected: `npm test` 211 passed (17 files: 208 + 3); 212 after the final review'
 ```markdown
 ### B13. Channel roles (phase 6)
 
-Start from a fresh seed (`npm run db:reset`). *Assurance auto* (id 1, public) is moderated by its creator Amir; Adrien, Lina and Karim are members. Rasiol is the ADMIN and a member of no channel. Every login uses `motdepasse123`. Use two browsers (or a private window) so Adrien stays signed in while Rasiol promotes him.
+Start from a fresh seed (`npm run db:reset`). *Assurance auto* (id 1, public) is moderated by its creator Amir; Adrien, Lina and Karim are members. Rasiol is the ADMIN and not a member of *Assurance auto* (in the seed he created *CAF* and is a member of *Titre de séjour*; B13 only uses *Assurance auto*). Every login uses `motdepasse123`. Use two browsers (or a private window) so Adrien stays signed in while Rasiol promotes him.
 
 | As | Action | Expected |
 |---|---|---|
