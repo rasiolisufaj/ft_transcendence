@@ -111,6 +111,7 @@
       "delete": "Supprimer",
       "kick": "Retirer un membre",
       "leave": "Quitter",
+      "requests": "Demandes d'adhésion",
       "public": "channel public",
       "private": "channel privé"
     },
@@ -191,7 +192,11 @@
     "kick": {
       "back": "← Retour aux channels",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
-      "kick": "Retirer"
+      "kick": "Retirer",
+      "member": "membre",
+      "moderator": "modérateur",
+      "promote": "Nommer modérateur",
+      "demote": "Repasser membre"
     },
     "delete": {
       "back": "← Retour aux channels",
