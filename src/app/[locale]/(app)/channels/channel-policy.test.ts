@@ -4,12 +4,12 @@ import type { GlobalRole } from "@/generated/prisma/client";
 import { ForbiddenError } from "@/lib/auth/policy";
 import { createSession, requireUser, validateSessionToken } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
-import { kickMembers } from "./[id]/kick/action";
+import { kickMembers, setChannelRole } from "./[id]/kick/action";
 import { acceptJoinRequest, rejectJoinRequest } from "./[id]/requests/action";
 import { inviteUser } from "./[id]/invite/action";
 import { editChannel } from "./[id]/edit/action";
 import { deleteChannel } from "./[id]/delete/action";
-import { createAnswer, deleteAnswer, modifAnswerUser } from "./[id]/actions";
+import { createAnswer, deleteAnswer, leaveChannel, modifAnswerUser } from "./[id]/actions";
 import { redirect } from "@/i18n/navigation";
 
 // requireUser() reads the cookie, and revalidatePath(), getLocale() and the localised
@@ -293,5 +293,91 @@ describe("answers", () => {
     expect(await auditRows(c.id)).toEqual([
       expect.objectContaining({ actorUserId: admin.id, action: "answer:update", targetType: "Answer", targetId: String(a1.id) }),
     ]);
+  });
+});
+
+describe("channel roles (channel:manageRoles)", () => {
+  const roleOf = async (channelId: number, userId: string) =>
+    (await prisma.channelMember.findUnique({ where: { channelId_userId: { channelId, userId } } }))?.role;
+
+  it("refuses a moderator, even in their own channel, and changes nothing", async () => {
+    const mod = await newUser();
+    const member = await newUser();
+    const c = await newChannel({ [mod.id]: "MODERATOR", [member.id]: "MEMBER" }, mod.id);
+    await signInAs(mod.id);
+
+    await expect(setChannelRole(form({ channelId: c.id, userId: member.id, role: "MODERATOR" })))
+      .rejects.toBeInstanceOf(ForbiddenError);
+
+    expect(await roleOf(c.id, member.id)).toBe("MEMBER");
+    expect(await auditRows(c.id)).toEqual([]);
+  });
+
+  it("lets an admin who is not a member promote, once, audited; the member's existing session kicks on its next request", async () => {
+    const admin = await newUser("ADMIN");
+    const creator = await newUser();
+    const member = await newUser();
+    const other = await newUser();
+    const outsider = await newUser();
+    const c = await newChannel({ [creator.id]: "MODERATOR", [member.id]: "MEMBER", [other.id]: "MEMBER" }, creator.id);
+    const { token } = await createSession(member.id);   // the member was signed in before the promote
+    await signInAs(admin.id);
+
+    // Forged forms: a role that is not a ChannelRole, a user who is not a member.
+    await setChannelRole(form({ channelId: c.id, userId: member.id, role: "ADMIN" }));
+    await setChannelRole(form({ channelId: c.id, userId: outsider.id, role: "MODERATOR" }));
+    expect(await roleOf(c.id, member.id)).toBe("MEMBER");
+    expect(await isMember(c.id, outsider.id)).toBe(false);
+
+    await setChannelRole(form({ channelId: c.id, userId: member.id, role: "MODERATOR" }));
+    await setChannelRole(form({ channelId: c.id, userId: member.id, role: "MODERATOR" }));   // a double click
+
+    expect(await roleOf(c.id, member.id)).toBe("MODERATOR");
+    expect(await auditRows(c.id)).toEqual([
+      expect.objectContaining({
+        actorUserId: admin.id, action: "channel:setRole", targetType: "User", targetId: member.id,
+        metadata: { role: "MODERATOR" },
+      }),
+    ]);
+
+    // No session was invalidated: the member's next request re-reads the memberships.
+    vi.mocked(requireUser).mockResolvedValue((await validateSessionToken(token))!);
+    await kickMembers(form({ channelId: c.id, userId: other.id }));
+    expect(await isMember(c.id, other.id)).toBe(false);
+  });
+
+  it("lets an admin demote a channel's last moderator (§C-20), who can then no longer kick", async () => {
+    const admin = await newUser("ADMIN");
+    const creator = await newUser();
+    const member = await newUser();
+    const c = await newChannel({ [creator.id]: "MODERATOR", [member.id]: "MEMBER" }, creator.id);
+    await signInAs(admin.id);
+
+    await setChannelRole(form({ channelId: c.id, userId: creator.id, role: "MEMBER" }));
+
+    expect(await roleOf(c.id, creator.id)).toBe("MEMBER");
+    expect(await auditRows(c.id)).toEqual([
+      expect.objectContaining({ actorUserId: admin.id, action: "channel:setRole", targetId: creator.id, metadata: { role: "MEMBER" } }),
+    ]);
+
+    await signInAs(creator.id);
+    await expect(kickMembers(form({ channelId: c.id, userId: member.id }))).rejects.toBeInstanceOf(ForbiddenError);
+    expect(await isMember(c.id, member.id)).toBe(true);
+  });
+});
+
+describe("leaving a channel", () => {
+  it("lets a moderator leave, the creator included (vision §3: a moderator can do everything a member can)", async () => {
+    const creator = await newUser();
+    const appointed = await newUser();
+    const c = await newChannel({ [creator.id]: "MODERATOR", [appointed.id]: "MODERATOR" }, creator.id);
+
+    await signInAs(appointed.id);
+    await leaveChannel(form({ channelId: c.id }));
+    await signInAs(creator.id);
+    await leaveChannel(form({ channelId: c.id }));
+
+    expect(await isMember(c.id, appointed.id)).toBe(false);
+    expect(await isMember(c.id, creator.id)).toBe(false);   // §C-19/§C-20: a channel may be left with no moderator
   });
 });

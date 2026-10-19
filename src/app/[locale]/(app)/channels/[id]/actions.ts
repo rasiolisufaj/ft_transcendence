@@ -226,6 +226,8 @@ export async function leaveChannel(formData: FormData) {
   });
   if (!membership) return;
 
+  // Roadmap task 6.1: leaveChannel refuses every moderator, so leaving never
+  // empties a channel (unlike deleteUser's admin cascade, §C-19).
   if (membership.role === "MODERATOR") {
     const otherMods = await prisma.channelMember.count({
       where: {

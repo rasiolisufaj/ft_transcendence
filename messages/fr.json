@@ -96,7 +96,7 @@
       "kick": "Retirer un membre",
       "leave": "Quitter",
       "lastModerator": "Vous êtes le dernier modérateur, promouvez quelqu'un avant de quitter.",
-      "requests": "Demandes",
+      "requests": "Demandes d'adhésion",
       "close": "Fermer le channel",
       "reopen": "Rouvrir le channel",
       "closed": "channel fermé",
@@ -191,7 +191,11 @@
     "kick": {
       "back": "← Retour aux channels",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
-      "kick": "Retirer"
+      "kick": "Retirer",
+      "member": "membre",
+      "moderator": "modérateur",
+      "promote": "Nommer modérateur",
+      "demote": "Repasser membre"
     },
     "delete": {
       "back": "← Retour aux channels",
