@@ -96,7 +96,7 @@
       "kick": "Expulsar a un miembro",
       "leave": "Salir",
       "lastModerator": "Eres el último moderador, promueve a alguien antes de salir.",
-      "requests": "Solicitudes",
+      "requests": "Solicitudes de acceso",
       "close": "Cerrar el canal",
       "reopen": "Reabrir el canal",
       "closed": "canal cerrado",
@@ -191,7 +191,11 @@
     "kick": {
       "back": "← Volver a los canales",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
-      "kick": "Expulsar"
+      "kick": "Expulsar",
+      "member": "miembro",
+      "moderator": "moderador",
+      "promote": "Nombrar moderador",
+      "demote": "Volver a miembro"
     },
     "delete": {
       "back": "← Volver a los canales",

@@ -96,7 +96,7 @@
       "kick": "Remove a member",
       "leave": "Leave",
       "lastModerator": "You are the last moderator, promote someone before you leave.",
-      "requests": "Requests",
+      "requests": "Join requests",
       "close": "Close channel",
       "reopen": "Reopen channel",
       "closed": "closed channel",
@@ -191,7 +191,11 @@
     "kick": {
       "back": "← Back to channels",
       "membersCount": "{count, plural, one {# member} other {# members}}",
-      "kick": "Remove"
+      "kick": "Remove",
+      "member": "member",
+      "moderator": "moderator",
+      "promote": "Make moderator",
+      "demote": "Make member"
     },
     "delete": {
       "back": "← Back to channels",

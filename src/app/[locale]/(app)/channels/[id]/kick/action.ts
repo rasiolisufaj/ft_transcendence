@@ -47,6 +47,50 @@ export async function kickMembers(formData: FormData) {
       channelId: intChannelId,
     });
 
-  revalidatePath("/[locale]/channels/[id]/kick", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]/kick", "page");
   revalidatePath("/[locale]/channels/[id]", "page");
+}
+
+// Admins only, in any channel (§C-18). Changes an existing membership, never adds one.
+export async function setChannelRole(formData: FormData) {
+  const channelId = formData.get("channelId");
+  const targetUserId = formData.get("userId");
+  const role = formData.get("role");
+
+  if (typeof channelId !== "string" || typeof targetUserId !== "string" || !channelId || !targetUserId)
+    return;
+  // A forged role would reach Prisma as an invalid enum value and throw.
+  if (role !== "MEMBER" && role !== "MODERATOR")
+    return;
+
+  const channelIdTrim = channelId.trim();
+  const targetUserIdTrim = targetUserId.trim();
+  if (channelIdTrim.length === 0 || targetUserIdTrim.length === 0)
+    return;
+
+  const intChannelId = parseInt(channelIdTrim, 10);
+  if (Number.isNaN(intChannelId) || intChannelId <= 0 || String(intChannelId) !== channelIdTrim)
+    return;
+
+  const ctx = await requireUser();
+  assertCan(ctx, "channel:manageRoles", { channelId: intChannelId });
+
+  // No session is invalidated: validateSessionToken() re-reads memberships on every
+  // request. Demoting the last moderator is allowed (§C-20).
+  const { count } = await prisma.channelMember.updateMany({
+    where: { channelId: intChannelId, userId: targetUserIdTrim, role: { not: role } },
+    data: { role },
+  });
+  // A double click, or a user who is not a member, changes nothing and records nothing.
+  if (count > 0)
+    await writeAudit({
+      actorUserId: ctx.user.id,
+      action: "channel:setRole",
+      targetType: "User",
+      targetId: targetUserIdTrim,
+      channelId: intChannelId,
+      metadata: { role },
+    });
+
+  revalidatePath("/[locale]/(app)/channels/[id]/kick", "page");
 }
