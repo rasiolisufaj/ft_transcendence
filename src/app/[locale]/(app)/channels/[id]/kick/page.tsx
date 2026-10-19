@@ -20,7 +20,6 @@ export default async function kickUser({
     notFound();
   }
   const ctx = await requireUser();
-  // The same check as kickMembers: a moderator of this channel, or an admin.
   if (!can(ctx, "channel:moderate", { channelId: id })) notFound();
 
   const channel = await prisma.channel.findFirst({
@@ -75,7 +74,6 @@ export default async function kickUser({
                 </h1>
                 <p className="mt-1 text-xs text-zinc-400">{membre.role}</p>
               </div>
-              {/* kickMembers refuses yourself and moderators: no button that does nothing */}
               {membre.role === "MEMBER" && membre.userId !== ctx.user.id && (
                 <button
                   type="submit"

@@ -25,7 +25,6 @@ export default async function DeleteChannelPage({
     where: { id: id },
     include: { _count: { select: { members: true } } },
   });
-  // The same check as deleteChannel: the creator, or an admin.
   if (!channel || !can(ctx, "channel:delete", { channelId: id, ownerUserId: channel.createdBy })) {
     notFound();
   }

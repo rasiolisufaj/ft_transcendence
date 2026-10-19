@@ -66,11 +66,12 @@ function form(fields: Record<string, string | number>): FormData {
 const isMember = async (channelId: number, userId: string) =>
   (await prisma.channelMember.count({ where: { channelId, userId } })) === 1;
 const auditRows = (channelId: number) =>
-  prisma.auditLog.findMany({ where: { channelId: String(channelId) } });
+  prisma.auditLog.findMany({ where: { channelId } });
 
 afterEach(async () => {
-  // Audit rows first: their channelId is a plain string, so no cascade reaches them.
-  await prisma.auditLog.deleteMany({ where: { channelId: { in: created.channels.map(String) } } });
+  // Audit rows first: their channel FK is onDelete:SetNull, so we delete them
+  // explicitly here before the channel disappears.
+  await prisma.auditLog.deleteMany({ where: { channelId: { in: created.channels } } });
   // Cascades members, threads, answers, invites and join requests.
   await prisma.channel.deleteMany({ where: { id: { in: created.channels } } });
   await prisma.user.deleteMany({ where: { id: { in: created.users } } });
@@ -216,9 +217,16 @@ describe("editing and deleting a channel", () => {
     await expect(deleteChannel(form({ deletechannel: c.id }))).resolves.toBeUndefined();   // a double click
 
     expect(await prisma.channel.findUnique({ where: { id: c.id } })).toBeNull();
-    expect(await auditRows(c.id)).toEqual([
+    // AuditLog.channelId is a FK with onDelete:SetNull, so after the delete
+    // the audit row survives with channelId NULL. targetId still carries the id.
+    const rows = await prisma.auditLog.findMany({
+      where: { targetType: "Channel", targetId: String(c.id), action: "channel:delete" },
+    });
+    expect(rows).toEqual([
       expect.objectContaining({ actorUserId: creator.id, action: "channel:delete", targetType: "Channel", targetId: String(c.id) }),
     ]);
+    // Nettoyage : la ligne d'audit n'a plus de channelId, donc l'afterEach ne la ciblera pas.
+    await prisma.auditLog.deleteMany({ where: { targetType: "Channel", targetId: String(c.id) } });
   });
 });
 
