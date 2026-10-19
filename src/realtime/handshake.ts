@@ -9,8 +9,9 @@ export function readTicket(path: string | undefined): string | null {
   return url.searchParams.get("ticket");
 }
 
-// Default-deny: a user topic only for its owner; channel topics wait for the membership check.
-export function canSubscribe(userId: string, topic: string): boolean {
+export type IsMember = (userId: string, channelId: number) => Promise<boolean>;
+
+export async function canSubscribe(userId: string, topic: string, isMember: IsMember): Promise<boolean> {
   const parsed = parseTopic(topic);
   if (!parsed) {
     return false;
@@ -18,5 +19,5 @@ export function canSubscribe(userId: string, topic: string): boolean {
   if (parsed.kind === "user") {
     return parsed.userId === userId;
   }
-  return false;
+  return isMember(userId, parsed.channelId);
 }

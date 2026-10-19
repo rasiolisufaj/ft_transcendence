@@ -5,6 +5,7 @@ import { parseClientMessage, type ServerMessage } from "@/contracts/socket";
 import { verifyTicket } from "@/lib/auth/ticket";
 import { canSubscribe, readTicket } from "./handshake";
 import { log } from "./log";
+import { isChannelMember } from "./membership";
 
 type Options = {
   port: number;
@@ -54,7 +55,7 @@ export function startServer({ port, heartbeatMs }: Options) {
     log("info", "client connected", { userId, clients: server.clients.size });
     send(socket, { type: "hello", userId });
 
-    socket.on("message", (data) => {
+    socket.on("message", async (data) => {
       const message = parseClientMessage(data.toString());
       if (!message) {
         send(socket, { type: "error", code: "badRequest" });
@@ -70,7 +71,7 @@ export function startServer({ port, heartbeatMs }: Options) {
         send(socket, { type: "unsubscribed", topic: message.topic });
         return;
       }
-      if (!canSubscribe(userId, message.topic)) {
+      if (!(await canSubscribe(userId, message.topic, isChannelMember))) {
         send(socket, { type: "error", code: "forbidden", topic: message.topic });
         return;
       }
