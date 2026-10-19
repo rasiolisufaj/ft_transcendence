@@ -26,7 +26,7 @@ npm test                                                                    # ev
 npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" "src/app/[locale]/(app)/channels" --reporter=verbose    # auth only
 ```
 
-Expected: `npm test` reports **208 passed** (17 files). The auth part is 9 files and 90 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓.
+Expected: `npm test` reports **213 passed** (17 files). The auth part is 9 files and 95 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓.
 
 | File | What it proves |
 |---|---|
@@ -36,7 +36,7 @@ Expected: `npm test` reports **208 passed** (17 files). The auth part is 9 files
 | [login/actions.test.ts](<../src/app/[locale]/(auth)/login/actions.test.ts>) | the action returns the schema's errors; 6 failures lock an email for 15 minutes |
 | [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything except touch another user's documents (the vault is owner-only, even for an admin); a moderator acts only in their own channel, and moderation is never granted by ownership; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` and `channel:manageRoles` are admin-only, even on your own account. Plus the C4 truth table: one row per `Action` (23) with the resource its caller passes and the answer for admin, moderator, member, owner and stranger; a new `Action` without a row fails the typecheck |
 | [admin/users/actions.test.ts](<../src/app/[locale]/(app)/admin/users/actions.test.ts>) | a non-admin cannot change a role or delete a user; an admin cannot demote or delete themselves; a role change ends that user's sessions; every change writes one `AuditLog` row; a role other than USER/ADMIN is refused; a double click or a stale page (user already gone, role already set) changes nothing and does not throw. Uses the real DB. |
-| [channels/channel-policy.test.ts](<../src/app/[locale]/(app)/channels/channel-policy.test.ts>) | phase 5, the policy in the channel actions: a plain member is refused every moderation action; a moderator of another channel cannot kick there; an admin kicks in a channel with no moderator; a member cannot edit a channel, a moderator who is not the creator can; that moderator cannot delete it, the creator can; a member cannot delete someone else's answer, a moderator can; a non-member cannot post; a moderator cannot rewrite someone else's answer, an admin's rewrite is audited; a non-member admin is sent back to `/channels` after an edit; every privileged action writes one `AuditLog` row, once, after it happened. Uses the real DB. |
+| [channels/channel-policy.test.ts](<../src/app/[locale]/(app)/channels/channel-policy.test.ts>) | phase 5, the policy in the channel actions: a plain member is refused every moderation action; a moderator of another channel cannot kick there; an admin kicks in a channel with no moderator; a member cannot edit a channel, a moderator who is not the creator can; that moderator cannot delete it, the creator can; a member cannot delete someone else's answer, a moderator can; a non-member cannot post; a moderator cannot rewrite someone else's answer, an admin's rewrite is audited; a non-member admin is sent back to `/channels` after an edit; every privileged action writes one `AuditLog` row, once, after it happened. Phase 6: a moderator cannot change a channel role; an admin promotes once, audited, a forged role or a non-member changes nothing, and the promoted member's existing session moderates on its next request; an admin may demote the last moderator, who then cannot kick or delete; a moderator, the creator included, can leave a channel, and a creator who left cannot delete it. Uses the real DB. |
 | [audit.test.ts](../src/lib/audit.test.ts) | `writeAudit()` records the actor, action, target and channel; a failed write is logged and never throws. Uses the real DB. |
 
 To run one test by name: `npx vitest run -t "never extends"`.
@@ -306,6 +306,27 @@ Seed: *Assurance auto* is moderated by Amir (members Adrien, Lina, Karim; answer
 | rasiol | open `/fr/channels/<identite>/edit`, change the title and save; then open `/delete` (do not confirm) | the save lands on `/fr/channels` with the new title (the channel page would 404 for a non-member); the delete page opens: no moderator and no creator are left, so only an admin may |
 | any | `select actor."displayName", a.action, target."displayName", a."channelId" from "AuditLog" a left join "User" actor on actor.id = a."actorUserId" left join "User" target on target.id = a."targetId" order by a."createdAt" desc limit 5;` | newest first: `channel:update` (Rasiol, empty target: it is the channel), `channel:kick` (Rasiol, Lina), `user:delete` (Rasiol, empty target: Syu is gone), `answer:delete` (Amir); no row for the forged kick (5.2) |
 | any | the pages above at 375, 768 and 1440 px | no sideways scroll; the console stays empty except for the forged submit (graded) |
+
+Afterwards, `npm run db:reset` restores the seed.
+
+### B13. Channel roles (phase 6)
+
+Start from a fresh seed (`npm run db:reset`). *Assurance auto* (id 1, public) is moderated by its creator Amir; Adrien, Lina and Karim are members. Rasiol is the ADMIN and not a member of *Assurance auto* (in the seed he created *CAF* and is a member of *Titre de séjour*; B13 only uses *Assurance auto*). Every login uses `motdepasse123`. Use two browsers (or a private window) so Adrien stays signed in while Rasiol promotes him.
+
+| As | Action | Expected |
+|---|---|---|
+| adrien | sign in, open `/fr/channels`, then ⋯ on *Assurance auto* | *Quitter* only |
+| rasiol (ADMIN) | `/fr/channels/join`, join *Assurance auto*; then `/fr/channels`, ⋯ | *Supprimer*, *Modifier*, *Retirer un membre* and *Quitter* (an admin passes every `can()`) |
+| rasiol | ⋯ → *Retirer un membre* | each row shows *membre* or *modérateur*; every row has *Nommer modérateur* or *Repasser membre*; Amir's has *Repasser membre* |
+| rasiol | *Nommer modérateur* on Adrien | his row now says *modérateur* and offers *Repasser membre*; his *Retirer* disappears |
+| adrien (still signed in from row 1) | reload `/fr/channels`, ⋯ | *Modifier*, *Retirer un membre* and *Quitter*, no *Supprimer* (he is not the creator; 6.2). No re-login was needed (6.1) |
+| adrien | *Retirer un membre*, then *Retirer* on Lina | she disappears (6.3); no promote/demote buttons on his page (§C-18) |
+| amir | open `/fr/channels/1/kick` | *Retirer* on members, no promote/demote buttons: a moderator does not manage roles (§C-18) |
+| rasiol | *Repasser membre* on Adrien, then on Amir | both work, even though the channel is left with no moderator (§C-20) |
+| amir | reload `/fr/channels`, ⋯ | *Quitter* only: a demoted creator can no longer delete (§C-20) |
+| amir | open `/fr/channels/1/delete` | 404: the page asks the same `can()` |
+| any | `select actor."displayName", a.action, target."displayName", a.metadata from "AuditLog" a left join "User" actor on actor.id = a."actorUserId" left join "User" target on target.id = a."targetId" order by a."createdAt" desc limit 4;` | newest first: `channel:setRole` (Rasiol, Amir, `{"role": "MEMBER"}`), `channel:setRole` (Rasiol, Adrien, `{"role": "MEMBER"}`), `channel:kick` (Adrien, Lina), `channel:setRole` (Rasiol, Adrien, `{"role": "MODERATOR"}`) |
+| any | the kick page and the menu at 375, 768 and 1440 px | no sideways scroll (the name truncates beside the two buttons); the console stays empty (graded) |
 
 Afterwards, `npm run db:reset` restores the seed.
 

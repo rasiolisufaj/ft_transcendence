@@ -202,9 +202,8 @@ export async function leaveChannel(formData: FormData)
   if (!membership)
     return;
 
-  if (membership.role === "MODERATOR")
-    return;
-
+  // Moderators may leave too (vision §3: a moderator can do everything a member can).
+  // The channel may be left with no moderator: an admin moderates it (§C-19, §C-20).
   await prisma.channelMember.deleteMany({
     where: { channelId: channel.id, userId: user.id },
   });

@@ -6,7 +6,7 @@
 
 **Architecture:** Database-backed opaque sessions (random token in an httpOnly cookie, only its SHA-256 stored), one synchronous default-deny `can()` policy function resolving three tiers (global admin → channel moderator → resource owner), and Server Actions that each call `requireUser()` then `assertCan()`. No auth in middleware, no auth library, no service layer — plain functions in `src/lib/auth/`.
 
-> **Status (revised 2026-10-14):** phases **0–4 and task 2.5 are done and merged** (PRs #10, #13, #18, #22 and #24; `main` = `e4f597d`). **Module 1 is complete.** PRs #26, #27 and #29 followed up on phase 4's nav and responsive layout. Since PR #31 (2026-10-14), Alexandre's realtime server verifies task 2.5's ticket on connect. **Phase 5 is built on `feat/channel-policy`** (Tasks 1–3 committed; its final review and PR are still to come; see its *As built* note). Amir's **PR #28** (`chore/review-fixes`, merged 2026-10-12) removed the duplicate kick and delete actions that phase 5's table listed. Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 5–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` and the open branches on 2026-10-14. `handoff/WORKLOG.md` remains the day-to-day progress log.
+> **Status (revised 2026-10-19):** phases **0–5 and task 2.5 are done and merged** (PRs #10, #13, #18, #22, #24 and #33; `main` = `8bf5fcd`). **Module 1 is complete.** PRs #26, #27 and #29 followed up on phase 4's nav and responsive layout. Since PR #31 (2026-10-14), Alexandre's realtime server verifies task 2.5's ticket on connect. **Phase 6 is in PR #34** (`feat/channel-roles`, opened 2026-10-18, not merged). **Phase 7 is cut** (§C-21, 2026-10-19), so **Module 2 is complete when PR #34 merges**. Next: phases 8–11. Amir's **PR #28** (`chore/review-fixes`, merged 2026-10-12) removed the duplicate kick and delete actions that phase 5's table listed. Code in the done phases is the plan as written; each one opens with an *As shipped* note listing where the merged code differs. Phases 5–11 were rewritten on 2026-10-02 against `[locale]` routes, i18n keys and Amir's `feat/channels`, and checked against `main` and the open branches on 2026-10-14. `handoff/WORKLOG.md` remains the day-to-day progress log.
 
 **Tech Stack:** Next.js 16 App Router · React 19 · TypeScript strict · Prisma 6 (generator `prisma-client` → `src/generated/prisma/`) · PostgreSQL 17 · Vitest 5 · Zod 4 · `@node-rs/argon2` · `otpauth` · `node:crypto`
 
@@ -57,6 +57,7 @@ Copied from `PROJECT_PLAN.md` §0. Every task's definition of done implicitly in
   - **PR #32** (Adrien, `admin/privacy-and-terms`, `e4f597d`): `/[locale]/privacy` and `/[locale]/terms` in a `(public)` group, open signed out, and `src/components/Footer.tsx` in the root layout linking both. The graded "accessible Privacy Policy and Terms pages" line is met. The policy says rights (deletion, export) are exercised by e-mail, because `feat/gdpr` is not merged.
 - **In flight, not merged (checked 2026-10-14):**
   - **`feat/gdpr`, PR #30** (Amir, opened 2026-10-12; **work in progress, not ready for review** as of 2026-10-14): E12's export as `GET /api/account/export` (a ZIP of `data.json` plus the original files, `getCurrentUser()`, 401 without a session), a `/[locale]/account/data` page linked from `UserMenu`, and a `deleteAccount` action, now behind a form, that re-asks the password. Adds `jszip`. Merges into `e4f597d` without conflicts. Relevant to phases 8 and 11.3. Once it merges, PR #32's policy should point at `/account/data` instead of e-mail.
+  - **`correction`** (Amir, one commit `8a8815e`, pushed 2026-10-19, no PR; checked 2026-10-19): upload magic bytes, channel close and join requests, and a **DB consolidation**. It touches this plan in two places, so Rasiol reviews it. (1) It edits `src/lib/audit.ts` and makes `AuditLog.channelId` an `Int?` foreign key with `onDelete: SetNull`, which reverses §C-8; `deleteChannel` now writes its audit row **before** the delete, which reverses phase 5's "after, only when it removed the row". It is consistent (the tests are updated; `targetId` keeps the channel id once `channelId` is nulled), but it is a decision to accept or refuse, and to record. (2) It deletes the seven applied migrations after `init` and renames `init` to `20261019000000_init`, so every existing database reports drift and needs `npm run db:reset`; create phase 10's migration only after it merges. It also adds `CHECK (value IN (-1, 1))` on `Vote.value` (phase 7's E10 note). No hide, mute or vote action.
 
 ### The blocking dependencies, in order
 
@@ -68,7 +69,7 @@ Copied from `PROJECT_PLAN.md` §0. Every task's definition of done implicitly in
 | 4 | **`policy.ts`: `can()` / `assertCan()`** | modules 1–2, and 3 teammates | ✅ phase 3 (PR #18). Used by the admin surface (phase 4), and by Amir's channel actions since phase 5 (`feat/channel-policy`). |
 | 5 | **`writeAudit()`** | admin surface, moderation | ✅ phase 3 (PR #18) |
 | 6 | Amir's `feat/channels` merged | phase 5 (policy in his actions), phase 6 (channel roles) | ✅ PR #9 (2026-10-05) |
-| 7 | Amir's E10 (votes, reputation) and E11 (hide/mute) | phase 6's Helper badge, phase 7 | not started |
+| 7 | Amir's E10 (votes, reputation) and E11 (hide/mute) | nothing of yours since phase 7 was cut (§C-21); review notes in phase 7 | not started (checked 2026-10-19: no hide, mute or vote action on any branch) |
 
 ### Module order
 
@@ -81,15 +82,15 @@ Phase 4    admin surface (C14a) ✅                      merged (PR #24) → MOD
    │
    ├──────────────────────────────────────┬──────────────────────────────────────
    │ Track A — waits on Amir's merges     │ Track B — no outside dependency
-   │ Phase 5   policy in channel  BUILT   │ Phase 8   OAuth Google (C7)
-   │ Phase 6   channel roles + Helper     │ Phase 9   OAuth GitHub (C8)  → MODULE 3
-   │ Phase 7   moderation sign-off (E11)  │ Phase 10  TOTP (C9)
-   │           → MODULE 2 done            │ Phase 11  step-up (C10)      → MODULE 4
+   │ Phase 5   policy in channel  MERGED  │ Phase 8   OAuth Google (C7)
+   │ Phase 6   channel roles (C14b) PR #34│ Phase 9   OAuth GitHub (C8)  → MODULE 3
+   │           → MODULE 2 done            │ Phase 10  TOTP (C9)
+   │ Phase 7   CUT (§C-21)                │ Phase 11  step-up (C10)      → MODULE 4
 ```
 
-**The load-bearing observation (revised 2026-10-07):** phase 4 is merged, so phase 5 is the critical path. It has no outside dependency left; phase 6's Helper part and phase 7 wait on Amir's E10/E11; phases 8–11 depend only on phase 2. So do phase 5 now, and OAuth/TOTP in the gaps. Do not leave phase 5 waiting behind OAuth: permissions is 2 of your 6 points, and its graded demo, "different actions per role", needs the channel tier.
+**The load-bearing observation (revised 2026-10-19):** phases 5 and 6 had the critical path, because permissions is 2 of your 6 points and its graded demo, "different actions per role", needed the channel tier. Phase 5 merged (PR #33) and phase 6 is in review (PR #34). Phase 7 is cut (§C-21), so nothing of yours waits on a teammate any more: phases 8–11 depend only on phase 2.
 
-**Module 1 (user management & auth)** is complete since PR #24 (2026-10-07) for what this plan owns: signup, login, sessions, the admin user list. The profile and settings page (D14: display name, locale, avatar, Helper badge) is built by Alexandre and counts toward this module (§6). **Module 2 (advanced permissions)** is complete at phase 7, once the channel-moderator tier is in use in real channels.
+**Module 1 (user management & auth)** is complete since PR #24 (2026-10-07) for what this plan owns: signup, login, sessions, the admin user list. The profile and settings page (D14: display name, locale, avatar, Helper badge) is built by Alexandre and counts toward this module (§6). **Module 2 (advanced permissions)** is complete when phase 6 merges (PR #34): the channel-moderator tier is then appointed by an admin and in use in real channels (B13). Phase 7 was cut on 2026-10-19 (§C-21).
 
 ---
 
@@ -112,7 +113,7 @@ Phase 4    admin surface (C14a) ✅                      merged (PR #24) → MOD
 | `app/[locale]/` + `next-intl` (D10, D11) | Alexandre | — | ✅ PR #12. All new routes go under `[locale]`; §C-3 is obsolete. |
 | `DocumentCategory` | Amir | — | ✅ PR #11. `Document.version` is still missing, and nothing of yours needs it. |
 | `feat/channels` merged | Amir | phases 5 and 6 | ✅ PR #9 (2026-10-05). The review notes still open are in phase 5. |
-| E10 votes/reputation, E11 hide/mute | Amir | phase 6's Helper part, phase 7 | not started (checked 2026-10-14) |
+| E10 votes/reputation, E11 hide/mute | Amir | nothing since §C-21 (phase 7 cut); review his PRs with phase 7's notes | not started (checked 2026-10-19) |
 | E12 GDPR export, E13 deletion | Amir | 11.3 (step-up on the export) | PR #30 (`feat/gdpr`), work in progress as of 2026-10-14: §A, *In flight* |
 | Redis | Adrien | nothing of yours | The login limiter and the WS nonce set are in-process Maps. |
 
@@ -170,6 +171,19 @@ Each one is a deliberate, reversible choice. Read them out at evaluation rather 
 
 19. **Deleting a channel's only moderator leaves the channel without one, and that is accepted.** Phase 4's `deleteUser` cascades the user's `ChannelMember` rows and sets `Channel.createdBy` to null; pages already render a missing author as `t("deletedUser")`. Until phase 5 the channel is frozen, because Amir's inline checks need a `MODERATOR` membership and an admin has none. From phase 5, tier 1 lets an admin moderate, edit and delete every channel; from phase 6, an admin appoints a successor with `setChannelRole`. Refusing the delete was rejected: the only fix would be promoting someone first, which does not exist until phase 6, so every seeded channel creator (each its channel's only moderator) would be undeletable, and a reachable refusal would need its own i18n error. Auto-promoting a remaining member was rejected too: it hands moderation to someone nobody chose, which §C-18 forbids.
 
+*Added 2026-10-18, from the phase 6 review:*
+
+20. **Demoting a channel's last moderator is allowed, and `channel:delete` needs the creator to still moderate the channel.** Task 6.1 used to refuse demoting the last moderator. That guard was cut. §C-19 already accepts a channel with no moderator: an admin moderates every channel and can promote someone again. A count-then-update guard also races (two demotes at once both see two moderators) unless it is wrapped in a transaction, and a refusal the user can reach needs its own i18n error. The case for allowing it (Amir asked for one in his PR #34 review): the only moderator of a channel abuses the role, and the admin must take it away before a successor is found; refusing would force the admin to promote someone arbitrary first, or to delete the account, which already leaves the channel with no moderator (§C-19). **`channel:delete` (changed 2026-10-19, Amir's PR #34 review):** this section first kept `channel:delete` on ownership alone (`ownerUserId: channel.createdBy`, phase 5), so a demoted creator could still delete, and once moderators could leave, so could a creator who had left, by typing the URL. Amir's review rejected both: a demotion takes away every right on the channel. `can()` now grants `channel:delete` to the creator only while they hold a `MODERATOR` membership in that channel (admins still pass at tier 1). Leaving, or a demotion, ends it, and then only an admin may delete; a re-promotion gives it back. The three callers (the action, the delete page, the `/channels` menu) already passed `{ channelId, ownerUserId }`, so none changed. Only Amir's channel code asks `channel:delete`, so this is a team announcement, not a team decision. **Also (final review, 2026-10-18, Rasiol's decision): any moderator may leave a channel**, the creator included. Amir's `leaveChannel` refused every moderator so that a channel never lost its moderators; with this section and §C-19 that state is accepted, and the refusal left an admin-appointed moderator stuck, against vision §3 ("everything a Member can do").
+
+*Added 2026-10-19, from the phase 7 review (Rasiol: "keep only the necessary"):*
+
+21. **Phase 7 is cut, and Module 2 closes with phase 6.** Every task in it was either already done or someone else's work, and its entry gate tied this module to three teammate deliverables (E10, E11, D14), none of them started. The subject's three lines for this module are met by phases 4–6: user CRUD (`/admin/users`, B11), roles admin / user / moderator (global roles in phase 4, the channel moderator in phase 6), different views and actions per role (B11 for admin vs. user; B13 shows member, admin, appointed moderator and creator on one channel). What each phase 7 task became:
+    - **Hide and mute** (7.1–7.3) are E11, in Amir's organization-system module. They plug into `channel:moderate`, which `policy.ts` already has, scoped to one channel and in the truth table. Reviewing his PR is ordinary review, so the checks moved to phase 7's review notes. C14's "gains hide/mute only there" is met with kick, the moderator action that exists: B13 row 6, and the cross-channel replay test from phase 5.
+    - **The demo script** (7.4) is B11, then B13, then B12's forged kick (row 3) in `docs/testing-auth.md`.
+    - **The Helper badge** (7.5): its permission half, "a Helper gets no extra permission" (C4), is phase 3's test *reputation is a badge, not a tier*. Showing the badge is D14's (Alexandre), which the vision counts toward module 1. C14's "threshold job" is not built: whoever renders the badge first computes `reputation >= threshold` at render.
+
+    If an evaluator asks to *edit* a user from the admin surface, the admin edits the role; display names are D14's profile page.
+
 ---
 
 ## D. File structure
@@ -218,7 +232,7 @@ src/components/{Nav,UserMenu,MobileMenu}.tsx  ⚠ Alexandre's. P4 ✅ admin-only
 messages/{fr,en,es}.json                  every phase with UI: fr.json first (it types t())
 ```
 
-**One schema migration** remains in this plan: **phase 10** (2FA columns). Phase 7's moderation columns are now Amir's to add as part of E11. `prisma/` is Amir's directory. Coordinate the phase 10 migration with him: `main` already has seven, three of them his.
+**One schema migration** remains in this plan: **phase 10** (2FA columns). The hide and mute columns are Amir's to add as part of E11. `prisma/` is Amir's directory. Coordinate the phase 10 migration with him: `main` has eight, and his `correction` branch squashes them into one `init` (§A, *In flight*), so create phase 10's after that lands.
 
 ---
 
@@ -1808,7 +1822,7 @@ git commit -m "chore(auth): drop the unused AUTH_STUB key and document the C5 ow
 - Consumes: `requireUser`, `can`, `assertCan`, `writeAudit`, `invalidateAllSessions`.
 - Produces: no exported interface — this phase is a screen.
 
-**This is where "different views/actions per role" becomes demonstrable for global roles.** The channel-scoped half arrives in phases 5–7.
+**This is where "different views/actions per role" becomes demonstrable for global roles.** The channel-scoped half arrives in phases 5–6 (phase 7 was cut, §C-21).
 
 ### Task 4.1: An admin you can log in as
 
@@ -1948,7 +1962,7 @@ Title: `feat(admin): user management and role administration`. In the descriptio
 
 ## Phases 5–11 — specifications
 
-Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are specified at task level and each is expanded into its own `docs/plans/YYYY-MM-DD-<id>.md` when its gate opens.** Phases 5–7 were rewritten on 2026-10-02. E9–E11 are Amir's (§B), so they now cover only what is yours: putting the policy into his community actions, channel-role management (C14b), and signing off module 2.
+Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are specified at task level and each is expanded into its own `docs/plans/YYYY-MM-DD-<id>.md` when its gate opens.** Phases 5–7 were rewritten on 2026-10-02. E9–E11 are Amir's (§B), so they now cover only what is yours: putting the policy into his community actions and channel-role management (C14b). Phase 7, the module 2 sign-off, was cut on 2026-10-19 (§C-21).
 
 ### Phase 5 — The policy in the channel actions (C5, C6 in Amir's merged code) · 1d
 
@@ -1980,7 +1994,7 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 | 5.2 | Audit writes | every "yes" row writes one `AuditLog` row with `channelId` and the target |
 | 5.3 | Cross-channel check by hand | a moderator of channel A who replays a kick form with channel B's id is refused; a plain member's kick in A is refused; an admin kicks a member in a channel that has **no moderator** (§C-19: delete its only moderator in the admin surface first) and succeeds; recorded in `docs/testing-auth.md` |
 
-**As built (2026-10-14, `feat/channel-policy`, not merged yet):** Tasks 1–3 of the expansion, committed by Rasiol as `07dc37b` (kick, join requests, invite), `34275cd` (edit, delete) and `cbe363d` (answers); the create/join rows are dropped (decision 4). **5.1:** the grep finds 4 lines, none of them an authorization check: `leaveChannel`'s moderator-cannot-leave rule, `createChannel`'s `MODERATOR` write, and the `/channels` options menu twice (display, moved to 6.2). **5.2:** each "yes" row writes its `AuditLog` row after the change, only when it happened; pinned by `channels/channel-policy.test.ts` (9 DB tests, each watched failing first). **5.3:** B12 in `docs/testing-auth.md`. The page checks were verified server-side on mespapiers.local with throwaway sessions (deleted after): lina gets 404 on the five management pages of *Assurance auto*; rasiol (admin, not a member) gets 200 on them and 404 on the channel page; amir sees 2 answer *delete* buttons and no *edit* link on others' answers, and 3 *Kick* buttons. The forged kick, the console and the 375/768/1440 check are Rasiol's browser run of B12. **Final review (2026-10-14, fresh Opus reviewer):** "with fixes", 0 Critical, 2 Important, both fixed with a failing test first: a non-member admin is sent to `/channels` after `editChannel` / `modifAnswerUser` (the channel page 404s for them; the requests page's back link too), and an admin's rewrite of someone else's answer writes `answer:update`. The 5 Minor findings are deferred (worklog). **Gates:** `npm test` 208/208 (17 files, after the fixes), build, typecheck, lint 0/0, `i18n:check` unchanged (the 5 known unused keys). **Departures:** the expansion's *Departures* table and decision 4.
+**As built (2026-10-14, `feat/channel-policy`; merged in PR #33 on 2026-10-16, `8bf5fcd`):** Tasks 1–3 of the expansion, committed by Rasiol as `07dc37b` (kick, join requests, invite), `34275cd` (edit, delete) and `cbe363d` (answers); the create/join rows are dropped (decision 4). **5.1:** the grep finds 4 lines, none of them an authorization check: `leaveChannel`'s moderator-cannot-leave rule, `createChannel`'s `MODERATOR` write, and the `/channels` options menu twice (display, moved to 6.2). **5.2:** each "yes" row writes its `AuditLog` row after the change, only when it happened; pinned by `channels/channel-policy.test.ts` (9 DB tests, each watched failing first). **5.3:** B12 in `docs/testing-auth.md`. The page checks were verified server-side on mespapiers.local with throwaway sessions (deleted after): lina gets 404 on the five management pages of *Assurance auto*; rasiol (admin, not a member) gets 200 on them and 404 on the channel page; amir sees 2 answer *delete* buttons and no *edit* link on others' answers, and 3 *Kick* buttons. The forged kick, the console and the 375/768/1440 check are Rasiol's browser run of B12. **Final review (2026-10-14, fresh Opus reviewer):** "with fixes", 0 Critical, 2 Important, both fixed with a failing test first: a non-member admin is sent to `/channels` after `editChannel` / `modifAnswerUser` (the channel page 404s for them; the requests page's back link too), and an admin's rewrite of someone else's answer writes `answer:update`. The 5 Minor findings are deferred (worklog). **Gates:** `npm test` 208/208 (17 files, after the fixes), build, typecheck, lint 0/0, `i18n:check` unchanged (the 5 known unused keys). **Departures:** the expansion's *Departures* table and decision 4.
 
 **Review notes for Amir's code** (PR #9 merged; status checked 2026-10-12, after PR #28 merged). Send them with the table:
 - ✅ **Fixed before merge:** `requestJoinChannel` now takes `user.id` from `requireUser()`, parses the channel id from `channelId` and awaits the `create`.
@@ -1989,38 +2003,43 @@ Per `CLAUDE.md`'s rule: **phases 0–4 carry full TDD steps; phases 5–11 are s
 - **PR #28 review (2026-10-12):** on the branch, lint 0/0, `tsc` clean, `i18n:check` only the 5 known unused keys, all 8 migrations apply to an empty DB with no drift from `schema.prisma`, `npm test` 180/180 (scratch DB). **Merged without it, fixed by Rasiol on `fix/nav-channels`:** the new *Channels* nav link is only in the bar (`barLinks`), not in the ☰ panel (`panelLinks`), so below 768 px nothing in the nav reaches `/channels`. Moving it into `AccountLinks` in `UserMenu.tsx` puts it in both, signed-in only, which also drops the signed-out link that only bounces to `/login` and the mis-indented `<>`. **Follow-ups, still open:** `deleteDocument`'s `Number()` check lets `id=99999999999` through and Prisma throws (INT4 overflow, a 500 that deletes nothing, same as before); the stray `{" "}` after the date on the requests page. (Done at merge: squashed into one conventional commit; `CLAUDE.md` updated for eight migrations and the `updatedAt` columns.) **Already on `main`, not caused by PR #28:** `requests/action.ts` revalidates `/[locale]/channels/[id]/requests` without the `(app)` group; the kick page shows *Kick* next to moderators and the viewer, where the action silently refuses; it also prints the raw role enum (`MEMBER`) untranslated. PR #28 also edited `CLAUDE.md` and `handoff/WORKLOG.md`; the conflict with the uncommitted docs sync was resolved on `fix/nav-channels`.
 - `joinChannel` already uses `createMany({ skipDuplicates: true })`, so E9's "idempotent under a double-click, via the constraint" holds. Keep it that way.
 
-### Phase 6 — Channel role management + Helper badge (C14, second half) · 1d
+### Phase 6 — Channel role management (C14, second half) · 0.5d — **Module 2 complete** (when PR #34 merges)
 
-**Expand into:** `docs/plans/<date>-c14b-channel-roles.md`
-**Entry gate:** phase 5 green. Task 6.4 also needs Amir's E10 (votes → `User.reputation`).
-**Schema:** none.
-
-| Task | Deliverable | Done when |
-|---|---|---|
-| 6.1 | `setChannelRole(channelId, userId, role)` action | `assertCan(ctx, "channel:manageRoles", { channelId })`: admins only, in any channel (§C-18). Refuses to demote a channel's **last** MODERATOR (Amir's `leaveChannel` refuses every moderator, so leaving never empties a channel). That guard covers demotion only: deleting a user can still leave a channel with **zero** moderators (§C-19), so promoting must work there, and neither the action nor the buttons may assume a moderator exists. Writes `channel:setRole` to the audit log. **Invalidates no sessions:** `validateSessionToken()` re-reads memberships on every request, so the change applies on the target's next request |
-| 6.2 | Promote/demote buttons | next to Amir's kick buttons on the channel's member list (`/channels/[id]/kick` today), shown only when `can(ctx, "channel:manageRoles", { channelId })`. Strings go in his `channels` namespace. Agree the placement with him. **Also (deferred from phase 5):** the `/channels` options menu (`channels/page.tsx`) still shows the management links on `members[0]?.role === "MODERATOR"`. Once a moderator can be promoted, a moderator is no longer always the creator, so switch each link to the `can()` its page asks (`channel:update`, `channel:delete`, `channel:moderate`) |
-| 6.3 | **C14 Done-when, scoped** | an ADMIN promotes a member to MODERATOR in channel A; that user can now kick and accept requests in A, and is refused in B (forged form). Hide/mute join this check in phase 7, once E11 exists |
-| 6.4 | Helper badge | `reputation >= HELPER_THRESHOLD`, **derived at render**: no column, no "threshold job" (C14's wording), so it cannot drift. Agree the constant with Alexandre (D14 profile) and Amir (answer list); whoever renders it first owns it. Never in `policy.ts`. "Grants no action" is already phase 3's reputation test |
-
-### Phase 7 — Moderation sign-off (E11 is Amir's) · 0.5d — **Module 2 complete**
-
-**Expand into:** `docs/plans/<date>-e11-moderation-signoff.md`
-**Entry gate:** Amir's E11 merged, including his moderation migration (`hiddenAt`/`hiddenById` on `Thread`/`Answer`, `ChannelMember.mutedUntil` or equivalent).
-**Schema:** none of yours.
+**Expanded into:** [`2026-10-18-c14b-channel-roles.md`](2026-10-18-c14b-channel-roles.md) (2026-10-18). Its *Keep vs. Cut* table lists what this section dropped on 2026-10-18 and why. In short: the last-moderator guard (§C-20); 6.3's forged form in channel B, already pinned by phase 5's test *replays a kick with another channel's id*; and 6.4, the Helper badge, moved to phase 7 as task 7.5 (since cut, §C-21), because nothing writes `User.reputation` until Amir's E10 and the badge is D14's to render.
+**Entry gate:** phase 5 merged: **met on 2026-10-16** (PR #33). Phase 6 no longer waits on E10.
+**Schema:** none. **Files:** Amir's, under `src/app/[locale]/(app)/channels/`. Open `feat/channel-roles` and tag him.
 
 | Task | Deliverable | Done when |
 |---|---|---|
-| 7.1 | Review E11 for the policy | hide/unhide/mute/unmute call `assertCan(ctx, "channel:moderate", { channelId })` and write an `AuditLog` row with `channelId` and target (C6 + E11). Hidden content comes from a **different query branch** for moderators, not from a CSS class over data already sent to members |
-| 7.2 | Mute enforcement | a muted member's `thread:create`/`answer:create` is refused **server-side**. Recommended: add `mutedUntil` to the memberships `select` in `validateSessionToken()` and have `can()` deny `MEMBER_ACTIONS` while it is in the future. That is one field and one line, additive to `SessionContext`, and every posting action gets it for free. Decide with Amir |
-| 7.3 | Phase 6.3 completed | the promoted moderator hides and mutes in channel A only |
-| 7.4 | **Evaluation demo script** in `docs/testing-auth.md` | one channel, three browsers (admin, moderator, member), three different views and action sets on the same thread |
+| 6.1 | `setChannelRole(formData)` in `[id]/kick/action.ts`, next to `kickMembers` | `assertCan(ctx, "channel:manageRoles", { channelId })`: admins only, in any channel (§C-18). Changes an **existing** membership only (`updateMany`, no upsert), and only when the role differs, so a double click writes nothing. Demoting the last moderator is allowed (§C-20). Writes `channel:setRole` (`metadata: { role }`) when a row changed. **Invalidates no sessions:** `validateSessionToken()` re-reads memberships on every request, so the change applies on the target's next request |
+| 6.2 | Promote/demote buttons, and the `/channels` menu | on Amir's member list (`/channels/[id]/kick`), one button per row inside the existing kick form (`formAction={setChannelRole}`, the new role in a hidden `role` input, not the button's `name`: React overrides it), shown only when `can(ctx, "channel:manageRoles", { channelId })`; the row's role is translated. Strings go in his `channels` namespace. **Also (deferred from phase 5):** each link of the `/channels` options menu (`channels/page.tsx`) asks the `can()` its page asks (`channel:update`, `channel:delete`, `channel:moderate`) instead of `members[0]?.role === "MODERATOR"`. A promoted moderator is not the creator, so *Delete* is not theirs. One menu replaces the two copied ones |
+| 6.3 | **C14 Done-when, scoped** | a DB test: an admin promotes a member of channel A, and that member's existing session kicks in A on its next request. The "refused in B" half is phase 5's test. By hand (B13): the admin joins A, promotes, the new moderator kicks. Hide/mute are E11's, Amir's (phase 7 cut, §C-21) |
 
-**Review notes for E10, when it comes:** `Vote.value` is a plain `Int`, so constrain it to `-1 | 1` in the shared Zod module, or a crafted request writes `9999` into someone's reputation. The vote and the reputation change go in **one** `$transaction`. A second vote must `upsert` on `@@id([answerId, userId])`, not duplicate.
+**As built (2026-10-18, `feat/channel-roles`; PR #34 opened 2026-10-18, not merged as of 2026-10-19):** Tasks 1–3 of the expansion, committed by Rasiol as `5989fbd` (`setChannelRole`, 3 DB tests, each watched failing first, plus a mutation check on its `assertCan`), `4155e50` (the kick page buttons, translated roles) and `27da8a4` (the `/channels` menu on `can()`, 343 → 289 lines). **B13 in real Chromium** (Playwright, on mespapiers.local) found one bug the DB tests cannot reach: React replaces the `name` of a button whose `formAction` is a server action with `$ACTION_ID_…`, so `role` never reached `setChannelRole` and a click changed nothing. Fixed by sending the role in a hidden input; B13 then passed every row, with no console error or warning and no sideways scroll at 375 / 768 / 1440, and the audit query returned the 4 expected rows. **Gates:** before the hidden-input fix, `npm test` 211/211 (17 files; auth part 9 files, 93 tests), build, typecheck, lint 0/0, `i18n:check` unchanged (the 5 known unused keys). On the final tree (`357a804`, after both review fixes): `npm test` 212/212 (auth part 94), typecheck, lint 0/0, `i18n:check` unchanged, and `npm run build` exit 0 (its log has the known Prisma engine-not-found noise from building with the container's engine). **Departures:** the expansion's rulings (the `i18n:check`-visible `t()` calls, the hidden `role` input, a 12-hit role grep). **Final review (2026-10-18, fresh Opus reviewer):** "with fixes", 0 Critical, 2 Important. Fixed with a failing check first: the member list re-sorted after each role change (no `orderBy`), so a second click could promote the next member; it is now ordered by `joinedAt`, then `userId`, and after the fix `npm test` 211/211, lint 0/0, typecheck clean, B13 passed again. Also changed (Rasiol): an admin-appointed moderator could not leave (`leaveChannel` refused every moderator); it no longer refuses them (§C-20), pinned by a DB test (`npm test` 212/212), with *Leave* shown to every member and B13 passed again. Amir is told in the PR. **Amir's review (2026-10-19):** a creator who left, or was demoted, could still delete the channel by URL. `can()` now requires the creator to still moderate it (§C-20), with the policy test, the truth-table row and two DB tests watched failing first; `npm test` 213/213, typecheck, lint 0/0.
+
+### Phase 7 — Moderation sign-off — ✂ **cut on 2026-10-19** (§C-21)
+
+Nothing to build and no expansion doc. Module 2 closes with phase 6 (§C-21). What each task became:
+
+| Task | Verdict | Why |
+|---|---|---|
+| Entry gate (E11, E10, D14) | cut | It made module 2 wait on three teammate deliverables, none of them started (checked 2026-10-19 on `main` and every remote branch) |
+| 7.1 Review E11 for the policy | cut as a task, kept as a review note (below) | ordinary review of Amir's PR. The policy side exists: `channel:moderate`, scoped to one channel, in the truth table |
+| 7.2 Mute enforcement | cut, kept as a review note (below) | it exists only if Amir ships mute |
+| 7.3 The promoted moderator hides and mutes in A only | cut | E11's own Done-when. The channel boundary is already proven with kick: phase 5's cross-channel replay test, B12 row 3, B13 row 6 |
+| 7.4 Evaluation demo script | cut | B11, then B13 (member, admin, appointed moderator and creator on one channel), then B12 row 3 |
+| 7.5 Helper badge check | cut, kept as a review note (below) | the permission half is phase 3's test; showing the badge is D14's (module 1) |
+
+**Review notes for Amir's E10 and E11 PRs, and for whoever renders the Helper badge** (no task; read them when the PR comes):
+- **E11, hide and unhide:** `assertCan(ctx, "channel:moderate", { channelId })` and one `AuditLog` row with `channelId` and the target (C6). For members, hidden content is left out **in the query**, not hidden with a CSS class over data already sent: the RSC payload would still carry it (task 4.3's lesson).
+- **E11, mute:** a muted member's `thread:create` / `answer:create` is refused **server-side**. The simplest place is `can()`: add `mutedUntil` to the memberships `select` in `validateSessionToken()` and deny `MEMBER_ACTIONS` while it is in the future. That is two lines in Rasiol's files, written in Amir's PR.
+- **E10:** the vote and the reputation change go in **one** `$transaction`, and a second vote `upsert`s on `@@id([answerId, userId])`. Amir's `correction` branch adds `CHECK (value IN (-1, 1))` on `Vote.value`, so a crafted `9999` is refused by the database; check the value in the action too, or the refusal is a 500.
+- **Helper badge** (D14, or Amir's answer list, whichever renders it first): compute `reputation >= threshold` **at render**. No column, no threshold job, never in `policy.ts`.
 
 ### Phase 8 — OAuth 2.0 Google (C7) · 1.5d
 
 **Expand into:** `docs/plans/<date>-c7-oauth-google.md`
-**Entry gate:** phase 4 green: **met on 2026-10-07** (PR #24). Only phase 2 is a technical dependency, and it is merged. Phases 6.4 and 7 wait on Amir's E10/E11, so this is the work for those gaps (§A). `feat/channels` has landed, so do phase 5 before this one.
+**Entry gate:** phase 4 green: **met on 2026-10-07** (PR #24). Only phase 2 is a technical dependency, and it is merged. Phase 7 is cut (§C-21), so this is the next phase.
 **Schema:** no migration. `OAuthAccount` exists with `@@unique([provider, providerUserId])`.
 **Env:** uncomment `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env.example` in this PR, and forward them in the `web` service's `environment:` in `docker-compose.yml` (compose does not pass `.env` through; see task 2.5 step 6).
 **Routes:** `src/app/api/auth/…` is not localised (the middleware matcher skips `/api`). The callback creates the session with `createSession()` + `setSessionCookie()`, which works in a Route Handler, and then redirects to `/`. The middleware adds the locale prefix. Failures redirect to `/login?error=oauth`, and the page shows an `auth.errors` key, never the provider's raw message.
@@ -2099,11 +2118,11 @@ Every "To Do" from the four modules (`PROJECT_PLAN.md` §6), mapped to the phase
 | 2 · Advanced permissions | `can()` / `assertCan()` policy module | 3 ✅ |
 | | Admin surface: user list, promote/demote | 4 ✅ |
 | | Role-based route guards | 2 ✅ (`(app)`), 4 ✅ (`/admin` 403) |
-| | Audit log writes | 3 ✅ (`writeAudit`), 4 ✅ · 5 · 6 · 7 (call sites) |
-| | Roles admin / user / moderator | 4 ✅ (global), 6 (channel-scoped), §C-1 |
-| | Policy applied to the community actions | 5 |
-| | Different views/actions per role | 4 ✅ (admin vs user, nav link), 7.4 (admin / moderator / member demo) |
-| | Helper is a badge, not a tier | 3 ✅ (test), 6.4 (badge) |
+| | Audit log writes | 3 ✅ (`writeAudit`), 4 ✅ · 5 ✅ · 6 (call sites; hide/mute are E11's, §C-21) |
+| | Roles admin / user / moderator | 4 ✅ (global), 6 (channel-scoped, PR #34), §C-1 |
+| | Policy applied to the community actions | 5 ✅ (PR #33) |
+| | Different views/actions per role | 4 ✅ (admin vs user, nav link), 5 ✅ · 6 (B13: member / admin / moderator on one channel) |
+| | Helper is a badge, not a tier | 3 ✅ (test); the badge is D14's (§C-21) |
 | 3 · OAuth 2.0 | Authorization-code + PKCE for Google | 8 |
 | | Same for GitHub | 9 |
 | | Callback routes | 8, 9 |
@@ -2116,8 +2135,8 @@ Every "To Do" from the four modules (`PROJECT_PLAN.md` §6), mapped to the phase
 | | C11 rotation on privilege change | 4 ✅ (`invalidateAllSessions` on a global-role change) |
 | | C5 ownership guards on documents | 2 ✅ (owner-scoped queries), 3.3 ✅ (evidence, §C-14) |
 | *(teammate unblock)* | WS ticket endpoint (C12) | 2.5 ✅ (PR #22; verified by `realtime` since PR #31) |
-| *(Amir's module)* | Organization system: E9 channels, E10 threads/votes, E11 moderation | Amir; policy hooks in 5–7 |
+| *(Amir's module)* | Organization system: E9 channels, E10 threads/votes, E11 moderation | Amir; policy hooks in 5–6, review notes in 7 |
 
 **Deliberately out of scope of this plan:** C13 (the OWASP / `npm audit` / `gitleaks` security review) is a week-5 task with no code dependency. Findings to carry into it: there is no `.dockerignore`, so the Dockerfile's `COPY . .` bakes `.env` and its secrets into the `web` image.
 
-**Total:** phases 0–4 and task 2.5 are done (≈ 6.75d). Remaining: 5 (1d) + 6 (1d) + 7 (0.5d) + 8 (1.5d) + 9 (1d) + 10 (1.5d) + 11 (0.5d) ≈ **7d**, so ≈ **14d** in all against §7's 15-day Domain C budget. The original plan was 15.5d plus a 4-day E9–E11 overhang; that overhang is now Amir's, as §7 always intended.
+**Total (revised 2026-10-19):** phases 0–5 and task 2.5 are done, and phase 6 is in review (≈ 8.25d). Phase 7 is cut (§C-21). Remaining: 8 (1.5d) + 9 (1d) + 10 (1.5d) + 11 (0.5d) ≈ **4.5d**, so ≈ **12.75d** in all against §7's 15-day Domain C budget. The original plan was 15.5d plus a 4-day E9–E11 overhang; that overhang is now Amir's, as §7 always intended.
