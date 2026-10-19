@@ -33,37 +33,19 @@ enum GlobalRole {
   ADMIN
 }
 
-// Une categorie = une carte du dashboard + une entree du registre
-// src/lib/documents/subtypes.ts. Ajouter une categorie ici et la-bas suffit :
-// carte, URL et prompt de classification en derivent. Cf. PROJECT_PLAN §3/§4.
 enum DocumentCategory {
   IDENTITY
   INSURANCE_AUTO
   OTHER
 }
 
-// How a document's deadline behaves, which decides whether it can ever expire.
-//
-// NONE is the value PROJECT_PLAN §3 is missing: a birth certificate, a diploma
-// or a payslip has no expiry date by nature. Without it, rule 1 of deriveStatus
-// (§5) marks every such document ACTION_REQUIRED forever — a correct document
-// permanently asking for human attention.
-//
-// Read together with targetDate, the pair is unambiguous:
-//   null + null  -> not analysed yet
-//   NONE + null  -> no expiry, and that is correct     -> VALID
-//   HARD + date  -> a legal deadline                   -> VALID/EXPIRING_SOON/EXPIRED
-//   HARD + null  -> should have one, could not read it -> ACTION_REQUIRED
 enum DeadlineType {
-  HARD // legal: passport, residence permit, roadworthiness test
-  SOFT // financial: an insurance contract that renews itself
-  PERIODIC // has to be redone: a declaration, a certificate
-  NONE // no expiry by nature: birth certificate, diploma, payslip
+  HARD
+  SOFT
+  PERIODIC
+  NONE
 }
 
-// Etat de la classification IA. PENDING = pas encore analyse, NEEDS_REVIEW =
-// confiance trop basse, un humain tranche (PROJECT_PLAN §5, regle 1 de
-// deriveStatus : un document que l'IA n'a pas su lire n'est pas "valide").
 enum ExtractionStatus {
   PENDING
   NEEDS_REVIEW
@@ -71,6 +53,7 @@ enum ExtractionStatus {
   FAILED
 }
 
+// a user of the site
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -104,6 +87,7 @@ model User {
   channelJoinRequests         ChannelJoinRequest[]
 }
 
+// a document stored in the user vault
 model Document {
   id        Int      @id @default(autoincrement())
   ownerId   String
@@ -116,24 +100,22 @@ model Document {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  // @default(OTHER) backfille les lignes deja en base sans script separe.
   category         DocumentCategory @default(OTHER)
   extractionStatus ExtractionStatus @default(PENDING)
 
-  // The deadline lives on the base row, not on each subtype table: one query
-  // then finds every deadline whatever the category, and adding a category
-  // cannot break it (PROJECT_PLAN §3).
   targetDate   DateTime?
   deadlineType DeadlineType?
 
   identity      DocumentIdentity?
   insuranceAuto DocumentInsuranceAuto?
 
+  @@unique([ownerId, fileHash])
   @@index([ownerId])
-  @@index([ownerId, category]) // dashboard (groupBy) et liste d'une categorie
-  @@index([deadlineType, targetDate]) // the nightly deadline scan (D8)
+  @@index([ownerId, category])
+  @@index([deadlineType, targetDate])
 }
 
+// fields read from an identity document
 model DocumentIdentity {
   id         Int      @id @default(autoincrement())
   documentId Int      @unique
@@ -147,6 +129,7 @@ model DocumentIdentity {
   updatedAt      DateTime @default(now()) @updatedAt
 }
 
+// fields read from a car insurance document
 model DocumentInsuranceAuto {
   id         Int      @id @default(autoincrement())
   documentId Int      @unique
@@ -160,6 +143,7 @@ model DocumentInsuranceAuto {
   updatedAt    DateTime @default(now()) @updatedAt
 }
 
+// a user who belongs to a channel
 model ChannelMember {
   channelId Int         @map("channel_id")
   userId    String      @map("user_id")
@@ -173,6 +157,7 @@ model ChannelMember {
   @@id([channelId, userId])
 }
 
+// a community channel around one topic
 model Channel {
   id           Int                  @id @default(autoincrement())
   createdBy    String?              @map("created_by")
@@ -181,18 +166,21 @@ model Channel {
   title        String               @db.VarChar(100)
   description  String?              @db.VarChar(250)
   isPrivate    Boolean              @default(false)
+  isClosed     Boolean              @default(false) @map("is_closed")
   creator      User?                @relation(fields: [createdBy], references: [id], onDelete: SetNull)
   members      ChannelMember[]
   threads      Thread[]
   invites      ChannelInvite[]
   joinRequests ChannelJoinRequest[]
+  auditLogs    AuditLog[]
 }
 
+// the main question of a channel
 model Thread {
   id        Int      @id @default(autoincrement())
   title     String   @db.VarChar(150)
   content   String   @db.VarChar(300)
-  channelId Int      @map("channel_id")
+  channelId Int      @unique @map("channel_id")
   userId    String?  @map("author_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -202,6 +190,7 @@ model Thread {
   answers Answer[]
 }
 
+// a reply posted inside a thread
 model Answer {
   id        Int      @id @default(autoincrement())
   content   String   @db.VarChar(300)
@@ -215,6 +204,7 @@ model Answer {
   votes  Vote[]
 }
 
+// a vote from a user on an answer plus one or minus one
 model Vote {
   answerId  Int      @map("answer_id")
   userId    String   @map("user_id")
@@ -228,6 +218,7 @@ model Vote {
   @@id([answerId, userId])
 }
 
+// a link between two users as friends
 model Friendship {
   id          Int              @id @default(autoincrement())
   requesterId String           @map("requester_id")
@@ -242,6 +233,7 @@ model Friendship {
   @@unique([requesterId, receiverId])
 }
 
+// a private chat between two users
 model Conversation {
   id             Int      @id @default(autoincrement())
   participant1Id String   @map("participant1_id")
@@ -256,6 +248,7 @@ model Conversation {
   @@unique([participant1Id, participant2Id])
 }
 
+// a message sent in a conversation
 model Message {
   id             Int      @id @default(autoincrement())
   content        String   @db.Text
@@ -268,6 +261,7 @@ model Message {
   sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 }
 
+// a notification sent to a user
 model Notification {
   id          Int              @id @default(autoincrement())
   recipientId String           @map("recipient_id")
@@ -280,6 +274,7 @@ model Notification {
   recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 }
 
+// a login session
 model Session {
   id                String   @id
   userId            String
@@ -291,9 +286,10 @@ model Session {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
 
-  @@index([userId]) // déconnecter quelqu'un de tous ses appareils
+  @@index([userId])
 }
 
+// an oauth account linked to a user
 model OAuthAccount {
   id             String   @id @default(cuid())
   userId         String
@@ -306,6 +302,7 @@ model OAuthAccount {
   @@unique([provider, providerUserId])
 }
 
+// one row per privileged action
 model AuditLog {
   id          String   @id @default(cuid())
   actorUserId String?
@@ -313,12 +310,16 @@ model AuditLog {
   action      String
   targetType  String
   targetId    String
-  channelId   String?
+  channelId   Int?
+  channel     Channel? @relation(fields: [channelId], references: [id], onDelete: SetNull)
   metadata    Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([channelId])
 }
 
+// an invite sent to a user to join a channel
 model ChannelInvite {
   channelId Int      @map("channel_id")
   userId    String   @map("user_id")
@@ -330,6 +331,7 @@ model ChannelInvite {
   @@id([channelId, userId])
 }
 
+// a request from a user to join a private channel
 model ChannelJoinRequest {
   channelId Int      @map("channel_id")
   userId    String   @map("user_id")
@@ -342,4 +344,3 @@ model ChannelJoinRequest {
   @@id([channelId, userId])
   @@index([userId])
 }
-

@@ -1,3 +1,10 @@
+npm notice run mespapiers@0.1.0 npx
+npm notice run 'prisma' migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script
+Loaded Prisma config from prisma.config.ts.
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "ChannelRole" AS ENUM ('MEMBER', 'MODERATOR');
 
@@ -9,6 +16,15 @@ CREATE TYPE "NotificationType" AS ENUM ('DEADLINE', 'REPLY', 'MESSAGE', 'FRIEND_
 
 -- CreateEnum
 CREATE TYPE "GlobalRole" AS ENUM ('USER', 'ADMIN');
+
+-- CreateEnum
+CREATE TYPE "DocumentCategory" AS ENUM ('IDENTITY', 'INSURANCE_AUTO', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "DeadlineType" AS ENUM ('HARD', 'SOFT', 'PERIODIC', 'NONE');
+
+-- CreateEnum
+CREATE TYPE "ExtractionStatus" AS ENUM ('PENDING', 'NEEDS_REVIEW', 'CONFIRMED', 'FAILED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -36,8 +52,13 @@ CREATE TABLE "Document" (
     "fileType" TEXT NOT NULL,
     "fileSize" INTEGER NOT NULL,
     "fileData" BYTEA NOT NULL,
+    "fileHash" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "category" "DocumentCategory" NOT NULL DEFAULT 'OTHER',
+    "extractionStatus" "ExtractionStatus" NOT NULL DEFAULT 'PENDING',
+    "targetDate" TIMESTAMP(3),
+    "deadlineType" "DeadlineType",
 
     CONSTRAINT "Document_pkey" PRIMARY KEY ("id")
 );
@@ -89,6 +110,8 @@ CREATE TABLE "Channel" (
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "title" VARCHAR(100) NOT NULL,
     "description" VARCHAR(250),
+    "isPrivate" BOOLEAN NOT NULL DEFAULT false,
+    "is_closed" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Channel_pkey" PRIMARY KEY ("id")
 );
@@ -210,12 +233,32 @@ CREATE TABLE "AuditLog" (
     "action" TEXT NOT NULL,
     "targetType" TEXT NOT NULL,
     "targetId" TEXT NOT NULL,
-    "channelId" TEXT,
+    "channelId" INTEGER,
     "metadata" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "AuditLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ChannelInvite" (
+    "channel_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ChannelInvite_pkey" PRIMARY KEY ("channel_id","user_id")
+);
+
+-- CreateTable
+CREATE TABLE "ChannelJoinRequest" (
+    "channel_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ChannelJoinRequest_pkey" PRIMARY KEY ("channel_id","user_id")
 );
 
 -- CreateIndex
@@ -225,10 +268,22 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE INDEX "Document_ownerId_idx" ON "Document"("ownerId");
 
 -- CreateIndex
+CREATE INDEX "Document_ownerId_category_idx" ON "Document"("ownerId", "category");
+
+-- CreateIndex
+CREATE INDEX "Document_deadlineType_targetDate_idx" ON "Document"("deadlineType", "targetDate");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Document_ownerId_fileHash_key" ON "Document"("ownerId", "fileHash");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "DocumentIdentity_documentId_key" ON "DocumentIdentity"("documentId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "DocumentInsuranceAuto_documentId_key" ON "DocumentInsuranceAuto"("documentId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Thread_channel_id_key" ON "Thread"("channel_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Friendship_requester_id_receiver_id_key" ON "Friendship"("requester_id", "receiver_id");
@@ -241,6 +296,12 @@ CREATE INDEX "Session_userId_idx" ON "Session"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "OAuthAccount_provider_providerUserId_key" ON "OAuthAccount"("provider", "providerUserId");
+
+-- CreateIndex
+CREATE INDEX "AuditLog_channelId_idx" ON "AuditLog"("channelId");
+
+-- CreateIndex
+CREATE INDEX "ChannelJoinRequest_user_id_idx" ON "ChannelJoinRequest"("user_id");
 
 -- AddForeignKey
 ALTER TABLE "Document" ADD CONSTRAINT "Document_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -307,3 +368,25 @@ ALTER TABLE "OAuthAccount" ADD CONSTRAINT "OAuthAccount_userId_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "AuditLog" ADD CONSTRAINT "AuditLog_actorUserId_fkey" FOREIGN KEY ("actorUserId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AuditLog" ADD CONSTRAINT "AuditLog_channelId_fkey" FOREIGN KEY ("channelId") REFERENCES "Channel"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChannelInvite" ADD CONSTRAINT "ChannelInvite_channel_id_fkey" FOREIGN KEY ("channel_id") REFERENCES "Channel"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChannelInvite" ADD CONSTRAINT "ChannelInvite_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChannelJoinRequest" ADD CONSTRAINT "ChannelJoinRequest_channel_id_fkey" FOREIGN KEY ("channel_id") REFERENCES "Channel"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChannelJoinRequest" ADD CONSTRAINT "ChannelJoinRequest_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Vote.value must be plus one or minus one.
+ALTER TABLE "Vote" ADD CONSTRAINT "Vote_value_check" CHECK ("value" IN (-1, 1));
+
+-- Channel.title must be unique even if the case is different.
+CREATE UNIQUE INDEX "Channel_title_lower_key" ON "Channel"((LOWER("title")));
+

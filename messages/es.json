@@ -77,22 +77,6 @@
     "submit": "Subir",
     "uploading": "Subiendo el archivo"
   },
-  "documentErrors": {
-    "duplicateName": {
-      "title": "Este documento ya existe",
-      "description": "Ya hay un archivo con el mismo nombre en su espacio. Cambie el nombre del archivo antes de enviarlo o elimine el documento anterior."
-    },
-    "duplicateContent": {
-      "title": "Este archivo ya se ha subido",
-      "description": "El contenido de este archivo es idéntico al de un documento que ya está en su espacio, aunque el nombre sea diferente. Revise sus documentos antes de añadir uno nuevo."
-    },
-    "fileType": {
-      "title": "Este tipo de archivo no se acepta",
-      "description": "Solo se pueden subir archivos PDF, PNG y JPG. Se comprueba el contenido del archivo, no su nombre: cambiarle el nombre no basta para que sea válido."
-    },
-    "chooseAnother": "Elegir otro archivo",
-    "backToDocuments": "Ver mis documentos"
-  },
   "channels": {
     "home": {
       "title": "Canales",
@@ -111,6 +95,11 @@
       "delete": "Eliminar",
       "kick": "Expulsar a un miembro",
       "leave": "Salir",
+      "lastModerator": "Eres el último moderador, promueve a alguien antes de salir.",
+      "requests": "Solicitudes",
+      "close": "Cerrar el canal",
+      "reopen": "Reabrir el canal",
+      "closed": "canal cerrado",
       "public": "canal público",
       "private": "canal privado"
     },
@@ -123,24 +112,35 @@
       "descriptionPlaceholder": "¿De qué trata este canal?",
       "questionLabel": "Pregunta (obligatoria)",
       "questionPlaceholder": "Haz tu pregunta con el mayor detalle posible para obtener respuestas claras.",
+      "visibilityLabel": "Visibilidad",
+      "visibilityPublic": "Público",
+      "visibilityPrivate": "Privado",
       "cancel": "Cancelar",
-      "submit": "Crear el canal"
+      "submit": "Crear el canal",
+      "errors": {
+        "nameEmpty": "El nombre es obligatorio.",
+        "nameTooLong": "El nombre no puede superar los 100 caracteres.",
+        "nameTaken": "Este nombre de canal ya está en uso.",
+        "descriptionTooLong": "La descripción no puede superar los 250 caracteres.",
+        "questionEmpty": "La pregunta es obligatoria.",
+        "questionTooLong": "La pregunta no puede superar los 300 caracteres.",
+        "visibilityMissing": "Elige una visibilidad: público o privado."
+      }
     },
     "join": {
       "back": "← Volver a los canales",
       "title": "Unirse a un canal",
       "subtitle": "Explora los canales públicos y únete a uno.",
-      "empty": "No hay ningún canal público al que unirse por ahora.",
+      "empty": "No hay ningún canal al que unirse por ahora.",
       "noDescription": "Este canal no tiene descripción.",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
-      "join": "Unirse"
+      "join": "Unirse",
+      "request": "Solicitar unirse",
+      "pending": "Solicitud enviada"
     },
     "detail": {
       "back": "← Volver a los canales",
       "leave": "Salir del canal",
-      "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
-      "moderator": "moderador",
-      "kick": "Expulsar",
       "authoredBy": "por {name} · {date}",
       "deletedUser": "Usuario eliminado",
       "repliesCount": "{count, plural, one {# respuesta} other {# respuestas}}",
@@ -322,10 +322,6 @@
       "provider": "Aseguradora",
       "policyNumber": "Número de póliza",
       "vehiclePlate": "Matrícula"
-    },
-    "status": {
-      "confirmed": "Confirmado",
-      "failed": "Error"
     }
   },
   "footer": {
@@ -388,7 +384,7 @@
         "export": "Derecho a la portabilidad: exportar sus datos en un formato estructurado.",
         "objection": "Derecho de oposición: eliminar un documento para detener su procesamiento, o contactarnos."
       },
-      "howTo": "Para ejercer estos derechos, escríbanos a la dirección indicada a continuación. Responderemos en un plazo de 30 días."
+      "howTo": "Para ejercer estos derechos, acceda a «Mi cuenta», sección «Mis datos»: puede exportar sus datos o eliminar su cuenta usted mismo en cualquier momento."
     },
     "cookies": {
       "heading": "Cookies",
@@ -453,7 +449,7 @@
     },
     "termination": {
       "heading": "Rescisión",
-      "body": "Puede solicitarnos por correo electrónico la eliminación de su cuenta. Nos reservamos el derecho de suspender o eliminar una cuenta en caso de incumplimiento de las presentes condiciones, previa notificación."
+      "body": "Puede eliminar su cuenta usted mismo en cualquier momento desde la página «Mi cuenta», sección «Mis datos». Nos reservamos el derecho de suspender o eliminar una cuenta en caso de incumplimiento de las presentes condiciones, previa notificación."
     },
     "modifications": {
       "heading": "Modificaciones de las condiciones",
