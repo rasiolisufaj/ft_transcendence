@@ -3,6 +3,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import { mintTicket } from "@/lib/auth/ticket";
+import type { IsMember } from "@/realtime/handshake";
 import { startServer } from "@/realtime/server";
 
 process.env.WS_TICKET_SECRET = "test-secret";
@@ -11,8 +12,8 @@ process.env.WS_TICKET_SECRET = "test-secret";
 let running: { stop: () => Promise<void> }[] = [];
 
 // Starts a server on a free port and returns its ws:// address.
-async function start(heartbeatMs = 1000) {
-  const realtime = startServer({ port: 0, heartbeatMs });
+async function start(heartbeatMs = 1000, isMember: IsMember = async () => false) {
+  const realtime = startServer({ port: 0, heartbeatMs, isMember });
   running.push(realtime);
   await once(realtime.server, "listening");
   const port = (realtime.server.address() as AddressInfo).port;
@@ -126,8 +127,8 @@ describe("client messages", () => {
 });
 
 describe("subscriptions", () => {
-  async function ask(message: object) {
-    const { url } = await start();
+  async function ask(message: object, isMember?: IsMember) {
+    const { url } = await start(1000, isMember);
     const client = new WebSocket(withTicket(url, "user-1"));
     await once(client, "message");
 
@@ -151,8 +152,27 @@ describe("subscriptions", () => {
     });
   });
 
-  it("refuses a channel topic for now", async () => {
-    expect(await ask({ type: "subscribe", topic: "channel:1" })).toEqual({
+  it("subscribes a member to their channel", async () => {
+    expect(await ask({ type: "subscribe", topic: "channel:1" }, async () => true)).toEqual({
+      type: "subscribed",
+      topic: "channel:1",
+    });
+  });
+
+  it("refuses a channel the user has not joined", async () => {
+    expect(await ask({ type: "subscribe", topic: "channel:1" }, async () => false)).toEqual({
+      type: "error",
+      code: "forbidden",
+      topic: "channel:1",
+    });
+  });
+
+  it("refuses the channel when the membership check fails", async () => {
+    const broken = async () => {
+      throw new Error("database is down");
+    };
+
+    expect(await ask({ type: "subscribe", topic: "channel:1" }, broken)).toEqual({
       type: "error",
       code: "forbidden",
       topic: "channel:1",

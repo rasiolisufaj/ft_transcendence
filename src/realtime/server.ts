@@ -3,20 +3,21 @@ import type { AddressInfo } from "node:net";
 import { WebSocketServer, type WebSocket } from "ws";
 import { parseClientMessage, type ServerMessage } from "@/contracts/socket";
 import { verifyTicket } from "@/lib/auth/ticket";
-import { canSubscribe, readTicket } from "./handshake";
+import { canSubscribe, readTicket, type IsMember } from "./handshake";
 import { log } from "./log";
 import { isChannelMember } from "./membership";
 
 type Options = {
   port: number;
   heartbeatMs: number; // ms to check if a client is alive
+  isMember?: IsMember;
 };
 
 function send(socket: WebSocket, message: ServerMessage) {
   socket.send(JSON.stringify(message));
 }
 
-export function startServer({ port, heartbeatMs }: Options) {
+export function startServer({ port, heartbeatMs, isMember = isChannelMember }: Options) {
   // verifyClient can only say yes or no: the user id waits here until "connection".
   const users = new WeakMap<IncomingMessage, string>();
 
@@ -71,7 +72,13 @@ export function startServer({ port, heartbeatMs }: Options) {
         send(socket, { type: "unsubscribed", topic: message.topic });
         return;
       }
-      if (!(await canSubscribe(userId, message.topic, isChannelMember))) {
+      let allowed = false;
+      try {
+        allowed = await canSubscribe(userId, message.topic, isMember);
+      } catch (error) {
+        log("error", "membership check failed", { userId, topic: message.topic, error: String(error) });
+      }
+      if (!allowed) {
         send(socket, { type: "error", code: "forbidden", topic: message.topic });
         return;
       }
