@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { canSubscribe, readTicket } from "@/realtime/handshake";
 
 describe("readTicket", () => {
@@ -16,19 +16,34 @@ describe("readTicket", () => {
 });
 
 describe("canSubscribe", () => {
-  it("allows the user's own topic", () => {
-    expect(canSubscribe("abc", "user:abc")).toBe(true);
+  const member = async () => true;
+  const stranger = async () => false;
+
+  it("allows the user's own topic", async () => {
+    expect(await canSubscribe("abc", "user:abc", stranger)).toBe(true);
   });
 
-  it("refuses another user's topic", () => {
-    expect(canSubscribe("abc", "user:bob")).toBe(false);
+  it("refuses another user's topic", async () => {
+    expect(await canSubscribe("abc", "user:bob", member)).toBe(false);
   });
 
-  it("refuses a channel topic for now", () => {
-    expect(canSubscribe("abc", "channel:1")).toBe(false);
+  it("allows a channel the user is a member of", async () => {
+    expect(await canSubscribe("abc", "channel:1", member)).toBe(true);
   });
 
-  it("refuses a topic it cannot read", () => {
-    expect(canSubscribe("abc", "admin")).toBe(false);
+  it("refuses a channel the user has not joined", async () => {
+    expect(await canSubscribe("abc", "channel:1", stranger)).toBe(false);
+  });
+
+  it("asks about the right user and channel", async () => {
+    const isMember = vi.fn(async () => true);
+
+    await canSubscribe("abc", "channel:12", isMember);
+
+    expect(isMember).toHaveBeenCalledWith("abc", 12);
+  });
+
+  it("refuses a topic it cannot read", async () => {
+    expect(await canSubscribe("abc", "admin", member)).toBe(false);
   });
 });
