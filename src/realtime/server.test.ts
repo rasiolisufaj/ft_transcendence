@@ -100,3 +100,69 @@ describe("ticket", () => {
     expect(JSON.parse(data.toString())).toEqual({ type: "hello", userId: "user-1" });
   });
 });
+
+describe("client messages", () => {
+  it("answers badRequest to something that is not JSON", async () => {
+    const { url } = await start();
+    const client = new WebSocket(withTicket(url));
+    await once(client, "message");
+
+    client.send("not json");
+    const [data] = await once(client, "message");
+
+    expect(JSON.parse(data.toString())).toEqual({ type: "error", code: "badRequest" });
+  });
+
+  it("answers badRequest to an unknown message type", async () => {
+    const { url } = await start();
+    const client = new WebSocket(withTicket(url));
+    await once(client, "message");
+
+    client.send(JSON.stringify({ type: "publish", topic: "user:user-1" }));
+    const [data] = await once(client, "message");
+
+    expect(JSON.parse(data.toString())).toEqual({ type: "error", code: "badRequest" });
+  });
+});
+
+describe("subscriptions", () => {
+  async function ask(message: object) {
+    const { url } = await start();
+    const client = new WebSocket(withTicket(url, "user-1"));
+    await once(client, "message");
+
+    client.send(JSON.stringify(message));
+    const [data] = await once(client, "message");
+    return JSON.parse(data.toString());
+  }
+
+  it("subscribes a user to their own topic", async () => {
+    expect(await ask({ type: "subscribe", topic: "user:user-1" })).toEqual({
+      type: "subscribed",
+      topic: "user:user-1",
+    });
+  });
+
+  it("refuses another user's topic", async () => {
+    expect(await ask({ type: "subscribe", topic: "user:bob" })).toEqual({
+      type: "error",
+      code: "forbidden",
+      topic: "user:bob",
+    });
+  });
+
+  it("refuses a channel topic for now", async () => {
+    expect(await ask({ type: "subscribe", topic: "channel:1" })).toEqual({
+      type: "error",
+      code: "forbidden",
+      topic: "channel:1",
+    });
+  });
+
+  it("unsubscribes from a topic", async () => {
+    expect(await ask({ type: "unsubscribe", topic: "user:user-1" })).toEqual({
+      type: "unsubscribed",
+      topic: "user:user-1",
+    });
+  });
+});
