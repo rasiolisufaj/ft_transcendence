@@ -43,7 +43,7 @@ The roadmap's phase 6 was reviewed for overengineering, out-of-scope edge cases 
 | A parse helper shared with `kickMembers` | it would rewrite Amir's tested function to save about 10 lines | `setChannelRole` repeats `kickMembers`' validation, in the same style |
 | An admin list of all channels, or another admin path to the member list | `/channels` lists only your channels, and the channel page 404s for non-members, but a public channel is one click to join | B13: the admin joins *Assurance auto* first; the per-link menu then shows them the links |
 | Renaming the kick page or its link to "Members" | cosmetic, and it is Amir's | — |
-| Stopping a demoted creator from deleting the channel | `channel:delete` is decided by ownership (`ownerUserId: channel.createdBy`, phase 5), not by role. Changing it is a whole-team change to `can()` | recorded in §C-20 |
+| Stopping a demoted creator from deleting the channel | `channel:delete` is decided by ownership (`ownerUserId: channel.createdBy`, phase 5), not by role. Changing it is a whole-team change to `can()` | recorded in §C-20. **Reversed on 2026-10-19 (Amir's review):** `can()` now requires the creator to still moderate the channel |
 | Refusing an admin's change to their own channel role | harmless: tier 1 already gives an admin every channel action. `setGlobalRole` refuses self-demotion because it could lock the last admin out; nothing similar exists here | — |
 | A realtime event on a role change | `src/lib/realtime/publish.ts` is a no-op stub | — |
 
@@ -66,7 +66,7 @@ The roadmap's phase 6 was reviewed for overengineering, out-of-scope edge cases 
 2. **A target who is not a member** (a forged `userId`, or a stale page after a kick): no membership is created, nothing is audited. Pinned by Task 1, test 2.
 3. **A double click on *Make moderator***: the second call matches no row (`role: { not: role }`) and writes no second audit row. Pinned by Task 1, test 2.
 4. **The change reaches a session that already existed**, without a re-login. Pinned by Task 1, test 2: the member's token is minted before the promote and validated after it. Demotion goes through the same re-read; test 3 checks its effect (the demoted creator is refused a kick).
-5. **A menu link that 404s**: a promoted moderator who is not the creator must not see *Delete*; a demoted creator still sees it (§C-20). Pages are not unit-tested here, so B13 checks it by hand (Task 4).
+5. **A menu link that 404s**: a promoted moderator who is not the creator must not see *Delete*; since Amir's review, a demoted creator does not see it either (§C-20). Pages are not unit-tested here, so B13 checks it by hand (Task 4).
 
 ---
 
@@ -456,7 +456,7 @@ git commit -m "feat(channels): promote and demote buttons on the member list, tr
 - Consumes: `can()` from `@/lib/auth/policy`; `getUserChannels()` returns each channel's scalar fields (its `include` keeps them), so `channel.createdBy` and `channel.isPrivate` are available. Each link asks the same question as its page: invite and requests `channel:moderate` (private channels only, as before), delete `channel:delete` with `ownerUserId: channel.createdBy`, edit `channel:update`, kick `channel:moderate`. *Leave* keeps `leaveChannel`'s own rule (a moderator cannot leave).
 - Produces: the message key `channels.home.requests`.
 
-Behaviour, by who opens the menu: a creator who moderates sees exactly what they saw before. A promoted moderator sees everything except *Delete*. An admin who is a member sees every link and *Leave*. A demoted creator sees *Delete* and *Leave* (§C-20). A plain member sees *Leave*. No one gets an empty menu, because everyone listed is a member. **As built, after the final review (Rasiol, 2026-10-18):** *Leave* is shown to every member, moderators included, because `leaveChannel` no longer refuses moderators (§C-20); the `members[0]?.role !== "MODERATOR"` condition in the snippet below was removed with it.
+Behaviour, by who opens the menu: a creator who moderates sees exactly what they saw before. A promoted moderator sees everything except *Delete*. An admin who is a member sees every link and *Leave*. A demoted creator sees *Delete* and *Leave* (§C-20). A plain member sees *Leave*. No one gets an empty menu, because everyone listed is a member. **As built, after the final review (Rasiol, 2026-10-18):** *Leave* is shown to every member, moderators included, because `leaveChannel` no longer refuses moderators (§C-20); the `members[0]?.role !== "MODERATOR"` condition in the snippet below was removed with it. **After Amir's review (2026-10-19):** a demoted creator sees *Leave* only, because `channel:delete` now needs the creator to still moderate the channel (§C-20).
 
 - [ ] **Step 1: Add the key, `fr.json` first**
 
@@ -688,7 +688,8 @@ Start from a fresh seed (`npm run db:reset`). *Assurance auto* (id 1, public) is
 | adrien | *Retirer un membre*, then *Retirer* on Lina | she disappears (6.3); no promote/demote buttons on his page (§C-18) |
 | amir | open `/fr/channels/1/kick` | *Retirer* on members, no promote/demote buttons: a moderator does not manage roles (§C-18) |
 | rasiol | *Repasser membre* on Adrien, then on Amir | both work, even though the channel is left with no moderator (§C-20) |
-| amir | reload `/fr/channels`, ⋯ | *Supprimer* and *Quitter*: he is still the creator (§C-20) |
+| amir | reload `/fr/channels`, ⋯ | *Quitter* only: a demoted creator can no longer delete (§C-20, since Amir's review) |
+| amir | open `/fr/channels/1/delete` | 404: the page asks the same `can()` |
 | any | `select actor."displayName", a.action, target."displayName", a.metadata from "AuditLog" a left join "User" actor on actor.id = a."actorUserId" left join "User" target on target.id = a."targetId" order by a."createdAt" desc limit 4;` | newest first: `channel:setRole` (Rasiol, Amir, `{"role": "MEMBER"}`), `channel:setRole` (Rasiol, Adrien, `{"role": "MEMBER"}`), `channel:kick` (Adrien, Lina), `channel:setRole` (Rasiol, Adrien, `{"role": "MODERATOR"}`) |
 | any | the kick page and the menu at 375, 768 and 1440 px | no sideways scroll (the name truncates beside the two buttons); the console stays empty (graded) |
 
@@ -738,7 +739,7 @@ Title: `feat(channels): admins promote and demote channel moderators (phase 6)`.
 
 **Behaviour changes, for Amir to confirm:**
 - The kick page prints the role translated (*membre* / *modérateur*) instead of `MEMBER`.
-- The `/channels` menu: a moderator who is not the creator no longer sees *Delete* (the page would 404); an admin who is a member sees every management link plus *Leave*; a demoted creator sees *Delete* and *Leave*, because deleting is the creator's right, not the moderator's (§C-20). The *requests* link's label is translated (it read `the text after`).
+- The `/channels` menu: a moderator who is not the creator no longer sees *Delete* (the page would 404); an admin who is a member sees every management link plus *Leave*; a demoted creator sees *Leave* only, because deleting needs the creator to still moderate the channel (§C-20, after Amir's review). The *requests* link's label is translated (it read `the text after`).
 - Demoting a channel's last moderator is allowed (§C-20): an admin can still moderate the channel and promote someone else.
 - **Moderators can leave a channel** (final review, Rasiol's decision): `leaveChannel` no longer refuses them, so an admin-appointed moderator is not stuck, and the channel page's *Leave* button no longer does nothing for a moderator. Vision §3: a moderator can do everything a member can. The creator may leave too; the channel can end with no moderator (§C-19, §C-20).
 
