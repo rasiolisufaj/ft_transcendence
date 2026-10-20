@@ -23,7 +23,7 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember }: O
 
   const http = createServer();
   const server = new WebSocketServer({
-    port,
+    server: http,
     verifyClient: ({ req }: { req: IncomingMessage }) => {
       const ticket = readTicket(req.url);
       const result = ticket ? verifyTicket(ticket) : null;
@@ -130,5 +130,6 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember }: O
       });
     });
   }
+  http.listen(port);
   return { server, http, stop };
 }
