@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { editChannel } from "./action";
 import { requireUser } from "@/lib/auth/session";
+import { can } from "@/lib/auth/policy";
 
 export default async function EditChannelPage({
   params,
@@ -19,13 +20,12 @@ export default async function EditChannelPage({
     notFound();
   }
 
-  const { user } = await requireUser();
+  const ctx = await requireUser();
+  // The same check as editChannel.
+  if (!can(ctx, "channel:update", { channelId: id })) notFound();
 
   const channel = await prisma.channel.findFirst({
-    where: {
-      id: id,
-      members: { some: { userId: user.id, role: "MODERATOR" } },
-    },
+    where: { id: id },
     select: {
       id: true,
       title: true,

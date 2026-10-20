@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { writeAudit } from "@/lib/audit";
+import { assertCan } from "@/lib/auth/policy";
 
 export async function inviteUser(formData: FormData) {
   const channelId = formData.get("channelId");
@@ -36,7 +38,7 @@ export async function inviteUser(formData: FormData) {
   if (!invitedUser) {
     return;
   }
-  const { user } = await requireUser();
+  const ctx = await requireUser();
   const channel = await prisma.channel.findFirst({
     where: { id: intChannelId },
   });
@@ -44,10 +46,7 @@ export async function inviteUser(formData: FormData) {
   if (!channel) {
     return;
   }
-  const member = await prisma.channelMember.findFirst({
-    where: { channelId: intChannelId, userId: user.id, role: "MODERATOR" },
-  });
-  if (!member) return;
+  assertCan(ctx, "channel:moderate", { channelId: channel.id });
 
   const AlreadyMember = await prisma.channelMember.findFirst({
     where: { channelId: intChannelId, userId: trueUserId },
@@ -68,6 +67,13 @@ export async function inviteUser(formData: FormData) {
       channelId: intChannelId,
       userId: trueUserId,
     },
+  });
+  await writeAudit({
+    actorUserId: ctx.user.id,
+    action: "channel:invite",
+    targetType: "User",
+    targetId: trueUserId,
+    channelId: intChannelId,
   });
   redirect({ href: "/channels", locale: await getLocale() });
 }
