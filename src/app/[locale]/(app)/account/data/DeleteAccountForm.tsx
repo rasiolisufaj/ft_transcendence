@@ -11,10 +11,12 @@ export function DeleteAccountForm() {
   const t = useTranslations("myData");
   const tAuth = useTranslations("auth");
   const [state, formAction, pending] = useActionState(deleteAccount, initialState);
-
-  const fieldError = (name: string) => {
-    const key = state.fieldErrors?.[name]?.[0];
-    return key && tAuth(`errors.${key}`);
+  const passwordError = state.fieldErrors?.password?.[0];
+  // Literal t("…") calls: npm run i18n:check cannot see a key built at runtime.
+  const errorText = {
+    wrongPassword: t("wrongPassword"),
+    lastAdmin: t("lastAdmin"),
+    tooManyAttempts: t("tooManyAttempts"),
   };
 
   return (
@@ -24,21 +26,13 @@ export function DeleteAccountForm() {
         name="password"
         type="password"
         autoComplete="current-password"
-        error={fieldError("password")}
+        error={passwordError && tAuth(`errors.${passwordError}`)}
       />
-      {state.error === "wrongPassword" ? (
+      {state.error && (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-          {t("wrongPassword")}
+          {errorText[state.error]}
         </p>
-      ) : state.error === "lastAdmin" ? (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-          {t("lastAdmin")}
-        </p>
-      ) : state.error === "tooManyAttempts" ? (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-          {t("tooManyAttempts")}
-        </p>
-      ) : null}
+      )}
       <button
         type="submit"
         disabled={pending}

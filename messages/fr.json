@@ -499,8 +499,8 @@
     "lastAdmin": "Vous êtes le seul administrateur : nommez un autre administrateur avant de supprimer votre compte.",
     "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes.",
     "exportMailSubject": "MesPapiers – Export de vos données",
-    "exportMailBody": "Bonjour,\n\nVos données personnelles ont été exportées le {date}.\n\nSi ce n'est pas vous, changez votre mot de passe.\n\nL'équipe MesPapiers",
+    "exportMailBody": "Bonjour,\n\nVos données personnelles ont été exportées.\n\nSi ce n'est pas vous, changez votre mot de passe.\n\nL'équipe MesPapiers",
     "deleteMailSubject": "MesPapiers – Votre compte a été supprimé",
-    "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement le {date}.\n\nVos réponses dans les channels restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
+    "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement.\n\nVos réponses dans les channels restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
   }
 }

@@ -64,12 +64,7 @@ export async function deleteAccount(
   // 0 rows: a concurrent submit deleted the account first, and already mailed and audited.
   if (deleted > 0) {
     const t = await getTranslations({ locale, namespace: "myData" });
-    const date = new Intl.DateTimeFormat(locale, {
-      dateStyle: "long",
-      timeStyle: "short",
-      timeZone: "Europe/Paris",
-    }).format(new Date());
-    await sendMail(user.email, t("deleteMailSubject"), t("deleteMailBody", { date }));
+    await sendMail(user.email, t("deleteMailSubject"), t("deleteMailBody"));
 
     await writeAudit({
       actorUserId: null,

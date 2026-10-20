@@ -61,12 +61,7 @@ export async function POST(request: Request) {
   const requested = String((await request.formData().catch(() => null))?.get("locale"));
   const locale = isLocale(requested) ? requested : defaultLocale;
   const t = await getTranslations({ locale, namespace: "myData" });
-  const date = new Intl.DateTimeFormat(locale, {
-    dateStyle: "long",
-    timeStyle: "short",
-    timeZone: "Europe/Paris",
-  }).format(new Date());
-  await sendMail(ctx.user.email, t("exportMailSubject"), t("exportMailBody", { date }));
+  await sendMail(ctx.user.email, t("exportMailSubject"), t("exportMailBody"));
 
   await writeAudit({
     actorUserId: userId,
