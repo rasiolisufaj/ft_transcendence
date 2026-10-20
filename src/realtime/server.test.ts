@@ -15,8 +15,8 @@ let running: { stop: () => Promise<void> }[] = [];
 async function start(heartbeatMs = 1000, isMember: IsMember = async () => false) {
   const realtime = startServer({ port: 0, heartbeatMs, isMember });
   running.push(realtime);
-  await once(realtime.server, "listening");
-  const port = (realtime.server.address() as AddressInfo).port;
+  await once(realtime.http, "listening");
+  const port = (realtime.http.address() as AddressInfo).port;
   return { ...realtime, url: `ws://localhost:${port}` };
 }
 
