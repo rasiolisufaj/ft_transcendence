@@ -499,8 +499,8 @@
     "lastAdmin": "Usted es el único administrador: nombre a otro administrador antes de eliminar su cuenta.",
     "tooManyAttempts": "Demasiados intentos fallidos. Vuelva a intentarlo en 15 minutos.",
     "exportMailSubject": "MesPapiers – Exportación de sus datos",
-    "exportMailBody": "Hola,\n\nSus datos personales se exportaron el {date}.\n\nSi no ha sido usted, cambie su contraseña.\n\nEl equipo de MesPapiers",
+    "exportMailBody": "Hola,\n\nSus datos personales se exportaron.\n\nSi no ha sido usted, cambie su contraseña.\n\nEl equipo de MesPapiers",
     "deleteMailSubject": "MesPapiers – Su cuenta ha sido eliminada",
-    "deleteMailBody": "Hola,\n\nSu cuenta de MesPapiers y sus documentos se eliminaron de forma definitiva el {date}.\n\nSus respuestas en los canales permanecen visibles, pero sin su nombre.\n\nEl equipo de MesPapiers"
+    "deleteMailBody": "Hola,\n\nSu cuenta de MesPapiers y sus documentos se eliminaron de forma definitiva.\n\nSus respuestas en los canales permanecen visibles, pero sin su nombre.\n\nEl equipo de MesPapiers"
   }
 }
