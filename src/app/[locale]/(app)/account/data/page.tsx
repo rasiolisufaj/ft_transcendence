@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/auth/session";
 import { Card } from "@/components/ui/Card";
 import { DeleteAccountForm } from "./DeleteAccountForm";
@@ -9,6 +9,7 @@ const primary =
 export default async function MyDataPage() {
   await requireUser();
   const t = await getTranslations("myData");
+  const locale = await getLocale();
 
   return (
     <section className="mx-auto max-w-xl px-4 py-16">
@@ -24,6 +25,7 @@ export default async function MyDataPage() {
           </h2>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t("exportDesc")}</p>
           <form method="post" action="/api/account/export" className="mt-4">
+            <input type="hidden" name="locale" value={locale} />
             <button type="submit" className={primary}>
               {t("exportButton")}
             </button>
