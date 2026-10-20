@@ -1,14 +1,13 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/auth/session";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { DeleteAccountForm } from "./DeleteAccountForm";
-
-const primary =
-  "inline-flex rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
 
 export default async function MyDataPage() {
   await requireUser();
   const t = await getTranslations("myData");
+  const locale = await getLocale();
 
   return (
     <section className="mx-auto max-w-xl px-4 py-16">
@@ -24,9 +23,8 @@ export default async function MyDataPage() {
           </h2>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t("exportDesc")}</p>
           <form method="post" action="/api/account/export" className="mt-4">
-            <button type="submit" className={primary}>
-              {t("exportButton")}
-            </button>
+            <input type="hidden" name="locale" value={locale} />
+            <Button type="submit">{t("exportButton")}</Button>
           </form>
         </section>
 
