@@ -9,7 +9,13 @@ const initialState: DeleteAccountState = {};
 
 export function DeleteAccountForm() {
   const t = useTranslations("myData");
+  const tAuth = useTranslations("auth");
   const [state, formAction, pending] = useActionState(deleteAccount, initialState);
+
+  const fieldError = (name: string) => {
+    const key = state.fieldErrors?.[name]?.[0];
+    return key && tAuth(`errors.${key}`);
+  };
 
   return (
     <form action={formAction} className="mt-4 space-y-4" noValidate>
@@ -18,8 +24,21 @@ export function DeleteAccountForm() {
         name="password"
         type="password"
         autoComplete="current-password"
-        error={state.error === "wrongPassword" ? t("wrongPassword") : undefined}
+        error={fieldError("password")}
       />
+      {state.error === "wrongPassword" ? (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          {t("wrongPassword")}
+        </p>
+      ) : state.error === "lastAdmin" ? (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          {t("lastAdmin")}
+        </p>
+      ) : state.error === "tooManyAttempts" ? (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          {t("tooManyAttempts")}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={pending}
