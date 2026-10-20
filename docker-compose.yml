@@ -32,7 +32,8 @@ services:
       WS_TICKET_SECRET: "${WS_TICKET_SECRET:-}"
       # Mailpit catches every email in dev (web UI on http://localhost:8025).
       SMTP_HOST: "mailpit"
-      SMTP_PORT: "${SMTP_PORT:-1025}"
+      # Mailpit's port inside the network; .env's SMTP_PORT is for `npm run dev` on the host.
+      SMTP_PORT: "1025"
     depends_on:
       db:
         condition: service_healthy
@@ -68,12 +69,13 @@ services:
       retries: 10
 
   mailpit:
-    image: axllent/mailpit
+    image: axllent/mailpit:v1.31.6
     container_name: mespapiers_mailpit
     restart: unless-stopped
+    # This machine only: the UI shows every caught email, and 1025 accepts mail from anyone who reaches it.
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
 
 volumes:
   postgres-data:
