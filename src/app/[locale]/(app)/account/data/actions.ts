@@ -3,7 +3,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { redirect } from "@/i18n/navigation";
-import { defaultLocale, isLocale } from "@/i18n/config";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth/password";
 import { clearSessionCookie, requireUser } from "@/lib/auth/session";
@@ -35,15 +34,6 @@ export async function deleteAccount(
   }
   const { password } = parsed.data;
 
-  if (user.globalRole === "ADMIN") {
-    const otherAdmins = await prisma.user.count({
-      where: { globalRole: "ADMIN", id: { not: user.id } },
-    });
-    if (otherAdmins === 0) {
-      return { error: "lastAdmin" };
-    }
-  }
-
   if (deleteLimiter.tooManyAttempts(user.id)) {
     return { error: "tooManyAttempts" };
   }
@@ -58,24 +48,37 @@ export async function deleteAccount(
   }
   deleteLimiter.clearAttempts(user.id);
 
-  await prisma.user.deleteMany({ where: { id: user.id } });
-
-  const locale = isLocale(user.locale) ? user.locale : defaultLocale;
-  const t = await getTranslations({ locale, namespace: "myData" });
-  const date = new Intl.DateTimeFormat(locale, {
-    dateStyle: "long",
-    timeStyle: "short",
-    timeZone: "Europe/Paris",
-  }).format(new Date());
-  await sendMail(user.email, t("deleteMailSubject"), t("deleteMailBody", { date }));
-
-  await writeAudit({
-    actorUserId: null,
-    action: "gdpr:delete",
-    targetType: "User",
-    targetId: user.id,
+  const deleted = await prisma.$transaction(async (tx) => {
+    // FOR UPDATE locks the admin rows: when the last two admins delete themselves at
+    // once, the second waits for the first, then sees it is the last one.
+    const admins = await tx.$queryRaw<{ id: string }[]>`
+      SELECT id FROM "User" WHERE "globalRole" = 'ADMIN' FOR UPDATE`;
+    if (admins.length === 1 && admins[0]?.id === user.id) return null;
+    return (await tx.user.deleteMany({ where: { id: user.id } })).count;
   });
+  if (deleted === null) {
+    return { error: "lastAdmin" };
+  }
+
+  const locale = await getLocale();
+  // 0 rows: a concurrent submit deleted the account first, and already mailed and audited.
+  if (deleted > 0) {
+    const t = await getTranslations({ locale, namespace: "myData" });
+    const date = new Intl.DateTimeFormat(locale, {
+      dateStyle: "long",
+      timeStyle: "short",
+      timeZone: "Europe/Paris",
+    }).format(new Date());
+    await sendMail(user.email, t("deleteMailSubject"), t("deleteMailBody", { date }));
+
+    await writeAudit({
+      actorUserId: null,
+      action: "gdpr:delete",
+      targetType: "User",
+      targetId: user.id,
+    });
+  }
 
   await clearSessionCookie();
-  return redirect({ href: "/login", locale: await getLocale() });
+  return redirect({ href: "/login", locale });
 }
