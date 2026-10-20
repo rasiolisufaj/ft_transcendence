@@ -7,7 +7,7 @@ import { assertCan } from "@/lib/auth/policy";
 import { writeAudit } from "@/lib/audit";
 import { sendMail } from "@/lib/mail";
 
-export async function POST() {
+export async function POST(request: Request) {
   const ctx = await getCurrentUser();
   if (!ctx) {
     return new Response(null, { status: 401 });
@@ -54,7 +54,12 @@ export async function POST() {
     zip.file(`files/${file.id}-${safeName}`, file.fileData);
   }
 
-  const locale = isLocale(ctx.user.locale) ? ctx.user.locale : defaultLocale;
+  // Built before the mail and the audit row, so a failed export reports nothing.
+  const zipBytes = await zip.generateAsync({ type: "arraybuffer" });
+
+  // The page sends its locale: API routes have no [locale] segment, and User.locale is never written.
+  const requested = String((await request.formData().catch(() => null))?.get("locale"));
+  const locale = isLocale(requested) ? requested : defaultLocale;
   const t = await getTranslations({ locale, namespace: "myData" });
   const date = new Intl.DateTimeFormat(locale, {
     dateStyle: "long",
@@ -70,9 +75,7 @@ export async function POST() {
     targetId: userId,
   });
 
-  const nodeStream = zip.generateNodeStream({ type: "nodebuffer", streamFiles: true });
-
-  return new Response(nodeStream as unknown as BodyInit, {
+  return new Response(zipBytes, {
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": 'attachment; filename="mes-donnees.zip"',
