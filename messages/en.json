@@ -389,7 +389,7 @@
         "export": "Right to data portability: export your data in a structured format.",
         "objection": "Right to object: delete a document to stop its processing, or contact us."
       },
-      "howTo": "To exercise these rights, email us at the address below. We will respond within 30 days."
+      "howTo": "To exercise these rights, go to the /account/data page: you can export your data or delete your account there. For any other question, email us at the address below."
     },
     "cookies": {
       "heading": "Cookies",
@@ -454,7 +454,7 @@
     },
     "termination": {
       "heading": "Termination",
-      "body": "You can ask us by email to delete your account. We reserve the right to suspend or delete an account in case of a breach of these terms, after notification."
+      "body": "You can delete your account at any time from the /account/data page. We reserve the right to suspend or delete an account in case of a breach of these terms, after notification."
     },
     "modifications": {
       "heading": "Changes to the terms",
@@ -495,6 +495,12 @@
     "passwordLabel": "Password",
     "deleteButton": "Delete my account",
     "deletePending": "Deleting…",
-    "wrongPassword": "Wrong password."
+    "wrongPassword": "Wrong password.",
+    "lastAdmin": "You are the only administrator: name another administrator before deleting your account.",
+    "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
+    "exportMailSubject": "MesPapiers – Export of your data",
+    "exportMailBody": "Hello,\n\nYour personal data was exported on {date}.\n\nIf this wasn't you, change your password.\n\nThe MesPapiers team",
+    "deleteMailSubject": "MesPapiers – Your account has been deleted",
+    "deleteMailBody": "Hello,\n\nYour MesPapiers account and your documents were permanently deleted on {date}.\n\nYour answers in channels remain visible, but without your name.\n\nThe MesPapiers team"
   }
 }

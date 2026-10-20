@@ -389,7 +389,7 @@
         "export": "Droit à la portabilité : exporter vos données dans un format structuré.",
         "objection": "Droit d'opposition : supprimer un document pour mettre fin à son traitement, ou nous contacter."
       },
-      "howTo": "Pour exercer ces droits, écrivez-nous à l'adresse indiquée ci-dessous. Nous répondrons dans un délai de 30 jours."
+      "howTo": "Pour exercer ces droits, rendez-vous sur la page /account/data : vous pouvez y exporter vos données ou supprimer votre compte. Pour toute autre question, écrivez-nous à l'adresse indiquée ci-dessous."
     },
     "cookies": {
       "heading": "Cookies",
@@ -454,7 +454,7 @@
     },
     "termination": {
       "heading": "Résiliation",
-      "body": "Vous pouvez nous demander par e-mail de supprimer votre compte. Nous nous réservons le droit de suspendre ou de supprimer un compte en cas de violation des présentes conditions, après notification."
+      "body": "Vous pouvez supprimer votre compte à tout moment depuis la page /account/data. Nous nous réservons le droit de suspendre ou de supprimer un compte en cas de violation des présentes conditions, après notification."
     },
     "modifications": {
       "heading": "Modifications des conditions",
@@ -495,6 +495,12 @@
     "passwordLabel": "Mot de passe",
     "deleteButton": "Supprimer mon compte",
     "deletePending": "Suppression…",
-    "wrongPassword": "Mot de passe incorrect."
+    "wrongPassword": "Mot de passe incorrect.",
+    "lastAdmin": "Vous êtes le seul administrateur : nommez un autre administrateur avant de supprimer votre compte.",
+    "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes.",
+    "exportMailSubject": "MesPapiers – Export de vos données",
+    "exportMailBody": "Bonjour,\n\nVos données personnelles ont été exportées le {date}.\n\nSi ce n'est pas vous, changez votre mot de passe.\n\nL'équipe MesPapiers",
+    "deleteMailSubject": "MesPapiers – Votre compte a été supprimé",
+    "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement le {date}.\n\nVos réponses dans les channels restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
   }
 }
