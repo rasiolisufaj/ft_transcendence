@@ -1,4 +1,4 @@
-import type { IncomingMessage } from "node:http";
+import { createServer, type IncomingMessage } from "node:http";
 import type { AddressInfo } from "node:net";
 import { WebSocketServer, type WebSocket } from "ws";
 import { parseClientMessage, type ServerMessage } from "@/contracts/socket";
@@ -21,6 +21,7 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember }: O
   // verifyClient can only say yes or no: the user id waits here until "connection".
   const users = new WeakMap<IncomingMessage, string>();
 
+  const http = createServer();
   const server = new WebSocketServer({
     port,
     verifyClient: ({ req }: { req: IncomingMessage }) => {
@@ -129,5 +130,5 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember }: O
       });
     });
   }
-  return { server, stop };
+  return { server, http, stop };
 }
