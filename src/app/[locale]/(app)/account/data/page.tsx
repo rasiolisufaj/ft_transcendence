@@ -11,7 +11,7 @@ export default async function MyDataPage() {
   const t = await getTranslations("myData");
 
   return (
-    <main className="mx-auto max-w-xl px-4 py-16">
+    <section className="mx-auto max-w-xl px-4 py-16">
       <Card>
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
           {t("title")}
@@ -23,9 +23,11 @@ export default async function MyDataPage() {
             {t("exportTitle")}
           </h2>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t("exportDesc")}</p>
-          <a href="/api/account/export" download className={`${primary} mt-4`}>
-            {t("exportButton")}
-          </a>
+          <form method="post" action="/api/account/export" className="mt-4">
+            <button type="submit" className={primary}>
+              {t("exportButton")}
+            </button>
+          </form>
         </section>
 
         <section className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
@@ -36,6 +38,6 @@ export default async function MyDataPage() {
           <DeleteAccountForm />
         </section>
       </Card>
-    </main>
+    </section>
   );
 }
