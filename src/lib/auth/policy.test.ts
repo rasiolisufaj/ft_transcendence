@@ -106,9 +106,14 @@ describe("tier 3 — ownership", () => {
     expect(can(stranger, "document:delete", { ownerUserId: "u-other" })).toBe(false);
   });
 
-  it("deleting a channel is its creator's call, not a moderator's", () => {
+  it("deleting a channel is its creator's call, while they still moderate it (§C-20)", () => {
     // Called as { channelId, ownerUserId: channel.createdBy }.
-    expect(can(stranger, "channel:delete", { channelId: CHANNEL, ownerUserId: "u-self" })).toBe(true);
+    expect(can(moderator, "channel:delete", { channelId: CHANNEL, ownerUserId: "u-self" })).toBe(true);
+    // A demoted creator, a creator who left, and one who moderates another channel only.
+    expect(can(member, "channel:delete", { channelId: CHANNEL, ownerUserId: "u-self" })).toBe(false);
+    expect(can(stranger, "channel:delete", { channelId: CHANNEL, ownerUserId: "u-self" })).toBe(false);
+    expect(can(moderator, "channel:delete", { channelId: OTHER_CHANNEL, ownerUserId: "u-self" })).toBe(false);
+    // A moderator who is not the creator.
     expect(can(moderator, "channel:delete", { channelId: CHANNEL, ownerUserId: "x" })).toBe(false);
     // createdBy is SetNull when the creator is deleted: only an admin can remove it then.
     expect(can(moderator, "channel:delete", { channelId: CHANNEL, ownerUserId: null })).toBe(false);
@@ -179,7 +184,7 @@ describe("truth table — every Action × every role (C4)", () => {
     "assistant:ask":       [none,         true,  true,  true,  true,  true],
     "channel:create":      [none,         true,  true,  true,  true,  true],
     "channel:update":      [inChannel,    true,  true,  false, false, false],
-    "channel:delete":      [ownInChannel, true,  false, false, true,  false],
+    "channel:delete":      [ownInChannel, true,  false, false, false, false],   // owner: a creator who left (§C-20)
     "channel:join":        [inChannel,    true,  true,  true,  true,  true],
     "channel:moderate":    [inChannel,    true,  true,  false, false, false],
     "thread:create":       [inChannel,    true,  true,  true,  false, false],

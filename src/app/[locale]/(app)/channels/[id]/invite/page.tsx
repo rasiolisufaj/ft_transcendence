@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/db";
+import { notFound } from "next/navigation";
+import { can } from "@/lib/auth/policy";
 import { getAllUsers } from "../../create/data";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
@@ -24,23 +26,15 @@ export default async function InviteUserPage({
   ) {
     return;
   }
-  const { user } = await requireUser();
+  const ctx = await requireUser();
 
   const channel = await prisma.channel.findFirst({
     where: { id: trueIdChannel },
   });
 
   if (!channel) return;
-  const moderator = await prisma.channelMember.findFirst({
-    where: {
-      channelId: channel.id,
-      userId: user.id,
-      role: "MODERATOR",
-    },
-  });
-  if (!moderator) {
-    return;
-  }
+  // The same check as inviteUser.
+  if (!can(ctx, "channel:moderate", { channelId: channel.id })) notFound();
   const users = await getAllUsers();
   return (
     <main className="mx-auto max-w-xl px-4 py-16">

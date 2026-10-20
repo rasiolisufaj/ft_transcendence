@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { can } from "@/lib/auth/policy";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { deleteChannel } from "./action";
@@ -18,24 +19,14 @@ export default async function DeleteChannelPage({
   if (Number.isNaN(id) || id <= 0 || String(id) !== idChannel) {
     notFound();
   }
-  const { user } = await requireUser();
-
-  const moderator = await prisma.channelMember.findFirst({
-    where: {
-      channelId: id,
-      userId: user.id,
-      role: "MODERATOR",
-    },
-  });
-  if (!moderator) {
-    notFound();
-  }
+  const ctx = await requireUser();
 
   const channel = await prisma.channel.findFirst({
     where: { id: id },
     include: { _count: { select: { members: true } } },
   });
-  if (!channel) {
+  // The same check as deleteChannel: the creator while they still moderate it, or an admin.
+  if (!channel || !can(ctx, "channel:delete", { channelId: id, ownerUserId: channel.createdBy })) {
     notFound();
   }
 

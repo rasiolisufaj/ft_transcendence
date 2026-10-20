@@ -112,6 +112,7 @@
       "delete": "Eliminar",
       "kick": "Expulsar a un miembro",
       "leave": "Salir",
+      "requests": "Solicitudes de acceso",
       "public": "canal público",
       "private": "canal privado"
     },
@@ -192,7 +193,11 @@
     "kick": {
       "back": "← Volver a los canales",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
-      "kick": "Expulsar"
+      "kick": "Expulsar",
+      "member": "miembro",
+      "moderator": "moderador",
+      "promote": "Nombrar moderador",
+      "demote": "Volver a miembro"
     },
     "delete": {
       "back": "← Volver a los canales",
