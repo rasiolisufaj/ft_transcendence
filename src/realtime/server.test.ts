@@ -49,6 +49,12 @@ describe("realtime server", () => {
 
     expect(code).toBe(1001);
   });
+
+  it("stops listening when it stops", async () => {
+    const { http, stop } = await start();
+    await stop();
+    expect(http.listening).toBe(false);
+  });
 });
 
 describe("heartbeat", () => {
