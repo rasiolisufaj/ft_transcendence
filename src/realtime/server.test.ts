@@ -3,6 +3,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import { mintTicket } from "@/lib/auth/ticket";
+import type { IsMember } from "@/realtime/handshake";
 import { startServer } from "@/realtime/server";
 
 process.env.WS_TICKET_SECRET = "test-secret";
@@ -11,8 +12,8 @@ process.env.WS_TICKET_SECRET = "test-secret";
 let running: { stop: () => Promise<void> }[] = [];
 
 // Starts a server on a free port and returns its ws:// address.
-async function start(heartbeatMs = 1000) {
-  const realtime = startServer({ port: 0, heartbeatMs });
+async function start(heartbeatMs = 1000, isMember: IsMember = async () => false) {
+  const realtime = startServer({ port: 0, heartbeatMs, isMember });
   running.push(realtime);
   await once(realtime.server, "listening");
   const port = (realtime.server.address() as AddressInfo).port;
@@ -98,5 +99,90 @@ describe("ticket", () => {
     const [data] = await once(client, "message");
 
     expect(JSON.parse(data.toString())).toEqual({ type: "hello", userId: "user-1" });
+  });
+});
+
+describe("client messages", () => {
+  it("answers badRequest to something that is not JSON", async () => {
+    const { url } = await start();
+    const client = new WebSocket(withTicket(url));
+    await once(client, "message");
+
+    client.send("not json");
+    const [data] = await once(client, "message");
+
+    expect(JSON.parse(data.toString())).toEqual({ type: "error", code: "badRequest" });
+  });
+
+  it("answers badRequest to an unknown message type", async () => {
+    const { url } = await start();
+    const client = new WebSocket(withTicket(url));
+    await once(client, "message");
+
+    client.send(JSON.stringify({ type: "publish", topic: "user:user-1" }));
+    const [data] = await once(client, "message");
+
+    expect(JSON.parse(data.toString())).toEqual({ type: "error", code: "badRequest" });
+  });
+});
+
+describe("subscriptions", () => {
+  async function ask(message: object, isMember?: IsMember) {
+    const { url } = await start(1000, isMember);
+    const client = new WebSocket(withTicket(url, "user-1"));
+    await once(client, "message");
+
+    client.send(JSON.stringify(message));
+    const [data] = await once(client, "message");
+    return JSON.parse(data.toString());
+  }
+
+  it("subscribes a user to their own topic", async () => {
+    expect(await ask({ type: "subscribe", topic: "user:user-1" })).toEqual({
+      type: "subscribed",
+      topic: "user:user-1",
+    });
+  });
+
+  it("refuses another user's topic", async () => {
+    expect(await ask({ type: "subscribe", topic: "user:bob" })).toEqual({
+      type: "error",
+      code: "forbidden",
+      topic: "user:bob",
+    });
+  });
+
+  it("subscribes a member to their channel", async () => {
+    expect(await ask({ type: "subscribe", topic: "channel:1" }, async () => true)).toEqual({
+      type: "subscribed",
+      topic: "channel:1",
+    });
+  });
+
+  it("refuses a channel the user has not joined", async () => {
+    expect(await ask({ type: "subscribe", topic: "channel:1" }, async () => false)).toEqual({
+      type: "error",
+      code: "forbidden",
+      topic: "channel:1",
+    });
+  });
+
+  it("refuses the channel when the membership check fails", async () => {
+    const broken = async () => {
+      throw new Error("database is down");
+    };
+
+    expect(await ask({ type: "subscribe", topic: "channel:1" }, broken)).toEqual({
+      type: "error",
+      code: "forbidden",
+      topic: "channel:1",
+    });
+  });
+
+  it("unsubscribes from a topic", async () => {
+    expect(await ask({ type: "unsubscribe", topic: "user:user-1" })).toEqual({
+      type: "unsubscribed",
+      topic: "user:user-1",
+    });
   });
 });

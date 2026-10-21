@@ -22,13 +22,13 @@ export function parseTopic(name: string) {
 		if (!channelId || channelId < 0) {
 			return null;
 		}
-		return { kind: "channel", channelId };
+		return { kind: "channel" as const, channelId };
 	}
 	if (kind === "user") {
 		if (!id) {
 			return null;
 		}
-		return { kind: "user", userId: id };
+		return { kind: "user" as const, userId: id };
 	}
 	return null;
 }
