@@ -35,8 +35,8 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember }: O
     },
   });
 
-  server.on("listening", () => {
-    log("info", "realtime server listening", { port: (server.address() as AddressInfo).port });
+  http.on("listening", () => {
+    log("info", "realtime server listening", { port: (http.address() as AddressInfo).port });
   });
 
   server.on("error", (error) => {
