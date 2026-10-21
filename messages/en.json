@@ -10,7 +10,8 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "channels": "Channels",
-    "account": "Account"
+    "account": "Account",
+    "myData": "My data"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -482,5 +483,24 @@
       "upstream": "Something went wrong. Please try again shortly.",
       "overloaded": "The service is overloaded. Please try again shortly."
     }
+  },
+  "myData": {
+    "title": "My data",
+    "intro": "Under the GDPR, you can view and retrieve the data MesPapiers holds about you at any time.",
+    "exportTitle": "Export my data",
+    "exportDesc": "Download a copy of your personal data (profile, documents, messages and activity) as a ZIP file (your data as JSON + your original files).",
+    "exportButton": "Download my data",
+    "deleteTitle": "Delete my account",
+    "deleteDesc": "Your account and your documents will be deleted forever. Your answers in channels will stay, but without your name.",
+    "passwordLabel": "Password",
+    "deleteButton": "Delete my account",
+    "deletePending": "Deleting…",
+    "wrongPassword": "Wrong password.",
+    "lastAdmin": "You are the only administrator: name another administrator before deleting your account.",
+    "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
+    "exportMailSubject": "MesPapiers – Export of your data",
+    "exportMailBody": "Hello,\n\nYour personal data was exported.\n\nIf this wasn't you, change your password.\n\nThe MesPapiers team",
+    "deleteMailSubject": "MesPapiers – Your account has been deleted",
+    "deleteMailBody": "Hello,\n\nYour MesPapiers account and your documents were permanently deleted.\n\nYour answers in channels remain visible, but without your name.\n\nThe MesPapiers team"
   }
 }

@@ -28,6 +28,8 @@ export async function deleteChannel(formData: FormData) {
     return;
   }
 
+  // The creator while they still moderate the channel, or an admin (§C-20). createdBy is
+  // null once the creator is deleted (§C-19): then only an admin matches.
   assertCan(ctx, "channel:delete", { channelId: trueId, ownerUserId: channel.createdBy });
 
   await writeAudit({

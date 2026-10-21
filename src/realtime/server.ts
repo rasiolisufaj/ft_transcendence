@@ -1,16 +1,23 @@
 import type { IncomingMessage } from "node:http";
 import type { AddressInfo } from "node:net";
 import { WebSocketServer, type WebSocket } from "ws";
+import { parseClientMessage, type ServerMessage } from "@/contracts/socket";
 import { verifyTicket } from "@/lib/auth/ticket";
-import { readTicket } from "./handshake";
+import { canSubscribe, readTicket, type IsMember } from "./handshake";
 import { log } from "./log";
+import { isChannelMember } from "./membership";
 
 type Options = {
   port: number;
   heartbeatMs: number; // ms to check if a client is alive
+  isMember?: IsMember;
 };
 
-export function startServer({ port, heartbeatMs }: Options) {
+function send(socket: WebSocket, message: ServerMessage) {
+  socket.send(JSON.stringify(message));
+}
+
+export function startServer({ port, heartbeatMs, isMember = isChannelMember }: Options) {
   // verifyClient can only say yes or no: the user id waits here until "connection".
   const users = new WeakMap<IncomingMessage, string>();
 
@@ -36,12 +43,48 @@ export function startServer({ port, heartbeatMs }: Options) {
   });
 
   const alive = new Set<WebSocket>();
+  const topics = new Map<WebSocket, Set<string>>();
 
   server.on("connection", (socket, request) => {
     const userId = users.get(request);
+    if (!userId) {
+      socket.terminate();
+      return;
+    }
     alive.add(socket);
+    topics.set(socket, new Set([`user:${userId}`]));
     log("info", "client connected", { userId, clients: server.clients.size });
-    socket.send(JSON.stringify({ type: "hello", userId }));
+    send(socket, { type: "hello", userId });
+
+    socket.on("message", async (data) => {
+      const message = parseClientMessage(data.toString());
+      if (!message) {
+        send(socket, { type: "error", code: "badRequest" });
+        return;
+      }
+
+      const mine = topics.get(socket);
+      if (!mine) {
+        return;
+      }
+      if (message.type === "unsubscribe") {
+        mine.delete(message.topic);
+        send(socket, { type: "unsubscribed", topic: message.topic });
+        return;
+      }
+      let allowed = false;
+      try {
+        allowed = await canSubscribe(userId, message.topic, isMember);
+      } catch (error) {
+        log("error", "membership check failed", { userId, topic: message.topic, error: String(error) });
+      }
+      if (!allowed) {
+        send(socket, { type: "error", code: "forbidden", topic: message.topic });
+        return;
+      }
+      mine.add(message.topic);
+      send(socket, { type: "subscribed", topic: message.topic });
+    });
 
     socket.on("pong", () => {
       alive.add(socket);
@@ -49,6 +92,7 @@ export function startServer({ port, heartbeatMs }: Options) {
 
     socket.on("close", () => {
       alive.delete(socket);
+      topics.delete(socket);
       log("info", "client disconnected", { clients: server.clients.size });
     });
   });

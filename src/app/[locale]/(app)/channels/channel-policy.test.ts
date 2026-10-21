@@ -346,7 +346,7 @@ describe("channel roles (channel:manageRoles)", () => {
     expect(await isMember(c.id, other.id)).toBe(false);
   });
 
-  it("lets an admin demote a channel's last moderator (§C-20), who can then no longer kick", async () => {
+  it("lets an admin demote a channel's last moderator (§C-20), who can then no longer kick or delete", async () => {
     const admin = await newUser("ADMIN");
     const creator = await newUser();
     const member = await newUser();
@@ -363,6 +363,9 @@ describe("channel roles (channel:manageRoles)", () => {
     await signInAs(creator.id);
     await expect(kickMembers(form({ channelId: c.id, userId: member.id }))).rejects.toBeInstanceOf(ForbiddenError);
     expect(await isMember(c.id, member.id)).toBe(true);
+    // The creator, but no longer a moderator.
+    await expect(deleteChannel(form({ deletechannel: c.id }))).rejects.toBeInstanceOf(ForbiddenError);
+    expect(await prisma.channel.findUnique({ where: { id: c.id } })).not.toBeNull();
   });
 });
 
@@ -379,5 +382,16 @@ describe("leaving a channel", () => {
 
     expect(await isMember(c.id, appointed.id)).toBe(false);
     expect(await isMember(c.id, creator.id)).toBe(false);   // §C-19/§C-20: a channel may be left with no moderator
+  });
+
+  it("takes channel:delete away from a creator who left (§C-20)", async () => {
+    const creator = await newUser();
+    const c = await newChannel({ [creator.id]: "MODERATOR" }, creator.id);
+    await signInAs(creator.id);
+    await leaveChannel(form({ channelId: c.id }));
+
+    await signInAs(creator.id);   // the next request reads the memberships again
+    await expect(deleteChannel(form({ deletechannel: c.id }))).rejects.toBeInstanceOf(ForbiddenError);
+    expect(await prisma.channel.findUnique({ where: { id: c.id } })).not.toBeNull();
   });
 });
