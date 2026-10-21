@@ -60,7 +60,7 @@ export async function getInvitableUsers(
   ]);
   const users = await prisma.user.findMany({
     where: { id: { notIn: Array.from(exclude) } },
-    select: { id: true, displayName: true, email: true },
+    select: { id: true, displayName: true },
     orderBy: { displayName: "asc" },
   });
   return users;

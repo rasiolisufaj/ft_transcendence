@@ -65,7 +65,7 @@ export default async function InviteUserPage({
             </option>
             {users.map((person) => (
               <option key={person.id} value={person.id}>
-                {person.displayName} ({person.email})
+                {person.displayName}
               </option>
             ))}
           </select>

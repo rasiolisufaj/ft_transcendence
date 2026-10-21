@@ -43,7 +43,7 @@ export async function acceptJoinRequest(formData: FormData) {
     channelId: id,
   });
 
-  revalidatePath("/[locale]/channels/[id]/requests", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]/requests", "page");
 }
 
 export async function rejectJoinRequest(formData: FormData) {
@@ -73,5 +73,5 @@ export async function rejectJoinRequest(formData: FormData) {
       channelId: id,
     });
 
-  revalidatePath("/[locale]/channels/[id]/requests", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]/requests", "page");
 }

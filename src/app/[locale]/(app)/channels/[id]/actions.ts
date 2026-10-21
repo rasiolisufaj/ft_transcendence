@@ -51,7 +51,7 @@ export async function createAnswer(formData: FormData) {
       userId: ctx.user.id,
     },
   });
-  revalidatePath("/[locale]/channels/[id]", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
 }
 
 export async function deleteAnswer(formData: FormData) {
@@ -92,7 +92,7 @@ export async function deleteAnswer(formData: FormData) {
       channelId,
     });
   }
-  revalidatePath("/[locale]/channels/[id]", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
 }
 
 export async function modifAnswerUser(formData: FormData) {
@@ -194,8 +194,8 @@ export async function toggleCloseChannel(formData: FormData) {
     channelId: intId,
   });
 
-  revalidatePath("/[locale]/channels/[id]", "page");
-  revalidatePath("/[locale]/channels", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
+  revalidatePath("/[locale]/(app)/channels", "page");
 }
 
 export async function leaveChannel(formData: FormData) {
@@ -245,6 +245,6 @@ export async function leaveChannel(formData: FormData) {
     where: { channelId: channel.id, userId: user.id },
   });
 
-  revalidatePath("/[locale]/channels", "page");
+  revalidatePath("/[locale]/(app)/channels", "page");
   redirect({ href: "/channels", locale: await getLocale() });
 }

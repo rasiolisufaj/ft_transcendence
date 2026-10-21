@@ -39,6 +39,6 @@ export async function deleteChannel(formData: FormData) {
   });
   await prisma.channel.deleteMany({ where: { id: trueId } });
 
-  revalidatePath("/[locale]/channels", "page");
+  revalidatePath("/[locale]/(app)/channels", "page");
   redirect({ href: "/channels", locale: await getLocale() });
 }
