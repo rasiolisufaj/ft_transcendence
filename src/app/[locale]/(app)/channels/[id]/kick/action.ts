@@ -48,7 +48,7 @@ export async function kickMembers(formData: FormData) {
     });
 
   revalidatePath("/[locale]/(app)/channels/[id]/kick", "page");
-  revalidatePath("/[locale]/channels/[id]", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
 }
 
 // Admins only, in any channel (§C-18). Changes an existing membership, never adds one.

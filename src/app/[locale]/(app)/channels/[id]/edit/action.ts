@@ -78,7 +78,7 @@ export async function editChannel(formData: FormData) {
     channelId: intId,
   });
 
-  revalidatePath("/[locale]/channels/[id]", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
   const isMember = ctx.memberships.some((m) => m.channelId === intId);
   redirect({ href: isMember ? `/channels/${intId}` : "/channels", locale: await getLocale() });
 }

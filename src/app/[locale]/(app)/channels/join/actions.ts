@@ -75,5 +75,5 @@ export default async function requestJoinChannel(formData: FormData) {
     throw error;
   }
 
-  revalidatePath("/[locale]/channels/join", "page");
+  revalidatePath("/[locale]/(app)/channels/join", "page");
 }

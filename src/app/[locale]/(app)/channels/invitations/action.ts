@@ -41,7 +41,7 @@ export async function acceptInvite(formData: FormData) {
     }),
   ]);
 
-  revalidatePath("/[locale]/channels/invitations", "page");
+  revalidatePath("/[locale]/(app)/channels/invitations", "page");
 }
 
 export async function declineInvite(formData: FormData) {
@@ -67,5 +67,5 @@ export async function declineInvite(formData: FormData) {
     where: { channelId: intIdChannel, userId: user.id },
   });
 
-  revalidatePath("/[locale]/channels/invitations", "page");
+  revalidatePath("/[locale]/(app)/channels/invitations", "page");
 }
