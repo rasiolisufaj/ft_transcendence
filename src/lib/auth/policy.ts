@@ -75,6 +75,13 @@ export function can(ctx: SessionContext, action: Action, resource: Resource = {}
   // Moderation itself has no owner: never fall through to tier 3.
   if (action === "channel:moderate") return false;
 
+  // Deleting a channel needs both: its creator, while they still moderate it (§C-20).
+  // Leaving or a demotion ends it, and then only an admin may delete.
+  if (action === "channel:delete") {
+    const membership = ctx.memberships.find((m) => m.channelId === resource.channelId);
+    return membership?.role === "MODERATOR" && ctx.user.id === resource.ownerUserId;
+  }
+
   // Membership — no channelId means no membership can match: denied.
   if (MEMBER_ACTIONS.has(action)) {
     return ctx.memberships.some((m) => m.channelId === resource.channelId);

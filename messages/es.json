@@ -10,7 +10,8 @@
     "openMenu": "Abrir el menú",
     "closeMenu": "Cerrar el menú",
     "channels": "Canales",
-    "account": "Cuenta"
+    "account": "Cuenta",
+    "myData": "Mis datos"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -482,5 +483,24 @@
       "upstream": "Algo salió mal. Inténtelo de nuevo en unos instantes.",
       "overloaded": "El servicio está sobrecargado. Inténtelo de nuevo en unos instantes."
     }
+  },
+  "myData": {
+    "title": "Mis datos",
+    "intro": "De acuerdo con el RGPD, puede consultar y recuperar en cualquier momento los datos que MesPapiers conserva sobre usted.",
+    "exportTitle": "Exportar mis datos",
+    "exportDesc": "Descargue una copia de sus datos personales (perfil, documentos, mensajes y actividad) en un archivo ZIP (sus datos en JSON + sus archivos originales).",
+    "exportButton": "Descargar mis datos",
+    "deleteTitle": "Eliminar mi cuenta",
+    "deleteDesc": "Su cuenta y sus documentos se eliminarán de forma definitiva. Sus respuestas en los canales se mantendrán, pero sin su nombre.",
+    "passwordLabel": "Contraseña",
+    "deleteButton": "Eliminar mi cuenta",
+    "deletePending": "Eliminando…",
+    "wrongPassword": "Contraseña incorrecta.",
+    "lastAdmin": "Usted es el único administrador: nombre a otro administrador antes de eliminar su cuenta.",
+    "tooManyAttempts": "Demasiados intentos fallidos. Vuelva a intentarlo en 15 minutos.",
+    "exportMailSubject": "MesPapiers – Exportación de sus datos",
+    "exportMailBody": "Hola,\n\nSus datos personales se exportaron.\n\nSi no ha sido usted, cambie su contraseña.\n\nEl equipo de MesPapiers",
+    "deleteMailSubject": "MesPapiers – Su cuenta ha sido eliminada",
+    "deleteMailBody": "Hola,\n\nSu cuenta de MesPapiers y sus documentos se eliminaron de forma definitiva.\n\nSus respuestas en los canales permanecen visibles, pero sin su nombre.\n\nEl equipo de MesPapiers"
   }
 }
