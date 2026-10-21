@@ -125,8 +125,10 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember }: O
 
     return new Promise((resolve) => {
       server.close(() => {
-        log("info", "realtime server stopped");
-        resolve();
+        http.close(() => {
+          log("info", "realtime server stopped");
+          resolve();
+        });
       });
     });
   }
