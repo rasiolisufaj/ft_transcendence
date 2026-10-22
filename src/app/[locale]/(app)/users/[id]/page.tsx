@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { isUserId, relationBetween } from "@/lib/users/profile";
+import { ProfileForm } from "./ProfileForm";
 
 export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -42,6 +43,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           ) : null}
         </div>
       </Card>
+      {isOwn ? (
+        <Card className="space-y-6">
+          <h2 className="text-lg font-semibold">{t("edit.title")}</h2>
+          <ProfileForm displayName={user.displayName} />
+        </Card>
+      ) : null}
     </div>
   );
 }

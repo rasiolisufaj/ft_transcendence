@@ -315,7 +315,14 @@
     }
   },
   "profile": {
-    "memberSince": "Miembro desde el {date}"
+    "memberSince": "Miembro desde el {date}",
+    "edit": {
+      "title": "Editar mi perfil",
+      "displayName": "Nombre visible",
+      "submit": "Guardar",
+      "pending": "Guardando…",
+      "saved": "Nombre guardado."
+    }
   },
   "documentDetail": {
     "category": "Categoría",

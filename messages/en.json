@@ -315,7 +315,14 @@
     }
   },
   "profile": {
-    "memberSince": "Member since {date}"
+    "memberSince": "Member since {date}",
+    "edit": {
+      "title": "Edit my profile",
+      "displayName": "Display name",
+      "submit": "Save",
+      "pending": "Saving…",
+      "saved": "Name saved."
+    }
   },
   "documentDetail": {
     "category": "Category",
