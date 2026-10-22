@@ -23,21 +23,25 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 npm run db:generate
 
 npm test                                                                    # everything
-npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" "src/app/[locale]/(app)/channels" --reporter=verbose    # auth only
+npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" "src/app/[locale]/(app)/channels" src/lib/users src/lib/files "src/app/[locale]/(app)/users" src/app/api/users --reporter=verbose    # auth and profile only
 ```
 
-Expected: `npm test` reports **240 passed** (20 files). The auth part is 9 files and 95 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓.
+Expected: `npm test` reports **262 passed** (24 files). The auth and profile part is 13 files and 116 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓. If `npm test` dies with exit 137 and no output, memory ran out: run `npx vitest run --maxWorkers=1`.
 
 | File | What it proves |
 |---|---|
 | [password.test.ts](../src/lib/auth/password.test.ts) | argon2 never stores plaintext, salts every hash differently, rejects a wrong password, and returns `false` on a corrupt hash instead of crashing |
-| [session.test.ts](../src/lib/auth/session.test.ts) | tokens are random and ≥128 bits; only the SHA-256 is stored; expired sessions are rejected and deleted; the expiry never slides; logout kills one session or all of them; channel memberships load. Uses the real DB. |
+| [session.test.ts](../src/lib/auth/session.test.ts) | tokens are random and ≥128 bits; only the SHA-256 is stored; expired sessions are rejected and deleted; the expiry never slides; logout kills one session or all of them; channel memberships load; `lastSeenAt` is written when unset or older than a minute, and a fresh one is left alone. Uses the real DB. |
 | [schemas.test.ts](../src/lib/auth/schemas.test.ts) | the signup and login rules; every error key exists in fr, en and es |
 | [login/actions.test.ts](<../src/app/[locale]/(auth)/login/actions.test.ts>) | the action returns the schema's errors; 6 failures lock an email for 15 minutes |
 | [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything except touch another user's documents (the vault is owner-only, even for an admin); a moderator acts only in their own channel, and moderation is never granted by ownership; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` and `channel:manageRoles` are admin-only, even on your own account. Plus the C4 truth table: one row per `Action` (23) with the resource its caller passes and the answer for admin, moderator, member, owner and stranger; a new `Action` without a row fails the typecheck |
 | [admin/users/actions.test.ts](<../src/app/[locale]/(app)/admin/users/actions.test.ts>) | a non-admin cannot change a role or delete a user; an admin cannot demote or delete themselves; a role change ends that user's sessions; every change writes one `AuditLog` row; a role other than USER/ADMIN is refused; a double click or a stale page (user already gone, role already set) changes nothing and does not throw. Uses the real DB. |
 | [channels/channel-policy.test.ts](<../src/app/[locale]/(app)/channels/channel-policy.test.ts>) | phase 5, the policy in the channel actions: a plain member is refused every moderation action; a moderator of another channel cannot kick there; an admin kicks in a channel with no moderator; a member cannot edit a channel, a moderator who is not the creator can; that moderator cannot delete it, the creator can; a member cannot delete someone else's answer, a moderator can; a non-member cannot post; a moderator cannot rewrite someone else's answer, an admin's rewrite is audited; a non-member admin is sent back to `/channels` after an edit; every privileged action writes one `AuditLog` row, once, after it happened. Phase 6: a moderator cannot change a channel role; an admin promotes once, audited, a forged role or a non-member changes nothing, and the promoted member's existing session moderates on its next request; an admin may demote the last moderator, who then cannot kick or delete; a moderator, the creator included, can leave a channel, and a creator who left cannot delete it. Uses the real DB. |
 | [audit.test.ts](../src/lib/audit.test.ts) | `writeAudit()` records the actor, action, target and channel; a failed write is logged and never throws. Uses the real DB. |
+| [users/profile.test.ts](../src/lib/users/profile.test.ts) | phase 12: `isUserId` accepts a cuid and refuses a NUL byte, a path and an empty string; `isOnline` is true at 4 min 59 s and false at 5 min 1 s or for someone never seen; `relationBetween` is `friend` for an accepted request, `none` then `pending` once a request is sent, and `blocked` seen from the blocked side too. Uses the real DB. |
+| [users/[id]/actions.test.ts](<../src/app/[locale]/(app)/users/[id]/actions.test.ts>) | `updateProfile` renames the caller only, even with another user's id in the form, and refuses a name that is one letter once trimmed; `addFriendFromProfile` adds nothing and does not throw when the profile's owner was deleted meanwhile; `uploadAvatar` stores a png and a second upload replaces it (one row), and refuses a text file or a PDF named `.png`, an oversized file and an empty one, storing nothing. Uses the real DB. |
+| [api/users/[id]/avatar/route.test.ts](<../src/app/api/users/[id]/avatar/route.test.ts>) | the avatar route answers 401 without a session, 404 without an avatar or for a malformed id, and serves the stored bytes with their type, `nosniff` and `private, no-store`. Uses the real DB. |
+| [files/sniff.test.ts](../src/lib/files/sniff.test.ts) | `sniffMime` recognises png, jpeg, webp and pdf by their first bytes; an SVG and plain text are `null`. |
 
 To run one test by name: `npx vitest run -t "never extends"`.
 
@@ -329,6 +333,29 @@ Start from a fresh seed (`npm run db:reset`). *Assurance auto* (id 1, public) is
 | any | the kick page and the menu at 375, 768 and 1440 px | no sideways scroll (the name truncates beside the two buttons); the console stays empty (graded) |
 
 Afterwards, `npm run db:reset` restores the seed.
+
+### B14. Profile, avatar, online status (phase 12)
+
+Two browsers (or a normal and a private window). amir and lina, seeded (`motdepasse123`). After pulling the `add_profile` migration: `npm run db:migrate`, then `docker restart mespapiers_web` (the running container keeps a Prisma client that does not know `lastSeenAt`, and every signed-in page is a 500 until it restarts).
+
+| # | Do | Expect |
+|---|---|---|
+| 0 | As amir, `/fr/friends`: add `lina@gmail.com`. As lina: accept | they are friends |
+| 1 | As amir: account menu → *Mon profil* | `/fr/users/<id>`: initials, *Amir*, *Membre depuis le …*, his email, the edit card; no dot |
+| 2 | Save `"  Amir K  "`, then `"R"` | *Nom enregistré.* and the nav says *Amir K* without a reload; then the error, the name unchanged |
+| 3 | Upload a portrait phone photo over 2 MB | it shows at once, upright and round; `/api/users/<id>/avatar` is a 256 × 256 `image/png` with `nosniff` and `private, no-store` |
+| 4 | Upload a `.txt` renamed `.png` | *Choisissez une image PNG, JPEG ou WebP.*; the old picture stays |
+| 5 | As lina, `/fr/friends` | amir's name is a link, *En ligne* |
+| 6 | As lina, open amir's profile | picture, name, *En ligne*; no email, no edit card |
+| 7 | amir logs out; lina reloads `/fr/friends` | *Hors ligne* |
+| 8 | As rasiol, open amir's profile URL | picture and name; no dot, no email; an *Ajouter en ami* button |
+| 9 | As rasiol, click *Ajouter en ami* | *Demande d'ami en attente* without a reload; amir's `/fr/friends` lists rasiol's request (leave it: row 10's block deletes it) |
+| 10 | As amir (signed in again), `/fr/friends`: *Accepter* rasiol's request, then *Bloquer* him on the *Amis* tab (`/friends` offers *Bloquer* only to friends); as rasiol, reload amir's profile; as amir, open rasiol's | 404 both ways |
+| 11 | `/fr/users/nope`, `/fr/users/%00`; the avatar URL signed out | 404, 400 (nginx refuses the NUL; the app alone answers 404); 401 |
+| 12 | Rows 1–9 in `/en` and `/es` | translated, dates in the locale |
+| 13 | 375 / 768 / 1440, keyboard only | no sideways scroll; Tab reaches the name field, *Enregistrer*, the file input and *Envoyer la photo* (and *Ajouter en ami* on a stranger's profile); the console stays clean |
+
+Afterwards: `npm run db:reset` (reseeds), or rename amir back and delete the friendship and the block on `/fr/friends`.
 
 ### Cleanup
 

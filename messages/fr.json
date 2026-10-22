@@ -377,7 +377,7 @@
       "heading": "Données collectées",
       "account": {
         "heading": "Données de compte",
-        "body": "Lors de votre inscription, nous collectons votre adresse e-mail, un nom d'affichage et un mot de passe (stocké sous forme de hash Argon2id). Nous enregistrons également les sessions de connexion à des fins de sécurité."
+        "body": "Lors de votre inscription, nous collectons votre adresse e-mail, un nom d'affichage et un mot de passe (stocké sous forme de hash Argon2id). Nous enregistrons également les sessions de connexion à des fins de sécurité. Si vous ajoutez une photo de profil, elle est stockée dans la base de données et visible par tous les membres connectés. Nous enregistrons aussi l'heure de votre dernière activité (au plus une fois par minute) pour indiquer à vos amis si vous êtes en ligne ; elle est effacée à la déconnexion."
       },
       "documents": {
         "heading": "Documents",

@@ -5,13 +5,14 @@ const sizes = {
   lg: { box: "h-20 w-20 text-2xl", px: 80 },
 };
 
-// Up to two initials, from the first two words of the name.
+// Up to two initials, from the first two words of the name. [...word] splits by
+// character, so a name that starts with an emoji does not show half of it.
 function initials(name: string): string {
   return name
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? "")
+    .map((word) => [...word][0]?.toUpperCase() ?? "")
     .join("");
 }
 
@@ -29,6 +30,7 @@ export function Avatar({
 
   if (src) {
     // unoptimized: the bytes come from an authorised API route, not from public/.
+    // eager: on a profile it is the Largest Contentful Paint (lazy logs a console warning).
     return (
       <Image
         src={src}
@@ -36,6 +38,7 @@ export function Avatar({
         width={px}
         height={px}
         unoptimized
+        loading="eager"
         className={`${box} shrink-0 rounded-full object-cover`}
       />
     );

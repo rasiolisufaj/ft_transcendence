@@ -377,7 +377,7 @@
       "heading": "Datos recopilados",
       "account": {
         "heading": "Datos de cuenta",
-        "body": "Al registrarse, recopilamos su dirección de correo electrónico, un nombre visible y una contraseña (almacenada como hash Argon2id). También registramos las sesiones de inicio de sesión con fines de seguridad."
+        "body": "Al registrarse, recopilamos su dirección de correo electrónico, un nombre visible y una contraseña (almacenada como hash Argon2id). También registramos las sesiones de inicio de sesión con fines de seguridad. Si añade una foto de perfil, se almacena en la base de datos y la ven todos los miembros conectados. También registramos la hora de su última actividad (como máximo una vez por minuto) para mostrar a sus amigos si está en línea; se borra al cerrar la sesión."
       },
       "documents": {
         "heading": "Documentos",

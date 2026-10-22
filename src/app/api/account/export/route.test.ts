@@ -66,6 +66,18 @@ describe("POST /api/account/export", () => {
     expect(await zip.file(`files/${docId}-scan.pdf`)!.async("nodebuffer")).toEqual(PDF);
   });
 
+  it("includes the avatar as a file, with its type and dates in data.json", async () => {
+    const PNG = Buffer.from("89504e470d0a1a0a", "hex");
+    await prisma.userAvatar.create({ data: { userId: user.id, data: PNG, mimeType: "image/png" } });
+
+    const zip = await JSZip.loadAsync(await (await POST(exportRequest("fr"))).arrayBuffer());
+    const data = JSON.parse(await zip.file("data.json")!.async("string"));
+
+    expect(await zip.file("files/avatar.png")?.async("nodebuffer")).toEqual(PNG);
+    expect(data.avatar).toMatchObject({ mimeType: "image/png" });
+    expect(data.avatar).not.toHaveProperty("data");
+  });
+
   it("sends the confirmation mail in the page's locale", async () => {
     await POST(exportRequest("en"));
 
