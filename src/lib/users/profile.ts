@@ -8,7 +8,7 @@ export function isUserId(id: string): boolean {
   return /^[a-z0-9]{1,40}$/i.test(id);
 }
 
-export type Relation = "friend" | "blocked" | "none";
+export type Relation = "friend" | "pending" | "blocked" | "none";
 
 /**
  * What viewerId is to userId, from the Friendship rows between them in either direction.
@@ -26,5 +26,7 @@ export async function relationBetween(viewerId: string, userId: string): Promise
     select: { status: true },
   });
   if (rows.some((row) => row.status === "BLOCKED")) return "blocked";
-  return rows.some((row) => row.status === "ACCEPTED") ? "friend" : "none";
+  if (rows.some((row) => row.status === "ACCEPTED")) return "friend";
+  // Any row left is a PENDING request, in one direction or the other.
+  return rows.length > 0 ? "pending" : "none";
 }

@@ -3,11 +3,14 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { isUserId, relationBetween } from "@/lib/users/profile";
 import { ProfileForm } from "./ProfileForm";
+import { addFriendFromProfile } from "./actions";
 
 export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -40,6 +43,19 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           {/* The email is the login: only its owner sees it. */}
           {isOwn ? (
             <p className="truncate text-sm text-zinc-500 dark:text-zinc-400">{user.email}</p>
+          ) : null}
+          {/* A plain form: works without JavaScript, like the buttons on /friends. */}
+          {relation === "none" ? (
+            <form action={addFriendFromProfile} className="pt-2">
+              <input type="hidden" name="userId" value={user.id} />
+              <Button type="submit" className="px-3 py-1.5 text-xs">
+                {t("addFriend")}
+              </Button>
+            </form>
+          ) : relation === "pending" ? (
+            <Link href="/friends" className="block pt-2 text-sm underline-offset-4 hover:underline">
+              {t("friendPending")}
+            </Link>
           ) : null}
         </div>
       </Card>

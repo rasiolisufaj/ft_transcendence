@@ -316,6 +316,8 @@
   },
   "profile": {
     "memberSince": "Membre depuis le {date}",
+    "addFriend": "Ajouter en ami",
+    "friendPending": "Demande d'ami en attente",
     "edit": {
       "title": "Modifier mon profil",
       "displayName": "Nom d'affichage",

@@ -316,6 +316,8 @@
   },
   "profile": {
     "memberSince": "Member since {date}",
+    "addFriend": "Add as friend",
+    "friendPending": "Friend request pending",
     "edit": {
       "title": "Edit my profile",
       "displayName": "Display name",
