@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
+import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { listFriendships } from "@/lib/friends/friendships";
 import { AddFriendForm } from "./AddFriendForm";
@@ -69,7 +70,7 @@ export default async function FriendsPage() {
             label: t("tabs.friends"),
             count: friends.length,
             panel: (
-              <PeopleList people={friends} empty={t("empty.friends")}>
+              <PeopleList people={friends} empty={t("empty.friends")} linkProfiles>
                 {(person) => (
                   <>
                     <ActionButton run={removeFriendAction} person={person}>
@@ -123,10 +124,12 @@ export default async function FriendsPage() {
 function PeopleList({
   people,
   empty,
+  linkProfiles = false,
   children,
 }: {
   people: Person[];
   empty?: string;
+  linkProfiles?: boolean;
   children: (person: Person) => ReactNode;
 }) {
   if (people.length === 0) {
@@ -137,7 +140,16 @@ function PeopleList({
     <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
       {people.map((person) => (
         <li key={person.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
-          <span className="min-w-0 truncate text-sm font-medium">{person.displayName}</span>
+          {linkProfiles ? (
+            <Link
+              href={`/users/${person.id}`}
+              className="min-w-0 truncate text-sm font-medium underline-offset-4 hover:underline"
+            >
+              {person.displayName}
+            </Link>
+          ) : (
+            <span className="min-w-0 truncate text-sm font-medium">{person.displayName}</span>
+          )}
           <div className="flex items-center gap-3">{children(person)}</div>
         </li>
       ))}

@@ -11,7 +11,8 @@
     "closeMenu": "Cerrar el menú",
     "channels": "Canales",
     "account": "Cuenta",
-    "myData": "Mis datos"
+    "myData": "Mis datos",
+    "profile": "Mi perfil"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -312,6 +313,9 @@
       "blocked": "No puede enviar una solicitud a esta persona.",
       "notPending": "Esta solicitud ya no existe."
     }
+  },
+  "profile": {
+    "memberSince": "Miembro desde el {date}"
   },
   "documentDetail": {
     "category": "Categoría",
