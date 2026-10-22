@@ -36,9 +36,10 @@ describe("relationBetween", () => {
     expect(await relationBetween(b, a)).toBe("friend");
   });
 
-  it("is none for a pending request", async () => {
-    await prisma.friendship.create({ data: { requesterId: a, receiverId: b } });
+  it("is none with no row, then pending once a request is sent, from either side", async () => {
     expect(await relationBetween(a, b)).toBe("none");
+    await prisma.friendship.create({ data: { requesterId: a, receiverId: b } });
+    expect(await relationBetween(b, a)).toBe("pending");
   });
 
   it("is blocked for the user who was blocked, not only for the blocker", async () => {
