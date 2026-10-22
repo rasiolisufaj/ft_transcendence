@@ -248,3 +248,46 @@ describe("http", () => {
     expect(response.status).toBe(204);
   });
 });
+
+describe("fan-out", () => {
+  it("sends an event to a client on its own topic", async () => {
+    const { url } = await start();
+    const client = new WebSocket(withTicket(url, "user-1"));
+    await once(client, "message");
+
+    const event = { type: "thread.created", channelId: 12 };
+    const received = once(client, "message");
+    await publish(url, JSON.stringify({ topic: "user:user-1", event }));
+    const [data] = await received;
+
+    expect(JSON.parse(data.toString())).toEqual({ type: "event", topic: "user:user-1", event });
+  });
+
+  it("does not send an event to a client that is not subscribed", async () => {
+    const { url } = await start();
+    const client = new WebSocket(withTicket(url, "user-2"));
+    await once(client, "message");
+
+    const received = once(client, "message");
+    await publish(url, JSON.stringify({ topic: "user:user-1", event: { type: "first" } }));
+    await publish(url, JSON.stringify({ topic: "user:user-2", event: { type: "second" } }));
+    const [data] = await received;
+
+    expect(JSON.parse(data.toString()).event).toEqual({ type: "second" });
+  });
+
+  it("sends a channel event to a subscribed member", async () => {
+    const { url } = await start(1000, async () => true);
+    const client = new WebSocket(withTicket(url, "user-1"));
+    await once(client, "message");
+    client.send(JSON.stringify({ type: "subscribe", topic: "channel:12" }));
+    await once(client, "message");
+
+    const event = { type: "thread.created", channelId: 12 };
+    const received = once(client, "message");
+    await publish(url, JSON.stringify({ topic: "channel:12", event }));
+    const [data] = await received;
+
+    expect(JSON.parse(data.toString())).toEqual({ type: "event", topic: "channel:12", event });
+  });
+});

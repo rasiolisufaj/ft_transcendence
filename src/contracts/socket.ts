@@ -5,7 +5,8 @@ export type ServerMessage =
 	| { type: "hello"; userId: string }
 	| { type: "subscribed"; topic: string }
 	| { type: "unsubscribed"; topic: string }
-	| { type: "error"; code: "badRequest" | "forbidden"; topic?: string };
+	| { type: "error"; code: "badRequest" | "forbidden"; topic?: string }
+	| { type: "event"; topic: string; event: PublishBody["event"] };
 
 // browser -> server
 export type ClientMessage =

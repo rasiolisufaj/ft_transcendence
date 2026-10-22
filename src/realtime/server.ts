@@ -75,6 +75,11 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
       response.writeHead(400).end();
       return;
     }
+    for (const [socket, mine] of topics) {
+      if (mine.has(body.topic)) {
+        send(socket, { type: "event", topic: body.topic, event: body.event });
+      }
+    }
     response.writeHead(204).end();
   });
 
