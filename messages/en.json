@@ -11,7 +11,8 @@
     "closeMenu": "Close menu",
     "channels": "Channels",
     "account": "Account",
-    "myData": "My data"
+    "myData": "My data",
+    "profile": "My profile"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -312,6 +313,9 @@
       "blocked": "You can't send a request to this person.",
       "notPending": "This request no longer exists."
     }
+  },
+  "profile": {
+    "memberSince": "Member since {date}"
   },
   "documentDetail": {
     "category": "Category",
