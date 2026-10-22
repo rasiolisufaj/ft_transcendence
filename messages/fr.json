@@ -326,6 +326,18 @@
       "submit": "Enregistrer",
       "pending": "Enregistrement…",
       "saved": "Nom enregistré."
+    },
+    "avatar": {
+      "label": "Photo de profil",
+      "hint": "PNG, JPEG ou WebP. Elle est recadrée en carré.",
+      "submit": "Envoyer la photo",
+      "pending": "Envoi…",
+      "saved": "Photo enregistrée."
+    },
+    "errors": {
+      "avatarMissing": "Choisissez une image.",
+      "avatarTooBig": "L'image ne doit pas dépasser 2 Mo.",
+      "avatarType": "Choisissez une image PNG, JPEG ou WebP."
     }
   },
   "documentDetail": {
