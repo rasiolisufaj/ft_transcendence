@@ -139,6 +139,17 @@ describe("client messages", () => {
 
     expect(JSON.parse(data.toString())).toEqual({ type: "error", code: "badRequest" });
   });
+
+  it("closes a client that sends a message over 4 KB", async () => {
+    const { url } = await start();
+    const client = new WebSocket(withTicket(url));
+    await once(client, "message");
+
+    client.send("x".repeat(5000));
+    const [code] = await once(client, "close");
+
+    expect(code).toBe(1009);
+  });
 });
 
 describe("subscriptions", () => {
@@ -240,6 +251,12 @@ describe("http", () => {
     const { url } = await start();
     const response = await publish(url, JSON.stringify({ topic: "channel:12" }));
     expect(response.status).toBe(400);
+  });
+
+  it("refuses a body over 64 KB", async () => {
+    const { url } = await start();
+    const response = await publish(url, "x".repeat(70_000));
+    expect(response.status).toBe(413);
   });
 
   it("accepts a valid publish", async () => {

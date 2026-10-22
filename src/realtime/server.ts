@@ -26,10 +26,19 @@ function hasSecret(header: string | undefined, secret: string): boolean {
   return expected.length === given.length && timingSafeEqual(expected, given);
 }
 
-async function readBody(request: IncomingMessage): Promise<string> {
+const MAX_BODY_BYTES = 64 * 1024;
+
+async function readBody(request: IncomingMessage): Promise<string | null> {
   const chunks: Buffer[] = [];
+  let size = 0;
   for await (const chunk of request) {
-    chunks.push(chunk as Buffer);
+    size += (chunk as Buffer).length;
+    if (size <= MAX_BODY_BYTES) {
+      chunks.push(chunk as Buffer);
+    }
+  }
+  if (size > MAX_BODY_BYTES) {
+    return null;
   }
   return Buffer.concat(chunks).toString();
 }
@@ -41,6 +50,7 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
   const http = createServer();
   const server = new WebSocketServer({
     server: http,
+    maxPayload: 4096,
     verifyClient: ({ req }: { req: IncomingMessage }) => {
       const ticket = readTicket(req.url);
       const result = ticket ? verifyTicket(ticket) : null;
@@ -65,12 +75,17 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
       response.writeHead(401).end();
       return;
     }
-    let body = null;
+    let raw: string | null = "";
     try {
-      body = parsePublishBody(await readBody(request));
+      raw = await readBody(request);
     } catch {
-      body = null;
+      raw = "";
     }
+    if (raw === null) {
+      response.writeHead(413).end();
+      return;
+    }
+    const body = parsePublishBody(raw);
     if (!body) {
       response.writeHead(400).end();
       return;
@@ -129,6 +144,10 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
       }
       mine.add(message.topic);
       send(socket, { type: "subscribed", topic: message.topic });
+    });
+
+    socket.on("error", (error) => {
+      log("warn", "client error", { userId, error: error.message });
     });
 
     socket.on("pong", () => {
