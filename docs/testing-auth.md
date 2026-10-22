@@ -26,7 +26,7 @@ npm test                                                                    # ev
 npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" "src/app/[locale]/(app)/channels" --reporter=verbose    # auth only
 ```
 
-Expected: `npm test` reports **213 passed** (17 files). The auth part is 9 files and 95 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓.
+Expected: `npm test` reports **240 passed** (20 files). The auth part is 9 files and 95 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓.
 
 | File | What it proves |
 |---|---|
@@ -45,7 +45,7 @@ To run one test by name: `npx vitest run -t "never extends"`.
 
 A test only counts if it fails when the code is wrong. Break the code on purpose, watch the test fail, then undo:
 
-1. In [login/actions.ts](<../src/app/[locale]/(auth)/login/actions.ts>), change `return entry.count >= MAX_ATTEMPTS;` to `>`.
+1. In [rate-limit.ts](../src/lib/auth/rate-limit.ts) (moved out of `login/actions.ts` in PR #30), change `return entry.count >= MAX_ATTEMPTS;` to `>`.
    - Run `npx vitest run -t "locks an email"`. Expected: **FAIL**.
 2. In [session.ts](../src/lib/auth/session.ts), comment out the `if (row.expiresAt.getTime() <= Date.now()) { … }` block.
    - Run `npx vitest run -t "expired"`. Expected: **FAIL**.
