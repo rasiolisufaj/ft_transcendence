@@ -318,6 +318,8 @@
     "memberSince": "Membre depuis le {date}",
     "addFriend": "Ajouter en ami",
     "friendPending": "Demande d'ami en attente",
+    "online": "En ligne",
+    "offline": "Hors ligne",
     "edit": {
       "title": "Modifier mon profil",
       "displayName": "Nom d'affichage",
