@@ -318,6 +318,8 @@
     "memberSince": "Member since {date}",
     "addFriend": "Add as friend",
     "friendPending": "Friend request pending",
+    "online": "Online",
+    "offline": "Offline",
     "edit": {
       "title": "Edit my profile",
       "displayName": "Display name",

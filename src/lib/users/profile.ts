@@ -30,3 +30,12 @@ export async function relationBetween(viewerId: string, userId: string): Promise
   // Any row left is a PENDING request, in one direction or the other.
   return rows.length > 0 ? "pending" : "none";
 }
+
+// ponytail: "last seen", not live. A friend who closes the tab still shows online for up
+// to 5 minutes, and the page shows the state when it rendered. The live dot is the
+// hand-off in docs/plans/2026-10-19-d14-profile.md, "Live upgrade"; lastSeenAt stays.
+export const ONLINE_WINDOW_MS = 5 * 60 * 1000;
+
+export function isOnline(lastSeenAt: Date | null, now: Date = new Date()): boolean {
+  return lastSeenAt !== null && now.getTime() - lastSeenAt.getTime() <= ONLINE_WINDOW_MS;
+}

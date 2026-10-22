@@ -2,13 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { OnlineDot } from "@/components/OnlineDot";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
-import { isUserId, relationBetween } from "@/lib/users/profile";
+import { isOnline, isUserId, relationBetween } from "@/lib/users/profile";
 import { ProfileForm } from "./ProfileForm";
 import { addFriendFromProfile } from "./actions";
 
@@ -22,7 +23,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   if (!isUserId(id)) notFound();
   const user = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, displayName: true, email: true, createdAt: true },
+    select: { id: true, displayName: true, email: true, createdAt: true, lastSeenAt: true },
   });
   if (!user) notFound();
 
@@ -37,6 +38,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         <Avatar name={user.displayName} size="lg" />
         <div className="min-w-0 max-w-full space-y-1">
           <h1 className="truncate text-2xl font-semibold">{user.displayName}</h1>
+          {relation === "friend" ? <OnlineDot online={isOnline(user.lastSeenAt)} /> : null}
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {t("memberSince", { date: format.dateTime(user.createdAt, { dateStyle: "long" }) })}
           </p>

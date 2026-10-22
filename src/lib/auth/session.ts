@@ -10,6 +10,10 @@ export const SESSION_COOKIE = "mp_session";
 // Next cannot re-set it while rendering, so a longer row would outlive its cookie.
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 
+// lastSeenAt feeds friends' online dots (isOnline, src/lib/users/profile.ts). It is written
+// at most once a minute, from the user row already loaded, so most requests add no query.
+const LAST_SEEN_EVERY_MS = 60 * 1000;
+
 export type SessionUser = {
   id: string;
   email: string;
@@ -65,6 +69,11 @@ export async function validateSessionToken(token: string): Promise<SessionContex
   }
 
   const { user } = row;
+  const now = new Date();
+  if (!user.lastSeenAt || now.getTime() - user.lastSeenAt.getTime() > LAST_SEEN_EVERY_MS) {
+    // updateMany: a user deleted mid-request updates nothing instead of throwing.
+    await prisma.user.updateMany({ where: { id: user.id }, data: { lastSeenAt: now } });
+  }
   return {
     session: { id: row.id, expiresAt: row.expiresAt, twoFactorVerified: row.twoFactorVerified },
     user: {

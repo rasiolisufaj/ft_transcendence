@@ -318,6 +318,8 @@
     "memberSince": "Miembro desde el {date}",
     "addFriend": "Añadir como amigo",
     "friendPending": "Solicitud de amistad pendiente",
+    "online": "En línea",
+    "offline": "Desconectado",
     "edit": {
       "title": "Editar mi perfil",
       "displayName": "Nombre visible",

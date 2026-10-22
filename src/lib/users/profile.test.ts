@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
-import { isUserId, relationBetween } from "./profile";
+import { isOnline, isUserId, relationBetween } from "./profile";
 
 const newUser = () =>
   prisma.user.create({
@@ -14,6 +14,20 @@ describe("isUserId", () => {
     expect(isUserId("bad\0id")).toBe(false);
     expect(isUserId("../etc")).toBe(false);
     expect(isUserId("")).toBe(false);
+  });
+});
+
+describe("isOnline", () => {
+  const now = new Date("2026-10-20T12:00:00Z");
+  const ago = (ms: number) => new Date(now.getTime() - ms);
+
+  it("is true up to 5 minutes after the last request, false after", () => {
+    expect(isOnline(ago(4 * 60_000 + 59_000), now)).toBe(true);
+    expect(isOnline(ago(5 * 60_000 + 1_000), now)).toBe(false);
+  });
+
+  it("is false for someone never seen", () => {
+    expect(isOnline(null, now)).toBe(false);
   });
 });
 
