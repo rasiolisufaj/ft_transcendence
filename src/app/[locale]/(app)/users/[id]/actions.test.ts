@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSession, requireUser, validateSessionToken } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { AVATAR_MAX_BYTES } from "@/lib/users/schemas";
-import { updateProfile, uploadAvatar } from "./actions";
+import { addFriendFromProfile, updateProfile, uploadAvatar } from "./actions";
 
 // requireUser() reads the cookie and refresh() needs a Next request, so both are
 // replaced. The context the actions get is still a real one, loaded from a real Session row.
@@ -65,6 +65,14 @@ describe("profile actions", () => {
 
     expect(state.fieldErrors?.displayName).toEqual(["displayNameTooShort"]);
     expect(await nameOf(me)).toBe("Me");
+  });
+
+  it("adds no friend, and does not throw, when the profile's owner was deleted meanwhile", async () => {
+    const gone = (await newUser("Gone")).id;
+    await prisma.user.delete({ where: { id: gone } });
+
+    await expect(addFriendFromProfile(form({ userId: gone }))).resolves.toBeUndefined();
+    expect(await prisma.friendship.count({ where: { requesterId: me } })).toBe(0);
   });
 
   it("stores a png avatar, and a second upload replaces it", async () => {

@@ -37,6 +37,7 @@ export async function POST(request: Request) {
       channelJoinRequests: true,
       oauthAccounts: true,
       notifications: true,
+      avatar: true,
     },
   });
 
@@ -46,12 +47,17 @@ export async function POST(request: Request) {
   const dataForJson = {
     ...userData,
     documents: files.map((file) => ({ ...file, fileData: undefined })),
+    avatar: userData?.avatar ? { ...userData.avatar, data: undefined } : null,
   };
   zip.file("data.json", JSON.stringify(dataForJson, null, 2));
 
   for (const file of files) {
     const safeName = file.fileName.replace(/[/\\]/g, "_");
     zip.file(`files/${file.id}-${safeName}`, file.fileData);
+  }
+  // The profile photo (phase 12); its type is image/png, image/jpeg or image/webp.
+  if (userData?.avatar) {
+    zip.file(`files/avatar.${userData.avatar.mimeType.split("/")[1]}`, userData.avatar.data);
   }
 
   // Built before the mail and the audit row, so a failed export reports nothing.

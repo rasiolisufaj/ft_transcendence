@@ -72,7 +72,8 @@ export function AvatarForm() {
   }
 
   return (
-    <form action={formAction} onSubmit={onSubmit} className="space-y-3">
+    // noValidate: an empty submit gets the translated avatarMissing, not the browser's bubble.
+    <form action={formAction} onSubmit={onSubmit} className="space-y-3" noValidate>
       <label htmlFor="avatar" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
         {t("avatar.label")}
       </label>
@@ -82,7 +83,7 @@ export function AvatarForm() {
         type="file"
         accept={AVATAR_TYPES.join(",")}
         required
-        aria-describedby="avatar-hint"
+        aria-describedby={errorKey ? "avatar-hint avatar-error" : "avatar-hint"}
         aria-invalid={!!errorKey}
         className="block w-full text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-zinc-200 dark:text-zinc-300 dark:file:bg-zinc-800 dark:hover:file:bg-zinc-700"
       />
@@ -90,7 +91,7 @@ export function AvatarForm() {
         {t("avatar.hint")}
       </p>
       {errorKey ? (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p id="avatar-error" role="alert" className="text-sm text-red-600 dark:text-red-400">
           {t(`errors.${errorKey}`)}
         </p>
       ) : state.saved ? (

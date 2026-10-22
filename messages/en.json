@@ -377,7 +377,7 @@
       "heading": "Data collected",
       "account": {
         "heading": "Account data",
-        "body": "When you sign up, we collect your email address, a display name and a password (stored as an Argon2id hash). We also record login sessions for security purposes."
+        "body": "When you sign up, we collect your email address, a display name and a password (stored as an Argon2id hash). We also record login sessions for security purposes. If you add a profile picture, it is stored in the database and visible to every signed-in member. We also record the time of your last activity (at most once a minute) to show your friends whether you are online; it is cleared when you log out."
       },
       "documents": {
         "heading": "Documents",

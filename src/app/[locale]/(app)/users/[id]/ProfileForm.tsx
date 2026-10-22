@@ -15,6 +15,12 @@ export function ProfileForm({ displayName }: { displayName: string }) {
   const [state, formAction, pending] = useActionState(updateProfile, initialState);
   // Controlled: React resets uncontrolled fields after every action.
   const [name, setName] = useState(displayName);
+  // After a save, refresh() brings the stored (trimmed) name: show it in the field too.
+  const [shown, setShown] = useState(displayName);
+  if (shown !== displayName) {
+    setShown(displayName);
+    setName(displayName);
+  }
   const errorKey = state.fieldErrors?.displayName?.[0];
 
   return (
