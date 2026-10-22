@@ -13,9 +13,16 @@ const emailField = z
   .max(254, "emailInvalid")
   .pipe(z.email("emailInvalid"));
 
+/** Shared by signup and the profile form (src/lib/users/schemas.ts): one rule, not two copies. */
+export const displayNameField = z
+  .string()
+  .trim()
+  .min(2, "displayNameTooShort")
+  .max(50, "displayNameTooLong");
+
 export const signupSchema = z.object({
   email: emailField,
-  displayName: z.string().trim().min(2, "displayNameTooShort").max(50, "displayNameTooLong"),
+  displayName: displayNameField,
   password: z.string().min(8, "passwordTooShort").max(200, "passwordTooLong"),
 });
 export type SignupInput = z.infer<typeof signupSchema>;

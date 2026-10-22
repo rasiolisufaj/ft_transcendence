@@ -315,7 +315,14 @@
     }
   },
   "profile": {
-    "memberSince": "Membre depuis le {date}"
+    "memberSince": "Membre depuis le {date}",
+    "edit": {
+      "title": "Modifier mon profil",
+      "displayName": "Nom d'affichage",
+      "submit": "Enregistrer",
+      "pending": "Enregistrement…",
+      "saved": "Nom enregistré."
+    }
   },
   "documentDetail": {
     "category": "Catégorie",
