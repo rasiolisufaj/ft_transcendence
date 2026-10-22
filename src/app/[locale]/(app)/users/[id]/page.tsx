@@ -10,6 +10,7 @@ import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { isOnline, isUserId, relationBetween } from "@/lib/users/profile";
+import { AvatarForm } from "./AvatarForm";
 import { ProfileForm } from "./ProfileForm";
 import { addFriendFromProfile } from "./actions";
 
@@ -23,7 +24,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   if (!isUserId(id)) notFound();
   const user = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, displayName: true, email: true, createdAt: true, lastSeenAt: true },
+    select: {
+      id: true,
+      displayName: true,
+      email: true,
+      createdAt: true,
+      lastSeenAt: true,
+      avatar: { select: { updatedAt: true } },
+    },
   });
   if (!user) notFound();
 
@@ -35,7 +43,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <Card className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
-        <Avatar name={user.displayName} size="lg" />
+        <Avatar
+          name={user.displayName}
+          size="lg"
+          src={user.avatar ? `/api/users/${user.id}/avatar?v=${user.avatar.updatedAt.getTime()}` : null}
+        />
         <div className="min-w-0 max-w-full space-y-1">
           <h1 className="truncate text-2xl font-semibold">{user.displayName}</h1>
           {relation === "friend" ? <OnlineDot online={isOnline(user.lastSeenAt)} /> : null}
@@ -65,6 +77,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         <Card className="space-y-6">
           <h2 className="text-lg font-semibold">{t("edit.title")}</h2>
           <ProfileForm displayName={user.displayName} />
+          <div className="border-t border-zinc-200 pt-6 dark:border-zinc-800">
+            <AvatarForm />
+          </div>
         </Card>
       ) : null}
     </div>

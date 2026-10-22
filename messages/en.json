@@ -326,6 +326,18 @@
       "submit": "Save",
       "pending": "Saving…",
       "saved": "Name saved."
+    },
+    "avatar": {
+      "label": "Profile picture",
+      "hint": "PNG, JPEG or WebP. It is cropped to a square.",
+      "submit": "Upload picture",
+      "pending": "Uploading…",
+      "saved": "Picture saved."
+    },
+    "errors": {
+      "avatarMissing": "Choose an image.",
+      "avatarTooBig": "The image must be 2 MB or less.",
+      "avatarType": "Choose a PNG, JPEG or WebP image."
     }
   },
   "documentDetail": {
