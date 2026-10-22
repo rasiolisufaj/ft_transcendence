@@ -54,3 +54,25 @@ export function parseClientMessage(raw: string): ClientMessage | null {
 	}
 	return result.data;
 }
+
+const publishBodySchema = z.object({
+	topic: topicSchema,
+	event: z.looseObject({ type: z.string() }),
+});
+
+export type PublishBody = z.infer<typeof publishBodySchema>;
+
+export function parsePublishBody(raw: string): PublishBody | null {
+	let data: unknown;
+	try {
+		data = JSON.parse(raw);
+	} catch {
+		return null;
+	}
+
+	const result = publishBodySchema.safeParse(data);
+	if (!result.success) {
+		return null;
+	}
+	return result.data;
+}

@@ -13,7 +13,7 @@ let running: { stop: () => Promise<void> }[] = [];
 
 // Starts a server on a free port and returns its ws:// address.
 async function start(heartbeatMs = 1000, isMember: IsMember = async () => false) {
-  const realtime = startServer({ port: 0, heartbeatMs, isMember });
+  const realtime = startServer({ port: 0, heartbeatMs, isMember, publishSecret: "publish-secret" });
   running.push(realtime);
   await once(realtime.http, "listening");
   const port = (realtime.http.address() as AddressInfo).port;
@@ -22,6 +22,15 @@ async function start(heartbeatMs = 1000, isMember: IsMember = async () => false)
 
 // The server only accepts a client that brings a valid ticket.
 const withTicket = (url: string, userId = "user-1") => `${url}?ticket=${mintTicket(userId)}`;
+
+const httpUrl = (url: string) => url.replace("ws://", "http://");
+
+const publish = (url: string, body: string) =>
+  fetch(`${httpUrl(url)}/publish`, {
+    method: "POST",
+    headers: { authorization: "Bearer publish-secret" },
+    body,
+  });
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -190,5 +199,52 @@ describe("subscriptions", () => {
       type: "unsubscribed",
       topic: "user:user-1",
     });
+  });
+});
+
+describe("http", () => {
+  it("answers 404 to an unknown route", async () => {
+    const { url } = await start();
+    const response = await fetch(`${httpUrl(url)}/nope`);
+    expect(response.status).toBe(404);
+  });
+
+  it("refuses publish without the secret", async () => {
+    const { url } = await start();
+    const response = await fetch(`${httpUrl(url)}/publish`, { method: "POST" });
+    expect(response.status).toBe(401);
+  });
+
+  it("refuses publish with a wrong secret", async () => {
+    const { url } = await start();
+    const response = await fetch(`${httpUrl(url)}/publish`, {
+      method: "POST",
+      headers: { authorization: "Bearer wrong" },
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it("refuses a body that is not JSON", async () => {
+    const { url } = await start();
+    const response = await publish(url, "not json");
+    expect(response.status).toBe(400);
+  });
+
+  it("refuses a bad topic", async () => {
+    const { url } = await start();
+    const response = await publish(url, JSON.stringify({ topic: "admin", event: { type: "thread.created" } }));
+    expect(response.status).toBe(400);
+  });
+
+  it("refuses a body without event", async () => {
+    const { url } = await start();
+    const response = await publish(url, JSON.stringify({ topic: "channel:12" }));
+    expect(response.status).toBe(400);
+  });
+
+  it("accepts a valid publish", async () => {
+    const { url } = await start();
+    const response = await publish(url, JSON.stringify({ topic: "channel:12", event: { type: "thread.created" } }));
+    expect(response.status).toBe(204);
   });
 });

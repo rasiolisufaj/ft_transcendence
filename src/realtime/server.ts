@@ -1,7 +1,8 @@
+import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage } from "node:http";
 import type { AddressInfo } from "node:net";
 import { WebSocketServer, type WebSocket } from "ws";
-import { parseClientMessage, type ServerMessage } from "@/contracts/socket";
+import { parseClientMessage, parsePublishBody, type ServerMessage } from "@/contracts/socket";
 import { verifyTicket } from "@/lib/auth/ticket";
 import { canSubscribe, readTicket, type IsMember } from "./handshake";
 import { log } from "./log";
@@ -11,13 +12,29 @@ type Options = {
   port: number;
   heartbeatMs: number; // ms to check if a client is alive
   isMember?: IsMember;
+  publishSecret: string;
 };
 
 function send(socket: WebSocket, message: ServerMessage) {
   socket.send(JSON.stringify(message));
 }
 
-export function startServer({ port, heartbeatMs, isMember = isChannelMember }: Options) {
+function hasSecret(header: string | undefined, secret: string): boolean {
+  const expected = Buffer.from(`Bearer ${secret}`);
+  const given = Buffer.from(header ?? "");
+  // timingSafe more secure than === because attacker can find the secret char by char from the response time with ===
+  return expected.length === given.length && timingSafeEqual(expected, given);
+}
+
+async function readBody(request: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) {
+    chunks.push(chunk as Buffer);
+  }
+  return Buffer.concat(chunks).toString();
+}
+
+export function startServer({ port, heartbeatMs, isMember = isChannelMember, publishSecret }: Options) {
   // verifyClient can only say yes or no: the user id waits here until "connection".
   const users = new WeakMap<IncomingMessage, string>();
 
@@ -37,6 +54,28 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember }: O
 
   http.on("listening", () => {
     log("info", "realtime server listening", { port: (http.address() as AddressInfo).port });
+  });
+
+  http.on("request", async (request, response) => {
+    if (request.method !== "POST" || request.url !== "/publish") {
+      response.writeHead(404).end();
+      return;
+    }
+    if (!hasSecret(request.headers.authorization, publishSecret)) {
+      response.writeHead(401).end();
+      return;
+    }
+    let body = null;
+    try {
+      body = parsePublishBody(await readBody(request));
+    } catch {
+      body = null;
+    }
+    if (!body) {
+      response.writeHead(400).end();
+      return;
+    }
+    response.writeHead(204).end();
   });
 
   server.on("error", (error) => {
