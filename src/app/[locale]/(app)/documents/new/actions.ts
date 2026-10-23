@@ -8,36 +8,11 @@ import { requireUser } from "@/lib/auth/session";
 import { assertCan } from "@/lib/auth/policy";
 import { classifyDocument, extractionStatusFor } from "@/lib/documents/classify";
 import { narrowSubtypeFields, writeSubtypeRow } from "@/lib/documents/subtypes";
+import { sniffMime } from "@/lib/files/sniff";
 import { ExtractionStatus } from "@/generated/prisma/enums";
 import { Prisma } from "@/generated/prisma/client";
 
 const DAILY_EXTRACTION_CAP = 20;
-
-// Lit les premiers octets et renvoie le vrai MIME, ou null si le type n'est pas accepte.
-// On ne fait jamais confiance a file.type.
-function sniffMime(fileBuffer: Buffer): string | null {
-  // PDF : %PDF
-  if (fileBuffer.subarray(0, 4).toString("hex") === "25504446") {
-    return "application/pdf";
-  }
-  // PNG : 89 50 4E 47 0D 0A 1A 0A
-  if (fileBuffer.subarray(0, 8).toString("hex") === "89504e470d0a1a0a") {
-    return "image/png";
-  }
-  // JPEG : FF D8 FF
-  if (fileBuffer.subarray(0, 3).toString("hex") === "ffd8ff") {
-    return "image/jpeg";
-  }
-  // WEBP : "RIFF" .... "WEBP"
-  if (
-    fileBuffer.length >= 12 &&
-    fileBuffer.subarray(0, 4).toString("ascii") === "RIFF" &&
-    fileBuffer.subarray(8, 12).toString("ascii") === "WEBP"
-  ) {
-    return "image/webp";
-  }
-  return null;
-}
 
 export async function uploadDocument(formData: FormData): Promise<void> {
   const ctx = await requireUser();
