@@ -11,7 +11,8 @@
     "closeMenu": "Cerrar el menú",
     "channels": "Canales",
     "account": "Cuenta",
-    "myData": "Mis datos"
+    "myData": "Mis datos",
+    "profile": "Mi perfil"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -312,6 +313,32 @@
       "notPending": "Esta solicitud ya no existe."
     }
   },
+  "profile": {
+    "memberSince": "Miembro desde el {date}",
+    "addFriend": "Añadir como amigo",
+    "friendPending": "Solicitud de amistad pendiente",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "edit": {
+      "title": "Editar mi perfil",
+      "displayName": "Nombre visible",
+      "submit": "Guardar",
+      "pending": "Guardando…",
+      "saved": "Nombre guardado."
+    },
+    "avatar": {
+      "label": "Foto de perfil",
+      "hint": "PNG, JPEG o WebP. Se recorta en cuadrado.",
+      "submit": "Subir foto",
+      "pending": "Subiendo…",
+      "saved": "Foto guardada."
+    },
+    "errors": {
+      "avatarMissing": "Elige una imagen.",
+      "avatarTooBig": "La imagen no puede superar 2 MB.",
+      "avatarType": "Elige una imagen PNG, JPEG o WebP."
+    }
+  },
   "documentDetail": {
     "category": "Categoría",
     "size": "Tamaño",
@@ -345,7 +372,7 @@
       "heading": "Datos recopilados",
       "account": {
         "heading": "Datos de cuenta",
-        "body": "Al registrarse, recopilamos su dirección de correo electrónico, un nombre visible y una contraseña (almacenada como hash Argon2id). También registramos las sesiones de inicio de sesión con fines de seguridad."
+        "body": "Al registrarse, recopilamos su dirección de correo electrónico, un nombre visible y una contraseña (almacenada como hash Argon2id). También registramos las sesiones de inicio de sesión con fines de seguridad. Si añade una foto de perfil, se almacena en la base de datos y la ven todos los miembros conectados. También registramos la hora de su última actividad (como máximo una vez por minuto) para mostrar a sus amigos si está en línea; se borra al cerrar la sesión."
       },
       "documents": {
         "heading": "Documentos",

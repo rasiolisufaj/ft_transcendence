@@ -11,7 +11,8 @@
     "closeMenu": "Fermer le menu",
     "channels": "Channels",
     "account": "Compte",
-    "myData": "Mes données"
+    "myData": "Mes données",
+    "profile": "Mon profil"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -312,6 +313,32 @@
       "notPending": "Cette demande n'existe plus."
     }
   },
+  "profile": {
+    "memberSince": "Membre depuis le {date}",
+    "addFriend": "Ajouter en ami",
+    "friendPending": "Demande d'ami en attente",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "edit": {
+      "title": "Modifier mon profil",
+      "displayName": "Nom d'affichage",
+      "submit": "Enregistrer",
+      "pending": "Enregistrement…",
+      "saved": "Nom enregistré."
+    },
+    "avatar": {
+      "label": "Photo de profil",
+      "hint": "PNG, JPEG ou WebP. Elle est recadrée en carré.",
+      "submit": "Envoyer la photo",
+      "pending": "Envoi…",
+      "saved": "Photo enregistrée."
+    },
+    "errors": {
+      "avatarMissing": "Choisissez une image.",
+      "avatarTooBig": "L'image ne doit pas dépasser 2 Mo.",
+      "avatarType": "Choisissez une image PNG, JPEG ou WebP."
+    }
+  },
   "documentDetail": {
     "category": "Catégorie",
     "size": "Taille",
@@ -345,7 +372,7 @@
       "heading": "Données collectées",
       "account": {
         "heading": "Données de compte",
-        "body": "Lors de votre inscription, nous collectons votre adresse e-mail, un nom d'affichage et un mot de passe (stocké sous forme de hash Argon2id). Nous enregistrons également les sessions de connexion à des fins de sécurité."
+        "body": "Lors de votre inscription, nous collectons votre adresse e-mail, un nom d'affichage et un mot de passe (stocké sous forme de hash Argon2id). Nous enregistrons également les sessions de connexion à des fins de sécurité. Si vous ajoutez une photo de profil, elle est stockée dans la base de données et visible par tous les membres connectés. Nous enregistrons aussi l'heure de votre dernière activité (au plus une fois par minute) pour indiquer à vos amis si vous êtes en ligne ; elle est effacée à la déconnexion."
       },
       "documents": {
         "heading": "Documents",

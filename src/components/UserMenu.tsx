@@ -13,7 +13,7 @@ const idle = "text-zinc-600 dark:text-zinc-400";
 const current = "font-semibold text-zinc-900 dark:text-zinc-100";
 
 // The account menu of the desktop bar, built like LocaleSwitcher (disclosure, not role="menu").
-export function UserMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) {
+export function UserMenu({ name, userId, isAdmin }: { name: string; userId: string; isAdmin: boolean }) {
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -67,14 +67,22 @@ export function UserMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) 
         hidden={!open}
         className="absolute end-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
       >
-        <AccountLinks isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
+        <AccountLinks userId={userId} isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
       </ul>
     </div>
   );
 }
 
 // The account rows (<li>s), shared by this dropdown and the ☰ panel.
-export function AccountLinks({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
+export function AccountLinks({
+  userId,
+  isAdmin,
+  onNavigate,
+}: {
+  userId: string;
+  isAdmin: boolean;
+  onNavigate?: () => void;
+}) {
   const t = useTranslations("nav");
   const pathname = usePathname();
 
@@ -82,6 +90,7 @@ export function AccountLinks({ isAdmin, onNavigate }: { isAdmin: boolean; onNavi
     <>
       {[
         { href: "/", label: t("dashboard") },
+        { href: `/users/${userId}`, label: t("profile") },
         { href: "/channels", label: t("channels") },
         { href: "/friends", label: t("friends") },
         { href: "/account/data", label: t("myData") },
