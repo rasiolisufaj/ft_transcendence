@@ -1,7 +1,3 @@
-npm notice run mespapiers@0.1.0 npx
-npm notice run 'prisma' migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script
-Loaded Prisma config from prisma.config.ts.
-
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
