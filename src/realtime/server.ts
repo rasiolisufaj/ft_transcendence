@@ -95,6 +95,14 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
         send(socket, { type: "event", topic: body.topic, event: body.event });
       }
     }
+    const { type, channelId, userId } = body.event;
+    if (type === "member.left" && typeof channelId === "number" && typeof userId === "string") {
+      for (const [socket, owner] of owners) {
+        if (owner === userId) {
+          topics.get(socket)?.delete(`channel:${channelId}`);
+        }
+      }
+    }
     response.writeHead(204).end();
   });
 
@@ -104,6 +112,7 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
 
   const alive = new Set<WebSocket>();
   const topics = new Map<WebSocket, Set<string>>();
+  const owners = new Map<WebSocket, string>();
 
   server.on("connection", (socket, request) => {
     const userId = users.get(request);
@@ -113,6 +122,7 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
     }
     alive.add(socket);
     topics.set(socket, new Set([`user:${userId}`]));
+    owners.set(socket, userId);
     log("info", "client connected", { userId, clients: server.clients.size });
     send(socket, { type: "hello", userId });
 
@@ -157,6 +167,7 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
     socket.on("close", () => {
       alive.delete(socket);
       topics.delete(socket);
+      owners.delete(socket);
       log("info", "client disconnected", { clients: server.clients.size });
     });
   });

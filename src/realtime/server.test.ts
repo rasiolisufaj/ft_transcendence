@@ -308,3 +308,56 @@ describe("fan-out", () => {
     expect(JSON.parse(data.toString())).toEqual({ type: "event", topic: "channel:12", event });
   });
 });
+
+describe("member.left", () => {
+  async function member(url: string, userId: string) {
+    const client = new WebSocket(withTicket(url, userId));
+    await once(client, "message");
+    client.send(JSON.stringify({ type: "subscribe", topic: "channel:12" }));
+    await once(client, "message");
+    return client;
+  }
+
+  const left = (userId: string) => ({ type: "member.left", channelId: 12, userId });
+
+  it("still sends member.left to the member who left", async () => {
+    const { url } = await start(1000, async () => true);
+    const client = await member(url, "user-1");
+
+    const received = once(client, "message");
+    await publish(url, JSON.stringify({ topic: "channel:12", event: left("user-1") }));
+    const [data] = await received;
+
+    expect(JSON.parse(data.toString()).event).toEqual(left("user-1"));
+  });
+
+  it("stops sending the channel to the member who left", async () => {
+    const { url } = await start(1000, async () => true);
+    const client = await member(url, "user-1");
+    const gone = once(client, "message");
+    await publish(url, JSON.stringify({ topic: "channel:12", event: left("user-1") }));
+    await gone;
+
+    const received = once(client, "message");
+    await publish(url, JSON.stringify({ topic: "channel:12", event: { type: "first" } }));
+    await publish(url, JSON.stringify({ topic: "user:user-1", event: { type: "second" } }));
+    const [data] = await received;
+
+    expect(JSON.parse(data.toString()).event).toEqual({ type: "second" });
+  });
+
+  it("keeps the other members subscribed", async () => {
+    const { url } = await start(1000, async () => true);
+    await member(url, "user-1");
+    const other = await member(url, "user-2");
+    const gone = once(other, "message");
+    await publish(url, JSON.stringify({ topic: "channel:12", event: left("user-1") }));
+    await gone;
+
+    const received = once(other, "message");
+    await publish(url, JSON.stringify({ topic: "channel:12", event: { type: "next" } }));
+    const [data] = await received;
+
+    expect(JSON.parse(data.toString()).event).toEqual({ type: "next" });
+  });
+});
