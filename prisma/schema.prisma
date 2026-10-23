@@ -84,6 +84,7 @@ model User {
   totpEnabled  Boolean    @default(false)
   globalRole   GlobalRole @default(USER)
   reputation   Int        @default(0)
+  lastSeenAt   DateTime?
 
   documents                   Document[]
   sessions                    Session[]
@@ -102,6 +103,7 @@ model User {
   auditLogs                   AuditLog[]
   channelInvites              ChannelInvite[]
   channelJoinRequests         ChannelJoinRequest[]
+  avatar                      UserAvatar?
 }
 
 model Document {
@@ -343,3 +345,13 @@ model ChannelJoinRequest {
   @@index([userId])
 }
 
+// One avatar per user; an upload replaces it (an upsert on userId). The bytes live here,
+// not on User, because validateSessionToken() loads every User column on every request.
+model UserAvatar {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Bytes
+  mimeType  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}

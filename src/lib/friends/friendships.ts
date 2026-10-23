@@ -50,8 +50,11 @@ export async function sendRequest(me: string, other: string): Promise<Result> {
   try {
     await prisma.friendship.create({ data: { requesterId: me, receiverId: other } });
   } catch (error) {
+    const code = (error as { code?: string }).code;
+    // The other user was deleted since the lookup: the foreign key refused the row.
+    if (code === "P2003") return fail("notFound");
     // Simultaneous clicks: the unique index refused the 2nd row.
-    if ((error as { code?: string }).code !== "P2002") throw error;
+    if (code !== "P2002") throw error;
   }
   return ok;
 }
