@@ -10,7 +10,8 @@
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
     "channels": "Channels",
-    "account": "Compte"
+    "account": "Compte",
+    "myData": "Mes données"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -393,7 +394,7 @@
         "export": "Droit à la portabilité : exporter vos données dans un format structuré.",
         "objection": "Droit d'opposition : supprimer un document pour mettre fin à son traitement, ou nous contacter."
       },
-      "howTo": "Pour exercer ces droits, écrivez-nous à l'adresse indiquée ci-dessous. Nous répondrons dans un délai de 30 jours."
+      "howTo": "Pour exercer ces droits, rendez-vous sur la page /account/data : vous pouvez y exporter vos données ou supprimer votre compte. Pour toute autre question, écrivez-nous à l'adresse indiquée ci-dessous."
     },
     "cookies": {
       "heading": "Cookies",
@@ -458,7 +459,7 @@
     },
     "termination": {
       "heading": "Résiliation",
-      "body": "Vous pouvez nous demander par e-mail de supprimer votre compte. Nous nous réservons le droit de suspendre ou de supprimer un compte en cas de violation des présentes conditions, après notification."
+      "body": "Vous pouvez supprimer votre compte à tout moment depuis la page /account/data. Nous nous réservons le droit de suspendre ou de supprimer un compte en cas de violation des présentes conditions, après notification."
     },
     "modifications": {
       "heading": "Modifications des conditions",
@@ -487,5 +488,24 @@
       "upstream": "Une erreur est survenue. Réessayez dans quelques instants.",
       "overloaded": "Le service est surchargé. Réessayez dans quelques instants."
     }
+  },
+  "myData": {
+    "title": "Mes données",
+    "intro": "Conformément au RGPD, vous pouvez consulter et récupérer à tout moment les données que MesPapiers conserve sur vous.",
+    "exportTitle": "Exporter mes données",
+    "exportDesc": "Téléchargez une copie de vos données personnelles (profil, documents, messages et activité) dans un fichier ZIP (données en JSON + vos fichiers originaux).",
+    "exportButton": "Télécharger mes données",
+    "deleteTitle": "Supprimer mon compte",
+    "deleteDesc": "Votre compte et vos documents seront effacés définitivement. Vos réponses dans les channels resteront, mais sans votre nom.",
+    "passwordLabel": "Mot de passe",
+    "deleteButton": "Supprimer mon compte",
+    "deletePending": "Suppression…",
+    "wrongPassword": "Mot de passe incorrect.",
+    "lastAdmin": "Vous êtes le seul administrateur : nommez un autre administrateur avant de supprimer votre compte.",
+    "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes.",
+    "exportMailSubject": "MesPapiers – Export de vos données",
+    "exportMailBody": "Bonjour,\n\nVos données personnelles ont été exportées.\n\nSi ce n'est pas vous, changez votre mot de passe.\n\nL'équipe MesPapiers",
+    "deleteMailSubject": "MesPapiers – Votre compte a été supprimé",
+    "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement.\n\nVos réponses dans les channels restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
   }
 }
