@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db";
 /**
  * C6: every privileged mutation writes one row. Fire-and-forget by design —
  * a failed audit write must never roll back the action the user asked for.
- * AuditLog.channelId is String? while Channel.id is Int, so it is stringified (§C-8).
+ * AuditLog.channelId is Int? with a FK to Channel (onDelete: SetNull), so the
+ * audit row outlives a deleted channel.
  */
 export async function writeAudit(entry: {
   actorUserId: string | null;
@@ -21,7 +22,7 @@ export async function writeAudit(entry: {
         action: entry.action,
         targetType: entry.targetType,
         targetId: entry.targetId,
-        channelId: entry.channelId == null ? null : String(entry.channelId),
+        channelId: entry.channelId ?? null,
         metadata: entry.metadata,
       },
     });
