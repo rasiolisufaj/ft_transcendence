@@ -60,12 +60,6 @@ export default async function ChannelPage({
   }
   const question = channel.threads[0];
 
-  const myRole =
-    channel.members.find((m) => m.userId === ctx.user.id)?.role ?? null;
-  const moderatorCount = channel.members.filter(
-    (m) => m.role === "MODERATOR",
-  ).length;
-  const isLastModerator = myRole === "MODERATOR" && moderatorCount <= 1;
   const canToggleClose = can(ctx, "channel:delete", {
     channelId: channel.id,
     ownerUserId: channel.createdBy,
@@ -103,35 +97,29 @@ export default async function ChannelPage({
           </button>
         </form>
       )}
-      {isLastModerator ? (
-        <p className="mt-4 text-sm italic text-zinc-500 dark:text-zinc-400">
-          {tHome("lastModerator")}
-        </p>
-      ) : (
-        <form action={leaveChannel} className="mt-4">
-          <input type="hidden" name="channelId" value={channel.id} />
-          <button
-            type="submit"
-            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+      <form action={leaveChannel} className="mt-4">
+        <input type="hidden" name="channelId" value={channel.id} />
+        <button
+          type="submit"
+          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="size-4"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-4"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
-              />
-            </svg>
-            {t("leave")}
-          </button>
-        </form>
-      )}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+            />
+          </svg>
+          {t("leave")}
+        </button>
+      </form>
       {question ? (
         <>
           <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
