@@ -53,6 +53,25 @@ describe("session lifecycle", () => {
     expect(row!.id).toBe(hashToken(token));
   });
 
+  it("stamps lastSeenAt when it is unset or older than a minute, and leaves a fresh one alone", async () => {
+    const { token } = await createSession(userId);
+    const lastSeen = async () =>
+      (await prisma.user.findUnique({ where: { id: userId } }))!.lastSeenAt;
+
+    await validateSessionToken(token);
+    expect(await lastSeen()).not.toBeNull();
+
+    const fresh = new Date(Date.now() - 10_000);
+    await prisma.user.update({ where: { id: userId }, data: { lastSeenAt: fresh } });
+    await validateSessionToken(token);
+    expect(await lastSeen()).toEqual(fresh);
+
+    const stale = new Date(Date.now() - 120_000);
+    await prisma.user.update({ where: { id: userId }, data: { lastSeenAt: stale } });
+    await validateSessionToken(token);
+    expect((await lastSeen())!.getTime()).toBeGreaterThan(stale.getTime() + 60_000);
+  });
+
   it("validates a fresh token into a full context", async () => {
     const { token } = await createSession(userId);
     const ctx = await validateSessionToken(token);
