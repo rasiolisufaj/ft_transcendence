@@ -3,6 +3,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import { mintTicket } from "@/lib/auth/ticket";
+import type { FriendsOf } from "@/realtime/friends";
 import type { IsMember } from "@/realtime/handshake";
 import { startServer } from "@/realtime/server";
 
@@ -12,8 +13,8 @@ process.env.WS_TICKET_SECRET = "test-secret";
 let running: { stop: () => Promise<void> }[] = [];
 
 // Starts a server on a free port and returns its ws:// address.
-async function start(heartbeatMs = 1000, isMember: IsMember = async () => false) {
-  const realtime = startServer({ port: 0, heartbeatMs, isMember, publishSecret: "publish-secret" });
+async function start(heartbeatMs = 1000, isMember: IsMember = async () => false, friendsOf: FriendsOf = async () => []) {
+  const realtime = startServer({ port: 0, heartbeatMs, isMember, friendsOf, publishSecret: "publish-secret" });
   running.push(realtime);
   await once(realtime.http, "listening");
   const port = (realtime.http.address() as AddressInfo).port;
@@ -359,5 +360,136 @@ describe("member.left", () => {
     const [data] = await received;
 
     expect(JSON.parse(data.toString()).event).toEqual({ type: "next" });
+  });
+});
+
+describe("presence", () => {
+  const friends: FriendsOf = async (userId) => {
+    const graph: Record<string, string[]> = { "user-1": ["user-2"], "user-2": ["user-1"] };
+    return graph[userId] ?? [];
+  };
+
+  // Collects the next n messages, listening from now on so none is missed.
+  function take(client: WebSocket, n: number): Promise<{ type: string; [key: string]: unknown }[]> {
+    return new Promise((resolve) => {
+      const got: { type: string }[] = [];
+      client.on("message", function collect(data) {
+        got.push(JSON.parse(data.toString()));
+        if (got.length === n) {
+          client.off("message", collect);
+          resolve(got);
+        }
+      });
+    });
+  }
+
+  async function connect(url: string, userId: string) {
+    const client = new WebSocket(withTicket(url, userId));
+    await take(client, 1);
+    return client;
+  }
+
+  // A marker on the user's own topic: if it comes first, nothing else was sent before it.
+  const marker = (url: string, userId: string) =>
+    publish(url, JSON.stringify({ topic: `user:${userId}`, event: { type: "marker" } }));
+
+  it("tells a friend when a user comes online", async () => {
+    const { url } = await start(1000, undefined, friends);
+    const bob = await connect(url, "user-2");
+
+    const received = take(bob, 1);
+    await connect(url, "user-1");
+
+    expect(await received).toEqual([{ type: "presence", userId: "user-1", online: true }]);
+  });
+
+  it("tells a friend when a user goes offline", async () => {
+    const { url } = await start(1000, undefined, friends);
+    const bob = await connect(url, "user-2");
+    const online = take(bob, 1);
+    const alice = await connect(url, "user-1");
+    await online;
+
+    const received = take(bob, 1);
+    alice.close();
+
+    expect(await received).toEqual([{ type: "presence", userId: "user-1", online: false }]);
+  });
+
+  it("does not announce a second tab", async () => {
+    const { url } = await start(1000, undefined, friends);
+    const bob = await connect(url, "user-2");
+    const online = take(bob, 1);
+    await connect(url, "user-1");
+    await online;
+
+    const received = take(bob, 1);
+    await connect(url, "user-1");
+    await marker(url, "user-2");
+
+    expect((await received)[0]?.type).toBe("event");
+  });
+
+  it("stays online while another tab is open", async () => {
+    const { url } = await start(1000, undefined, friends);
+    const bob = await connect(url, "user-2");
+    const online = take(bob, 1);
+    const tab = await connect(url, "user-1");
+    await connect(url, "user-1");
+    await online;
+
+    const received = take(bob, 1);
+    tab.close();
+    await once(tab, "close");
+    await wait(50);
+    await marker(url, "user-2");
+
+    expect((await received)[0]?.type).toBe("event");
+  });
+
+  it("does not tell someone who is not a friend", async () => {
+    const { url } = await start(1000, undefined, friends);
+    const carol = await connect(url, "user-3");
+
+    const received = take(carol, 1);
+    await connect(url, "user-1");
+    await marker(url, "user-3");
+
+    expect((await received)[0]?.type).toBe("event");
+  });
+
+  it("keeps working when the friends lookup fails", async () => {
+    const broken: FriendsOf = async () => {
+      throw new Error("database is down");
+    };
+    const { url } = await start(1000, undefined, broken);
+    const alice = await connect(url, "user-1");
+
+    const received = take(alice, 1);
+    await marker(url, "user-1");
+
+    expect((await received)[0]?.type).toBe("event");
+  });
+
+  it("tells a newcomer which friends are already online", async () => {
+    const { url } = await start(1000, undefined, friends);
+    await connect(url, "user-2");
+
+    const alice = new WebSocket(withTicket(url, "user-1"));
+    const [, first] = await take(alice, 2);
+
+    expect(first).toEqual({ type: "presence", userId: "user-2", online: true });
+  });
+
+  it("does not list friends who are offline", async () => {
+    const { url } = await start(1000, undefined, friends);
+    const alice = new WebSocket(withTicket(url, "user-1"));
+    const messages = take(alice, 2);
+    await once(alice, "open");
+    await wait(50);
+    await marker(url, "user-1");
+    const [, first] = await messages;
+
+    expect(first?.type).toBe("event");
   });
 });
