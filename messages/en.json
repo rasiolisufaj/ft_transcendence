@@ -11,7 +11,8 @@
     "closeMenu": "Close menu",
     "channels": "Channels",
     "account": "Account",
-    "myData": "My data"
+    "myData": "My data",
+    "profile": "My profile"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -313,6 +314,32 @@
       "notPending": "This request no longer exists."
     }
   },
+  "profile": {
+    "memberSince": "Member since {date}",
+    "addFriend": "Add as friend",
+    "friendPending": "Friend request pending",
+    "online": "Online",
+    "offline": "Offline",
+    "edit": {
+      "title": "Edit my profile",
+      "displayName": "Display name",
+      "submit": "Save",
+      "pending": "Saving…",
+      "saved": "Name saved."
+    },
+    "avatar": {
+      "label": "Profile picture",
+      "hint": "PNG, JPEG or WebP. It is cropped to a square.",
+      "submit": "Upload picture",
+      "pending": "Uploading…",
+      "saved": "Picture saved."
+    },
+    "errors": {
+      "avatarMissing": "Choose an image.",
+      "avatarTooBig": "The image must be 2 MB or less.",
+      "avatarType": "Choose a PNG, JPEG or WebP image."
+    }
+  },
   "documentDetail": {
     "category": "Category",
     "size": "Size",
@@ -350,7 +377,7 @@
       "heading": "Data collected",
       "account": {
         "heading": "Account data",
-        "body": "When you sign up, we collect your email address, a display name and a password (stored as an Argon2id hash). We also record login sessions for security purposes."
+        "body": "When you sign up, we collect your email address, a display name and a password (stored as an Argon2id hash). We also record login sessions for security purposes. If you add a profile picture, it is stored in the database and visible to every signed-in member. We also record the time of your last activity (at most once a minute) to show your friends whether you are online; it is cleared when you log out."
       },
       "documents": {
         "heading": "Documents",

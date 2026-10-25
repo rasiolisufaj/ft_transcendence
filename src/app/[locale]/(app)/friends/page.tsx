@@ -2,9 +2,13 @@ export const dynamic = "force-dynamic";
 
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
+import { OnlineDot } from "@/components/OnlineDot";
 import { Button } from "@/components/ui/Button";
+import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db";
 import { listFriendships } from "@/lib/friends/friendships";
+import { isOnline } from "@/lib/users/profile";
 import { AddFriendForm } from "./AddFriendForm";
 import { FriendsTabs } from "./FriendsTabs";
 import {
@@ -29,6 +33,13 @@ export default async function FriendsPage() {
   // The (app) layout is not a security boundary.
   const { user } = await requireUser();
   const { friends, incoming, outgoing, blocked } = await listFriendships(user.id);
+  // listFriendships returns { id, displayName } (its tests pin that shape), so the
+  // friends' lastSeenAt comes from one more query.
+  const seen = await prisma.user.findMany({
+    where: { id: { in: friends.map((friend) => friend.id) } },
+    select: { id: true, lastSeenAt: true },
+  });
+  const onlineIds = new Set(seen.filter((u) => isOnline(u.lastSeenAt)).map((u) => u.id));
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -69,7 +80,7 @@ export default async function FriendsPage() {
             label: t("tabs.friends"),
             count: friends.length,
             panel: (
-              <PeopleList people={friends} empty={t("empty.friends")}>
+              <PeopleList people={friends} empty={t("empty.friends")} linkProfiles onlineIds={onlineIds}>
                 {(person) => (
                   <>
                     <ActionButton run={removeFriendAction} person={person}>
@@ -123,10 +134,14 @@ export default async function FriendsPage() {
 function PeopleList({
   people,
   empty,
+  linkProfiles = false,
+  onlineIds,
   children,
 }: {
   people: Person[];
   empty?: string;
+  linkProfiles?: boolean;
+  onlineIds?: Set<string>;
   children: (person: Person) => ReactNode;
 }) {
   if (people.length === 0) {
@@ -137,7 +152,19 @@ function PeopleList({
     <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
       {people.map((person) => (
         <li key={person.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
-          <span className="min-w-0 truncate text-sm font-medium">{person.displayName}</span>
+          <div className="flex min-w-0 items-center gap-3">
+            {linkProfiles ? (
+              <Link
+                href={`/users/${person.id}`}
+                className="min-w-0 truncate text-sm font-medium underline-offset-4 hover:underline"
+              >
+                {person.displayName}
+              </Link>
+            ) : (
+              <span className="min-w-0 truncate text-sm font-medium">{person.displayName}</span>
+            )}
+            {onlineIds ? <OnlineDot online={onlineIds.has(person.id)} /> : null}
+          </div>
           <div className="flex items-center gap-3">{children(person)}</div>
         </li>
       ))}

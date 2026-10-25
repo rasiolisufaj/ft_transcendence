@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -36,6 +37,14 @@ export default function UiGalleryPage() {
           <Badge tone="success">Success</Badge>
           <Badge tone="warning">Warning</Badge>
           <Badge tone="danger">Danger</Badge>
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Avatar</h2>
+        <div className="flex items-center gap-4">
+          <Avatar name="Marie Curie" />
+          <Avatar name="amir" size="lg" />
         </div>
       </section>
 
