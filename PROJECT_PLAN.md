@@ -32,6 +32,39 @@ from both; executors read all three.
 > deliberately dropped. The two specs agree as of the current revision. If they ever diverge
 > again, reconcile before the week's planning, never during evaluation.
 
+## Status — 2026-10-21
+
+This plan is the **target**. What is built differs in places, and the differences are kept
+elsewhere: `CLAUDE.md` (*Current state vs. target*) lists what exists file by file,
+`docs/plans/2026-09-21-rasiol-modules-roadmap.md` §C records Rasiol's departures, and
+`handoff/WORKLOG.md` is the day-to-day log. `main` = `5a6b3b5` (PR #36): `npm test` 240/240,
+lint 0 errors / 0 warnings.
+
+| Domain | On `main` | In an open PR | Not started |
+|---|---|---|---|
+| A · Adrien | A1; compose with `db`, `web`, `nginx`, and Mailpit (added with PR #30); mkcert TLS | — | the `realtime` / `worker` / Redis / MinIO services, nginx `/ws` and security headers, `check:env`, CI (A5), Playwright (A6), A7–A9 |
+| B · Adrien | B2–B3 (PR #20); B9–B11, the assistant over SSE (PR #25; its route, persistence and tests depart from B9–B10, see `CLAUDE.md`) | — | B1 fixtures, B4 eval, B5–B7, B8 correction UI |
+| C · Rasiol | C1–C6, C11, C12, C14 (PRs #10 to #34): the advanced-permissions module is complete | — | D14 (moved here on 2026-10-19; planned in `docs/plans/2026-10-19-d14-profile.md`), C7–C8 OAuth, C9–C10 TOTP, C13 |
+| D · Alexandre | D0, D1, D2 (the ticket handshake, PR #31; topic authorisation, PR #36, 2026-10-21; membership is not re-checked after subscribe), the D4 contract (no Redis yet), D10 routing and switcher (no `User.locale` write), D11 catalogues, D15 friends (no live push) | — (`feat/realtime-publish` is pushed, with no PR yet) | D3, D5–D9, D12, D13, D16, D17 |
+| E · Amir | E1, E2, E5 (magic bytes without webp), E6 (file route at `/api/documents/[id]`), the E8 registry, E9 channels, E12–E13 GDPR (PR #30, 2026-10-20; departures below), E14 (built by Adrien, PR #32) | one consolidated migration, webp sniffing, closing a channel (PR #35) | E3, E4 (files stay in Postgres, team decision), E7 thumbnails, E10, E11, E15, E16 |
+
+**Changes to this plan since it was written:**
+
+- **2026-10-19: D14 (profile & settings) moved from Alexandre to Rasiol**, together with
+  friends' online status. They are the user-management major's remaining lines (§6), and §8
+  had never scheduled D14. §6, §7 and §8 below are updated. Plan: roadmap phase 12.
+- **E12–E13 as merged (PR #30, 2026-10-20).** There is no `DataRequest` model: export and
+  deletion are immediate. Deletion confirms with the password, not an e-mailed link, and mails
+  the user afterwards (to Mailpit in dev). Threads and answers stay, their author nulled
+  (`onDelete: SetNull`). The export is a direct `POST /api/account/export` download, a ZIP of
+  `data.json` plus the original files; it leaves out sessions and audit rows.
+- Files stay as bytes in Postgres (`Document.fileData`), and MinIO is optional and later
+  (`MEETING_DISCUSSION.md`). §5's storage interface and E3–E4 wait on that.
+- The document vault is owner-only **even for an admin**, and only admins appoint channel
+  moderators (roadmap §C-17, §C-18). Both narrow §5's "ADMIN wins everywhere".
+- The assistant streams from `POST /api/documents/[id]/assistant`, not
+  `/api/assistant/stream`, and the file route is `/api/documents/[id]`, not `…/file`.
+
 ---
 
 ## Context
@@ -651,12 +684,15 @@ Rules, in order:
 are *insurance against a module failing validation at evaluation*, not extra credit. Nobody
 should spend an extra day polishing module twenty-two while module three is shaky.
 
-**On the balance:** Rasiol carries 6 module points but writes almost no feature UI. Adrien
+**On the balance:** Rasiol carries 6 module points and, since D14 moved to him (2026-10-19),
+builds the profile UI as well. Adrien
 carries 5 and owns the entire infrastructure, CI and review load — none of which scores points
 but all of which is required. Alexandre (6) and Amir (5) carry the heaviest UI surface.
 
-**Module ownership is not exclusive authorship.** D14 (profile & settings UI) is built by
-Alexandre but counts towards Rasiol's user-management module; B8 (extraction correction UI) is
+**Module ownership is not exclusive authorship.** D14 (profile & settings UI) counts towards
+Rasiol's user-management module and, since 2026-10-19, is built by Rasiol too, with friends'
+online status; the same profile page also shows the "profiles" part of Alexandre's
+User-interaction major. B8 (extraction correction UI) is
 built by Alexandre but counts towards Adrien's image-recognition minor; Amir builds the
 channel data layer that Alexandre's real-time module demonstrates. Say this out loud at
 evaluation rather than letting it look like a gap.
@@ -719,8 +755,9 @@ Every task carries a **Done when** — the observable check that closes it.
 | C12 | WS ticket endpoint (short-lived, single-use) for Alexandre | 0.5d | a ticket is single-use, expires in 60s, is bound to the user, and a replay is rejected |
 | C13 | Security review: OWASP pass, secrets audit, dependency audit | 1d | the OWASP Top-10 checklist is filled in with per-item evidence; `npm audit` reports no high/critical; `gitleaks` finds nothing in history |
 | **C14** | **Admin surface + role management: user list/CRUD, promote/demote channel moderators, reputation→Helper threshold job** | **1.5d** | an ADMIN promotes a member to MODERATOR in one channel and that user gains hide/mute **only there**; a non-admin hitting the admin route gets 403, not a blank page; crossing the reputation threshold flips the Helper badge without granting any action |
+| D14 | *(moved from Domain D on 2026-10-19)* Profile page, profile update, avatar upload with a default avatar, friends' online status | 1d | as in D14 below |
 
-**Domain C total: 15d**
+**Domain C total: 16d** (15d, plus D14's 1d since 2026-10-19)
 
 ### Domain D — Real-Time, Messaging, Notifications, i18n & Shell (Alexandre)
 
@@ -740,12 +777,12 @@ Every task carries a **Done when** — the observable check that closes it.
 | D11 | FR/EN/ES message catalogues, FR date/number formatting | 1.5d | `npm run i18n:check` reports zero missing and zero orphan keys; French renders `31/12/2026` and `1 234,56 €` |
 | D12 | WS resilience testing: reconnect storms, Redis loss, dupes | 1d | 50 simultaneous reconnects plus a Redis restart lose no events and create no duplicate rows; posting a thread still succeeds while the realtime process is down |
 | D13 | Accessibility + responsive QA pass | 1d | axe reports zero violations on every route at 375/768/1440 and the full upload flow is completable by keyboard only |
-| D14 | Profile & settings page: display name, locale, avatar upload, Helper badge, online indicators | 1d | avatar upload replaces the previous object, renders through the authorised file route, and the member list shows live online state |
+| D14 | *(built by Rasiol since 2026-10-19, counted in Domain C)* Profile & settings page: display name, locale, avatar upload, Helper badge, online indicators | — | avatar upload replaces the previous object, renders through the authorised file route, and the member list shows live online state |
 | **D15** | **Friends: request / accept / decline / block, friends list, live status changes** | **1d** | a request creates one row, accepting is idempotent under a double-click, blocking hides both directions, and each transition pushes over the recipient's user topic |
 | **D16** | **Direct messaging: conversation + message persistence, live delivery, unread counts, read receipts** | **1.5d** | two browsers exchange messages with no refresh; unread counts survive a reload; a message to a user who blocked you is rejected server-side |
 | **D17** | *(credited to B8)* Extraction correction UI | **1d** | as specified in B8 |
 
-**Domain D total: 19d**
+**Domain D total: 18d** (19d until D14 moved to Domain C on 2026-10-19)
 
 ### Domain E — Data, Storage, Community & GDPR (Amir)
 
@@ -772,7 +809,8 @@ Every task carries a **Done when** — the observable check that closes it.
 
 **Capacity:** 68.5 planned person-days against 100 available (4 × 25) — a 31% buffer for
 review, integration, meetings and rework, down from 37% before the community layer was added.
-Adrien 15.5 · Rasiol 15 · Alexandre 19 · Amir 17. **Alexandre is the tightest**, and he also
+Adrien 15.5 · Rasiol 16 · Alexandre 18 · Amir 17 (since 2026-10-19, when D14 moved from
+Alexandre to Rasiol; before that Rasiol 15 · Alexandre 19). **Alexandre is the tightest**, and he also
 owns the shell that everyone else is blocked on in Week 1 — D15/D16 are the designated
 descope candidates if Week 3 runs long (see R6).
 
@@ -839,7 +877,7 @@ requirement, not a module, and discovering in Week 4 that the transport is wrong
 | Member | Tasks |
 |---|---|
 | **Adrien** | B11, A7, A9 · Chrome compat + zero-console-error sweep |
-| **Rasiol** | C9, C10, C11, C14 |
+| **Rasiol** | C9, C10, C11, C14 · D14 (added 2026-10-19; no week had it) |
 | **Alexandre** | D9, D11, D16, D17 · every dev supplies their own translation keys by Wednesday |
 | **Amir** | E11, E12, E13, E14, E16 |
 
@@ -900,7 +938,7 @@ demonstrated at Friday integration.
 | R3 | **Week 2 vertical slice slips.** Both pillars depend on it. | **High** | It is the sole W2 objective. Thursday checkpoint: if either path isn't working, all depth work stops and the team converges. |
 | R4 | **WebSocket authorisation done naively** — session cookies aren't reliably available at upgrade, and a client-declared topic leaks another user's DMs or a private channel. | **High** | Short-lived single-use ticket minted by an authenticated route handler (C12), exchanged on connect. Topic rights resolved server-side from the session and `ChannelMembership`; a user topic is only ever the connecting user's own. **Never** trusted from the client. |
 | R5 | **Concurrency correctness is explicitly graded.** | Med | Enforce at the database, not in application code: `@@unique([documentId, kind])` on deadline notifications, `@@unique` on `Vote` and `ChannelMembership`, transactions for multi-row writes, `version` column for optimistic concurrency. Scripted 4-browser concurrent test in W5. |
-| R6 | **22 points and two pillars in 5 weeks.** The buffer fell from 37% to 31% when the community layer replaced the analytics dashboard, and Alexandre is at 19 days. | **High** | Hard W4 freeze. Pre-agreed drop order if behind: (1) D16 direct messaging → threads-only community, keeping the User-interaction major intact via profiles + friends + channel replies, (2) Spanish → FR/EN, costing 1 point, (3) periodic deadline type → HARD/SOFT only. **Never drop a major** — the seven majors are 14 of the 22 points, and 14 is the pass line on its own. Remember the +5 bonus cap: dropping from 22 to 19 costs *nothing*. |
+| R6 | **22 points and two pillars in 5 weeks.** The buffer fell from 37% to 31% when the community layer replaced the analytics dashboard, and Alexandre is at 18 days (19 until D14 moved to Rasiol on 2026-10-19). | **High** | Hard W4 freeze. Pre-agreed drop order if behind: (1) D16 direct messaging → threads-only community, keeping the User-interaction major intact via profiles + friends + channel replies, (2) Spanish → FR/EN, costing 1 point, (3) periodic deadline type → HARD/SOFT only. **Never drop a major** — the seven majors are 14 of the 22 points, and 14 is the pass line on its own. Remember the +5 bonus cap: dropping from 22 to 19 costs *nothing*. |
 | R7 | **AI cost is now recurring, not one-shot.** Extraction is bounded by uploads; the assistant is an open-ended chat with document text in every prompt. | **Med** | Checksum cache on extraction, per-user daily extraction cap (B7) *and* hourly assistant message cap (B11), fixtures in CI instead of live calls, one shared key held by Adrien with a billing alert. Track spend weekly from `DocumentExtraction` and `AssistantMessage` token columns. |
 | R8 | **Uneven commit distribution**, which the subject grades directly. | Med | No long-lived branches. Every member merges a PR to `main` at least 3× per week. Rasiol audits `git shortlog -sne` at each Friday integration and raises it immediately, not in Week 5. |
 | R9 | Self-signed cert produces Chrome warnings, violating the clean-console requirement. | Low | `mkcert` local CA, documented in the README so evaluators can reproduce it. |
