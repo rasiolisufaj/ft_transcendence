@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net";
 import { WebSocketServer, type WebSocket } from "ws";
 import { parseClientMessage, parsePublishBody, type ServerMessage } from "@/contracts/socket";
 import { verifyTicket } from "@/lib/auth/ticket";
+import { friendsOf as findFriends, type FriendsOf } from "./friends";
 import { canSubscribe, readTicket, type IsMember } from "./handshake";
 import { log } from "./log";
 import { isChannelMember } from "./membership";
@@ -12,6 +13,7 @@ type Options = {
   port: number;
   heartbeatMs: number; // ms to check if a client is alive
   isMember?: IsMember;
+  friendsOf?: FriendsOf;
   publishSecret: string;
 };
 
@@ -43,7 +45,13 @@ async function readBody(request: IncomingMessage): Promise<string | null> {
   return Buffer.concat(chunks).toString();
 }
 
-export function startServer({ port, heartbeatMs, isMember = isChannelMember, publishSecret }: Options) {
+export function startServer({
+  port,
+  heartbeatMs,
+  isMember = isChannelMember,
+  friendsOf = findFriends,
+  publishSecret,
+}: Options) {
   // verifyClient can only say yes or no: the user id waits here until "connection".
   const users = new WeakMap<IncomingMessage, string>();
 
@@ -113,6 +121,37 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
   const alive = new Set<WebSocket>();
   const topics = new Map<WebSocket, Set<string>>();
   const owners = new Map<WebSocket, string>();
+  const connections = new Map<string, number>();
+
+  async function lookup(userId: string): Promise<string[]> {
+    try {
+      return await friendsOf(userId);
+    } catch (error) {
+      log("error", "friends lookup failed", { userId, error: String(error) });
+      return [];
+    }
+  }
+
+  // Sends the user's state at send time, so a fast connect + disconnect still ends on the right one.
+  async function announce(userId: string) {
+    const friends = await lookup(userId);
+    const online = connections.has(userId);
+    for (const [socket, mine] of topics) {
+      for (const friend of friends) {
+        if (mine.has(`user:${friend}`)) {
+          send(socket, { type: "presence", userId, online });
+        }
+      }
+    }
+  }
+
+  async function welcome(socket: WebSocket, userId: string) {
+    for (const friend of await lookup(userId)) {
+      if (connections.has(friend)) {
+        send(socket, { type: "presence", userId: friend, online: true });
+      }
+    }
+  }
 
   server.on("connection", (socket, request) => {
     const userId = users.get(request);
@@ -123,8 +162,14 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
     alive.add(socket);
     topics.set(socket, new Set([`user:${userId}`]));
     owners.set(socket, userId);
+    const count = (connections.get(userId) ?? 0) + 1;
+    connections.set(userId, count);
+    if (count === 1) {
+      void announce(userId);
+    }
     log("info", "client connected", { userId, clients: server.clients.size });
     send(socket, { type: "hello", userId });
+    void welcome(socket, userId);
 
     socket.on("message", async (data) => {
       const message = parseClientMessage(data.toString());
@@ -168,6 +213,13 @@ export function startServer({ port, heartbeatMs, isMember = isChannelMember, pub
       alive.delete(socket);
       topics.delete(socket);
       owners.delete(socket);
+      const left = (connections.get(userId) ?? 1) - 1;
+      if (left === 0) {
+        connections.delete(userId);
+        void announce(userId);
+      } else {
+        connections.set(userId, left);
+      }
       log("info", "client disconnected", { clients: server.clients.size });
     });
   });
