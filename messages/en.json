@@ -79,22 +79,6 @@
     "submit": "Upload",
     "uploading": "Uploading the file"
   },
-  "documentErrors": {
-    "duplicateName": {
-      "title": "This document already exists",
-      "description": "A file with the same name is already saved in your space. Rename your file before sending it, or delete the old document."
-    },
-    "duplicateContent": {
-      "title": "This file has already been uploaded",
-      "description": "This file's content is identical to a document already in your space, even though the name is different. Check your documents before adding a new one."
-    },
-    "fileType": {
-      "title": "This file type is not accepted",
-      "description": "Only PDF, PNG and JPG files can be uploaded. The file's content is checked, not its name: renaming a file is not enough to make it valid."
-    },
-    "chooseAnother": "Choose another file",
-    "backToDocuments": "View my documents"
-  },
   "channels": {
     "home": {
       "title": "Channels",
@@ -114,6 +98,9 @@
       "kick": "Remove a member",
       "leave": "Leave",
       "requests": "Join requests",
+      "close": "Close channel",
+      "reopen": "Reopen channel",
+      "closed": "closed channel",
       "public": "public channel",
       "private": "private channel"
     },
@@ -126,24 +113,35 @@
       "descriptionPlaceholder": "What is this channel about?",
       "questionLabel": "Question (required)",
       "questionPlaceholder": "Ask your question with as much detail as possible so answers can be clear.",
+      "visibilityLabel": "Visibility",
+      "visibilityPublic": "Public",
+      "visibilityPrivate": "Private",
       "cancel": "Cancel",
-      "submit": "Create channel"
+      "submit": "Create channel",
+      "errors": {
+        "nameEmpty": "The name is required.",
+        "nameTooLong": "The name cannot be longer than 100 characters.",
+        "nameTaken": "This channel name is already taken.",
+        "descriptionTooLong": "The description cannot be longer than 250 characters.",
+        "questionEmpty": "The question is required.",
+        "questionTooLong": "The question cannot be longer than 300 characters.",
+        "visibilityMissing": "Choose a visibility: public or private."
+      }
     },
     "join": {
       "back": "← Back to channels",
       "title": "Join a channel",
       "subtitle": "Browse public channels and join one.",
-      "empty": "No public channel to join for now.",
+      "empty": "No channel to join for now.",
       "noDescription": "This channel has no description.",
       "membersCount": "{count, plural, one {# member} other {# members}}",
-      "join": "Join"
+      "join": "Join",
+      "request": "Request to join",
+      "pending": "Request sent"
     },
     "detail": {
       "back": "← Back to channels",
       "leave": "Leave channel",
-      "membersCount": "{count, plural, one {# member} other {# members}}",
-      "moderator": "moderator",
-      "kick": "Remove",
       "authoredBy": "by {name} · {date}",
       "deletedUser": "Deleted user",
       "repliesCount": "{count, plural, one {# reply} other {# replies}}",
@@ -355,10 +353,6 @@
       "provider": "Insurer",
       "policyNumber": "Policy number",
       "vehiclePlate": "Vehicle plate"
-    },
-    "status": {
-      "confirmed": "Confirmed",
-      "failed": "Failed"
     }
   },
   "footer": {
@@ -421,7 +415,7 @@
         "export": "Right to data portability: export your data in a structured format.",
         "objection": "Right to object: delete a document to stop its processing, or contact us."
       },
-      "howTo": "To exercise these rights, go to the /account/data page: you can export your data or delete your account there. For any other question, email us at the address below."
+      "howTo": "To exercise these rights, go to \"My account\", \"My data\": you can export your data or delete your account yourself at any time."
     },
     "cookies": {
       "heading": "Cookies",
@@ -486,7 +480,7 @@
     },
     "termination": {
       "heading": "Termination",
-      "body": "You can delete your account at any time from the /account/data page. We reserve the right to suspend or delete an account in case of a breach of these terms, after notification."
+      "body": "You can delete your account yourself at any time from the \"My account\" page, in the \"My data\" section. We reserve the right to suspend or delete an account in case of a breach of these terms, after notification."
     },
     "modifications": {
       "heading": "Changes to the terms",

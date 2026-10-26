@@ -4,84 +4,97 @@ import { prisma } from "@/lib/db";
 import { redirect } from "@/i18n/navigation";
 import { getLocale } from "next-intl/server";
 import { requireUser } from "@/lib/auth/session";
+import { assertCan } from "@/lib/auth/policy";
+import { Prisma } from "@/generated/prisma/client";
 
-export async function createChannel(formData: FormData) {
+export type CreateChannelState = {
+  error?:
+    | "nameEmpty"
+    | "nameTooLong"
+    | "nameTaken"
+    | "descriptionTooLong"
+    | "questionEmpty"
+    | "questionTooLong"
+    | "visibilityMissing";
+};
+
+export async function createChannel(
+  _prev: CreateChannelState,
+  formData: FormData,
+): Promise<CreateChannelState> {
+  const ctx = await requireUser();
+  assertCan(ctx, "channel:create");
+  const { user } = ctx;
+
   const nameChannel = formData.get("name");
-  const descriptionChannel = formData.get("description");
-  const answer = formData.get("question");
+  if (typeof nameChannel !== "string") return { error: "nameEmpty" };
+
+  const trueNameChannel = nameChannel.trim();
+  if (trueNameChannel.length === 0) return { error: "nameEmpty" };
+  if (trueNameChannel.length > 100) return { error: "nameTooLong" };
+
   const visibilityChannel = formData.get("visibility");
-  let boolvisibility : boolean= false;
-  // Check that the channel name is not empty
-  // and does not contain only spaces.
-  if (typeof nameChannel !== "string" || typeof visibilityChannel !== "string" || !nameChannel || !visibilityChannel) {
-    return;
-  }
+  if (typeof visibilityChannel !== "string") return { error: "visibilityMissing" };
 
-  const trueVisibilityChannel : string = visibilityChannel.trim();
-  const trueNameChannel: string = nameChannel.trim();
-  if (trueNameChannel.length === 0 || visibilityChannel.length === 0) {
-    return;
-  } else if (trueNameChannel.length >= 100 || trueVisibilityChannel.length >= 8) {
-    return;
-  }
-
-  if(trueVisibilityChannel === "public")
+  const trueVisibilityChannel = visibilityChannel.trim();
+  let boolvisibility: boolean;
+  if (trueVisibilityChannel === "public") {
     boolvisibility = false;
-  else if (trueVisibilityChannel === "private")
+  } else if (trueVisibilityChannel === "private") {
     boolvisibility = true;
-  else
-    return;
-
-  if (typeof answer !== "string" || !answer) {
-    return;
+  } else {
+    return { error: "visibilityMissing" };
   }
 
-  const trueQuestion: string = answer.trim();
-  if (trueQuestion.length === 0) {
-    return;
-  } else if (trueQuestion.length > 300) {
-    return;
-  }
+  const answer = formData.get("question");
+  if (typeof answer !== "string") return { error: "questionEmpty" };
 
+  const trueQuestion = answer.trim();
+  if (trueQuestion.length === 0) return { error: "questionEmpty" };
+  if (trueQuestion.length > 300) return { error: "questionTooLong" };
+
+  const descriptionChannel = formData.get("description");
   let cleanDescription: string | null = null;
-
-  if (typeof descriptionChannel === "string" && descriptionChannel) {
-    const truedescriptionChannel: string = descriptionChannel.trim();
-    if (truedescriptionChannel.length === 0) {
-      cleanDescription = null;
-    } else if (truedescriptionChannel.length >= 251) {
-      return;
-    } else {
+  if (typeof descriptionChannel === "string") {
+    const truedescriptionChannel = descriptionChannel.trim();
+    if (truedescriptionChannel.length > 250) {
+      return { error: "descriptionTooLong" };
+    }
+    if (truedescriptionChannel.length > 0) {
       cleanDescription = truedescriptionChannel;
     }
   }
 
-  const { user } = await requireUser();
-
-  const existingChannel = await prisma.channel.findFirst({
-    where: { title: { equals: trueNameChannel, mode: "insensitive" } },
-  });
-  if (existingChannel) {
-    return;
-  }
-
-  await prisma.channel.create({
-    data: {
-      createdBy: user.id,
-      title: trueNameChannel,
-      description: cleanDescription,
-      isPrivate: boolvisibility,
-      members: {
-        create: { userId: user.id, role: "MODERATOR" },
-      },
-      threads: {
-        create: {
-          title: trueNameChannel,
-          userId: user.id,
-          content: trueQuestion,
+  let channelId: number;
+  try {
+    const created = await prisma.channel.create({
+      data: {
+        createdBy: user.id,
+        title: trueNameChannel,
+        description: cleanDescription,
+        isPrivate: boolvisibility,
+        members: {
+          create: { userId: user.id, role: "MODERATOR" },
+        },
+        threads: {
+          create: {
+            title: trueNameChannel,
+            userId: user.id,
+            content: trueQuestion,
+          },
         },
       },
-    },
-  });
-  redirect({ href: "/channels", locale: await getLocale() });
+    });
+    channelId = created.id;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return { error: "nameTaken" };
+    }
+    throw error;
+  }
+
+  return redirect({ href: `/channels/${channelId}`, locale: await getLocale() });
 }
