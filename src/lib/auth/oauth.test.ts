@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, describe, expect, it } from "vitest";
 import { hashPassword } from "@/lib/auth/password";
+import { createSession, validateSessionToken } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { challengeFor, googleProfileSchema, resolveGoogleUser } from "./oauth";
 
@@ -54,8 +55,21 @@ describe("resolveGoogleUser", () => {
     expect(await resolveGoogleUser(google({ email: email.toUpperCase() }))).toBe(owner.id);
 
     expect(await prisma.user.count({ where: { email: { equals: email, mode: "insensitive" } } })).toBe(1);
-    expect((await prisma.user.findUniqueOrThrow({ where: { id: owner.id } })).passwordHash).not.toBeNull();
     expect(await prisma.oAuthAccount.count({ where: { userId: owner.id } })).toBe(1);
+  });
+
+  it("takes a linked account back from whoever set its password: the password and every open session end", async () => {
+    // Signup never checks that you own the address, so that password may be an impostor's (final review).
+    const email = newEmail();
+    const squatter = await prisma.user.create({
+      data: { email, displayName: "Squatter", passwordHash: await hashPassword("motdepasse123") },
+    });
+    const { token } = await createSession(squatter.id);
+
+    await resolveGoogleUser(google({ email }));
+
+    expect((await prisma.user.findUniqueOrThrow({ where: { id: squatter.id } })).passwordHash).toBeNull();
+    expect(await validateSessionToken(token)).toBeNull();
   });
 
   it("refuses an email Google has not verified, and links nothing", async () => {
@@ -78,5 +92,14 @@ describe("resolveGoogleUser", () => {
 
     expect(a.displayName).toBe(noName.email.split("@")[0]);
     expect(b.displayName).toBe("A".repeat(50));
+  });
+
+  it("cuts a long name between characters, never inside one", async () => {
+    // Cutting at 50 UTF-16 units would keep half of this emoji, which the database refuses.
+    const profile = google({ email: newEmail(), name: `${"A".repeat(49)}😀 Curie` });
+
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: (await resolveGoogleUser(profile))! } });
+
+    expect(user.displayName).toBe(`${"A".repeat(49)}😀`);
   });
 });

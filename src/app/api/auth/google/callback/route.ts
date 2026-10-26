@@ -40,7 +40,10 @@ export async function GET(request: NextRequest) {
         redirect_uri: googleRedirectUri(),
       }),
     });
-    if (!tokenRes.ok) throw new Error(`Google's token endpoint answered ${tokenRes.status}`);
+    if (!tokenRes.ok) {
+      // Google's `error` field says why (invalid_grant, redirect_uri_mismatch, invalid_client); it holds no secret.
+      throw new Error(`Google's token endpoint answered ${tokenRes.status}: ${(await tokenRes.text()).slice(0, 200)}`);
+    }
     const { access_token } = tokenSchema.parse(await tokenRes.json());
 
     const infoRes = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
