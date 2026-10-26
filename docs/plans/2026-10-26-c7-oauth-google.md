@@ -200,7 +200,7 @@ import { challengeFor, googleProfileSchema, resolveGoogleUser } from "./oauth";
 describe("challengeFor", () => {
   it("is base64url(sha256(verifier)): RFC 7636's Appendix B pair", () => {
     expect(challengeFor("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk")).toBe(
-      "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbjZGWTxu9S0",
+      "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
     );
   });
 });

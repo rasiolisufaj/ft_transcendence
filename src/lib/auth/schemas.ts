@@ -6,7 +6,8 @@ export type AuthErrorKey = keyof Messages["auth"]["errors"];
 
 // Normalise BEFORE validating: a check sees the value as it is at its place in
 // the chain, so `z.email().trim()` would reject "  A@b.com " before trimming.
-const emailField = z
+/** Shared by signup, login, Google's profile (oauth.ts) and the account deletion form. */
+export const emailField = z
   .string()
   .trim()
   .toLowerCase()
