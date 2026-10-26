@@ -32,7 +32,7 @@ from both; executors read all three.
 > deliberately dropped. The two specs agree as of the current revision. If they ever diverge
 > again, reconcile before the week's planning, never during evaluation.
 
-## Status — 2026-10-21
+## Status — 2026-10-26
 
 This plan is the **target**. What is built differs in places, and the differences are kept
 elsewhere: `CLAUDE.md` (*Current state vs. target*) lists what exists file by file,
@@ -44,7 +44,7 @@ elsewhere: `CLAUDE.md` (*Current state vs. target*) lists what exists file by fi
 |---|---|---|---|
 | A · Adrien | A1; compose with `db`, `web`, `nginx`, and Mailpit (added with PR #30); mkcert TLS | — | the `realtime` / `worker` / Redis / MinIO services, nginx `/ws` and security headers, `check:env`, CI (A5), Playwright (A6), A7–A9 |
 | B · Adrien | B2–B3 (PR #20); B9–B11, the assistant over SSE (PR #25; its route, persistence and tests depart from B9–B10, see `CLAUDE.md`) | — | B1 fixtures, B4 eval, B5–B7, B8 correction UI |
-| C · Rasiol | C1–C6, C11, C12, C14 (PRs #10 to #34): the advanced-permissions module is complete; D14 (moved here on 2026-10-19; PR #38, 2026-10-23): the user-management module is complete | — | C7 OAuth Google (planned in `docs/plans/2026-10-26-c7-oauth-google.md`), C8 OAuth GitHub, C9–C10 TOTP, C13 |
+| C · Rasiol | C1–C6, C11, C12, C14 (PRs #10 to #34): the advanced-permissions module is complete; D14 (moved here on 2026-10-19; PR #38, 2026-10-23): the user-management module is complete | C7 OAuth Google: built on `feat/oauth-google` (2026-10-26, plan `docs/plans/2026-10-26-c7-oauth-google.md`), PR to come | C8 OAuth GitHub, C9–C10 TOTP, C13 |
 | D · Alexandre | D0, D1, D2 (the ticket handshake, PR #31; topic authorisation, PR #36, 2026-10-21; membership is not re-checked after subscribe), the D4 contract (no Redis yet), D10 routing and switcher (no `User.locale` write), D11 catalogues, D15 friends (no live push) | publishing and friends' presence (PR #39, `feat/realtime-publish`, 2026-10-25) | D3, D5–D9, D12, D13, D16, D17 |
 | E · Amir | E1, E2, E5 (magic bytes without webp), E6 (file route at `/api/documents/[id]`), the E8 registry, E9 channels, E12–E13 GDPR (PR #30, 2026-10-20; departures below), E14 (built by Adrien, PR #32) | one consolidated migration, webp sniffing (through `src/lib/files/sniff.ts`), closing a channel, a hardened file route (PR #35) | E3, E4 (files stay in Postgres, team decision), E7 thumbnails, E10, E11, E15, E16 |
 
