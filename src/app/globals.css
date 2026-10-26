@@ -1,28 +1,138 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens. Light values here, dark values under the media query below —
+ * same mechanism as the two variables this replaces (--background/--foreground),
+ * just with the full palette the UI actually needs. No .dark class anywhere:
+ * the app follows the OS setting, like the rest of the site already did.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* "Encre & papier": warm paper and ink, one terracotta accent used
+     sparingly — picked over a cool neutral + indigo precisely because that
+     pairing is the recognizable default of every generated SaaS template. */
+  --background: #f7f4ec; /* warm paper */
+  --foreground: #1c1a17; /* ink */
+  --foreground-muted: #6b6459; /* ~5.3:1 on --background */
+  --foreground-subtle: #9c948a; /* decorative icons only */
+
+  --surface: #fffefb;
+  --surface-hover: #f1ece1;
+
+  --border: #e4dfd3;
+  --border-strong: #d3cbbb;
+
+  --primary: #9c4530; /* terracotta, 6.3:1 on white */
+  --primary-hover: #7e3626;
+  --primary-foreground: #ffffff;
+  --primary-subtle: #f1e2d8;
+  --primary-subtle-foreground: #7e3626; /* ~6.8:1 on primary-subtle */
+
+  --success: #15803d; /* green-700, 5:1 on white */
+  --success-subtle: #dcfce7;
+  --success-subtle-foreground: #166534;
+
+  --warning: #b45309; /* amber-700, 5:1 on white */
+  --warning-subtle: #fef3c7;
+  --warning-subtle-foreground: #92400e;
+
+  --danger: #dc2626; /* red-600, 4.8:1 on white */
+  --danger-subtle: #fee2e2;
+  --danger-subtle-foreground: #991b1b;
+
+  /* Flat by design: hairline borders carry the hierarchy, shadow is only a
+     faint lift so a floating menu still separates from the page. */
+  --shadow-card: 0 1px 1px 0 rgb(28 26 23 / 0.03);
+  --shadow-elevated: 0 4px 16px -4px rgb(28 26 23 / 0.12), 0 2px 4px -2px rgb(28 26 23 / 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #15120d; /* warm near-black, not zinc */
+    --foreground: #f3eee4;
+    --foreground-muted: #a89c8c; /* ~7.6:1 on --background */
+    --foreground-subtle: #6f6557;
+
+    --surface: #1e1a14;
+    --surface-hover: #272019;
+
+    --border: #2e2720;
+    --border-strong: #3e352b;
+
+    /* Known caveat carried over from the indigo palette this replaces: a
+       single --primary can't both read as text on this background (needs
+       to be light) and carry white button text (needs to be dark) at
+       4.5:1 — the same gap existed with indigo-400 before. Not fixed here;
+       flagging it rather than silently restructuring Button's tokens. */
+    --primary: #e2916b;
+    --primary-hover: #edad8e;
+    --primary-subtle: rgb(156 69 48 / 0.18);
+    --primary-subtle-foreground: #f0c7ae;
+
+    --success: #4ade80; /* green-400 */
+    --success-subtle: rgb(34 197 94 / 0.16);
+    --success-subtle-foreground: #86efac;
+
+    --warning: #fbbf24; /* amber-400 */
+    --warning-subtle: rgb(245 158 11 / 0.16);
+    --warning-subtle-foreground: #fcd34d;
+
+    --danger: #f87171; /* red-400 */
+    --danger-subtle: rgb(220 38 38 / 0.16);
+    --danger-subtle-foreground: #fca5a5;
+
+    --shadow-card: 0 1px 1px 0 rgb(0 0 0 / 0.3);
+    --shadow-elevated: 0 4px 16px -4px rgb(0 0 0 / 0.45), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-foreground: var(--primary-subtle-foreground);
+
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-subtle-foreground: var(--success-subtle-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-subtle-foreground: var(--warning-subtle-foreground);
+
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-subtle-foreground: var(--danger-subtle-foreground);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+
+  --font-sans: var(--font-public-sans);
+  --font-serif: var(--font-fraunces);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Tighter than Tailwind's defaults (8px/12px): sharp enough not to read as
+   the soft, bubbly corners of a generated template. Cards get --radius-xl
+   (8px) for a touch of ease; controls get --radius-lg (4px). */
+@theme {
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
 }
 
 /* Tailwind v4 resets buttons to the default cursor: bring the hand back. */
@@ -30,5 +140,17 @@ body {
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+}
+
+/* prefers-reduced-motion: every transition/animation collapses to instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

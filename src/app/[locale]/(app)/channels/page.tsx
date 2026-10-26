@@ -1,123 +1,102 @@
-import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { getUserChannels } from "./create/data";
 import { requireUser } from "@/lib/auth/session";
 import { leaveChannel } from "./[id]/actions";
 import { can } from "@/lib/auth/policy";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { DashboardDecor } from "@/components/dashboard/DashboardDecor";
+
 export default async function ChannelsHomePage() {
   const t = await getTranslations("channels.home");
   const ctx = await requireUser();
   const channelsMember = await getUserChannels(ctx.user.email);
   return (
-    <main className="mx-auto max-w-xl px-4 py-16">
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("title")}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          {t("subtitle")}
-        </p>
+    <div className="relative">
+      <DashboardDecor />
+      <div className="relative z-10">
+        <div className="mb-10 border-b border-border pb-8">
+          <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">
+            {t("title")}
+          </h1>
+          <p className="mt-2 text-sm text-foreground-muted">{t("subtitle")}</p>
+        </div>
 
-        <div className="mt-6 flex flex-col gap-3">
+        <div className="grid gap-4 sm:grid-cols-3">
           <Link
             href="/channels/create"
-            className="flex items-center gap-4 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-500 dark:hover:bg-zinc-800/50"
+            className="group block rounded-xl border border-border bg-surface p-5 shadow-card transition hover:border-primary hover:shadow-elevated"
           >
-            <Image
-              src="/icons/channel/channel-create.svg"
-              alt=""
-              width={24}
-              height={24}
-              className="h-6 w-6 shrink-0"
-            />
-            <div>
-              <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
-                {t("createTitle")}
-              </h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {t("createDesc")}
-              </p>
-            </div>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover text-primary-foreground">
+              <PlusCircleIcon />
+            </span>
+            <h2 className="mt-4 font-medium text-foreground">{t("createTitle")}</h2>
+            <p className="mt-1 text-sm text-foreground-muted">{t("createDesc")}</p>
           </Link>
 
           <Link
             href="/channels/join"
-            className="flex items-center gap-4 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-500 dark:hover:bg-zinc-800/50"
+            className="group block rounded-xl border border-border bg-surface p-5 shadow-card transition hover:border-primary hover:shadow-elevated"
           >
-            <Image
-              src="/icons/channel/channel-join.svg"
-              alt=""
-              width={24}
-              height={24}
-              className="h-6 w-6 shrink-0"
-            />
-            <div>
-              <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
-                {t("joinTitle")}
-              </h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {t("joinDesc")}
-              </p>
-            </div>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-success to-success/70 text-primary-foreground">
+              <JoinIcon />
+            </span>
+            <h2 className="mt-4 font-medium text-foreground">{t("joinTitle")}</h2>
+            <p className="mt-1 text-sm text-foreground-muted">{t("joinDesc")}</p>
           </Link>
 
           <Link
             href="/channels/invitations"
-            className="flex items-center gap-4 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-500 dark:hover:bg-zinc-800/50"
+            className="group block rounded-xl border border-border bg-surface p-5 shadow-card transition hover:border-primary hover:shadow-elevated"
           >
-            <Image
-              src="/icons/channel/channel-invite.svg"
-              alt=""
-              width={24}
-              height={24}
-              className="h-6 w-6 shrink-0"
-            />
-            <div>
-              <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
-                {t("invitationsTitle")}
-              </h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {t("invitationsDesc")}
-              </p>
-            </div>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-foreground-muted to-foreground-subtle text-primary-foreground">
+              <EnvelopeIcon />
+            </span>
+            <h2 className="mt-4 font-medium text-foreground">{t("invitationsTitle")}</h2>
+            <p className="mt-1 text-sm text-foreground-muted">{t("invitationsDesc")}</p>
           </Link>
         </div>
-      </div>
 
-      {channelsMember.length > 0 ? (
-        <div className="mt-6 flex flex-col gap-3">
-          {channelsMember.map((channel) => (
-            <div
-              key={channel.id}
-              className="flex items-start justify-between gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700"
-            >
-              <Link
-                href={`/channels/${channel.id}`}
-                className="group min-w-0 flex-1"
-              >
-                <h3 className="font-medium text-zinc-900 group-hover:underline dark:text-zinc-100">
-                  {channel.title}
-                </h3>
-                {channel.description && (
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {channel.description}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-zinc-400">
-                  {t("membersCount", { count: channel._count.members })}
-                </p>
-                {channel.isPrivate === true ? (
-                  <p>{t("private")}</p>
-                ) : (
-                  <p>{t("public")}</p>
-                )}
+        {channelsMember.length > 0 && (
+          <h2 className="mb-4 mt-10 text-sm font-semibold uppercase tracking-wide text-foreground-muted">
+            {t("myChannels")}
+          </h2>
+        )}
+
+        {channelsMember.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {channelsMember.map((channel) => (
+            <Card key={channel.id} className="flex items-start justify-between gap-4">
+              <Link href={`/channels/${channel.id}`} className="group flex min-w-0 flex-1 items-start gap-3">
+                <span
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-primary-foreground ${channelAvatarClasses(channel.id)}`}
+                >
+                  {channel.title.charAt(0).toUpperCase()}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="truncate font-medium text-foreground group-hover:underline">
+                    {channel.title}
+                  </h3>
+                  {channel.description && (
+                    <p className="line-clamp-2 text-sm text-foreground-muted">{channel.description}</p>
+                  )}
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-xs text-foreground-subtle">
+                      {t("membersCount", { count: channel._count.members })}
+                    </span>
+                    <Badge tone={channel.isPrivate ? "neutral" : "primary"}>
+                      {channel.isPrivate ? t("private") : t("public")}
+                    </Badge>
+                  </div>
+                </div>
               </Link>
 
-              <details className="relative">
+              <details className="relative shrink-0">
                 <summary
                   aria-label={t("optionsAria")}
-                  className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 [&::-webkit-details-marker]:hidden"
+                  className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-foreground-muted hover:bg-surface-hover [&::-webkit-details-marker]:hidden"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -136,11 +115,11 @@ export default async function ChannelsHomePage() {
                 </summary>
                 {/* Each link asks can() the same question as the page it opens. Since phase 6
                     a moderator need not be the creator, so Delete is not every moderator's. */}
-                <div className="absolute right-0 z-10 mt-1 w-44 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                <div className="absolute right-0 z-10 mt-1 w-44 rounded-lg border border-border bg-surface p-1 shadow-elevated">
                   {channel.isPrivate && can(ctx, "channel:moderate", { channelId: channel.id }) && (
                     <Link
                       href={`/channels/${channel.id}/invite`}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-surface-hover"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +141,7 @@ export default async function ChannelsHomePage() {
                   {can(ctx, "channel:delete", { channelId: channel.id, ownerUserId: channel.createdBy }) && (
                     <Link
                       href={`/channels/${channel.id}/delete`}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-danger hover:bg-danger-subtle"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -184,7 +163,7 @@ export default async function ChannelsHomePage() {
                   {can(ctx, "channel:update", { channelId: channel.id }) && (
                     <Link
                       href={`/channels/${channel.id}/edit`}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-surface-hover"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -206,7 +185,7 @@ export default async function ChannelsHomePage() {
                   {channel.isPrivate && can(ctx, "channel:moderate", { channelId: channel.id }) && (
                     <Link
                       href={`/channels/${channel.id}/requests`}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-surface-hover"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -229,7 +208,7 @@ export default async function ChannelsHomePage() {
                   {can(ctx, "channel:moderate", { channelId: channel.id }) && (
                     <Link
                       href={`/channels/${channel.id}/kick`}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-surface-hover"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -253,7 +232,7 @@ export default async function ChannelsHomePage() {
                     <input type="hidden" name="channelId" value={channel.id} />
                     <button
                       type="submit"
-                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-danger hover:bg-danger-subtle"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -274,14 +253,56 @@ export default async function ChannelsHomePage() {
                   </form>
                 </div>
               </details>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
-          {t("empty")}
-        </p>
-      )}
-    </main>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-10">
+            <EmptyState title={t("empty")} />
+          </div>
+        )}
+      </div>
+    </div>
   );
+}
+
+function PlusCircleIcon() {
+  return (
+    <svg aria-hidden="true" className="size-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+  );
+}
+
+function JoinIcon() {
+  return (
+    <svg aria-hidden="true" className="size-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3-3-3-3m3 3H9m3 3 3-3"
+      />
+    </svg>
+  );
+}
+
+function EnvelopeIcon() {
+  return (
+    <svg aria-hidden="true" className="size-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+      />
+    </svg>
+  );
+}
+
+function channelAvatarClasses(id: number): string {
+  const gradients = [
+    "bg-gradient-to-br from-primary to-primary-hover",
+    "bg-gradient-to-br from-success to-success/70",
+    "bg-gradient-to-br from-warning to-warning/70",
+  ];
+  return gradients[id % gradients.length]!;
 }

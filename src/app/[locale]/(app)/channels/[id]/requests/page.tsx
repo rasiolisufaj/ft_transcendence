@@ -7,6 +7,8 @@ import { Link } from "@/i18n/navigation";
 import { getChannelJoinRequests } from "./data";
 import { acceptJoinRequest, rejectJoinRequest } from "./action";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default async function ChannelRequestsPage({
   params,
@@ -31,35 +33,31 @@ export default async function ChannelRequestsPage({
   const t = await getTranslations("channels.requests");
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+      <Card>
         {/* The channel page 404s for a non-member (an admin), so their way back is the list */}
         <Link
           href={ctx.memberships.some((m) => m.channelId === id) ? `/channels/${id}` : "/channels"}
-          className="text-sm text-zinc-500 hover:underline dark:text-zinc-400"
+          className="text-sm text-foreground-muted hover:text-foreground"
         >
           {t("back")}
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("title")}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          {t("subtitle")}
-        </p>
+        <h1 className="mt-4 text-2xl font-semibold text-foreground">{t("title")}</h1>
+        <p className="mt-1 text-sm text-foreground-muted">{t("subtitle")}</p>
 
         {requests.length === 0 ? (
-          <p className="mt-6 text-sm italic text-zinc-400">{t("empty")}</p>
+          <div className="mt-6">
+            <EmptyState title={t("empty")} />
+          </div>
         ) : (
           <div className="mt-6 flex flex-col gap-3">
             {requests.map((request) => (
               <div
                 key={request.userId}
-                className="flex items-center justify-between rounded-xl border border-zinc-200 p-4 dark:border-zinc-700"
+                className="flex items-center justify-between rounded-xl border border-border p-4"
               >
                 <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {request.user.displayName}
-                  </p>
-                  <p className="text-xs text-zinc-400">
+                  <p className="font-medium text-foreground">{request.user.displayName}</p>
+                  <p className="text-xs text-foreground-subtle">
                     {format.dateTime(request.createdAt, {
                       dateStyle: "short",
                     })}{" "}
@@ -72,7 +70,7 @@ export default async function ChannelRequestsPage({
                     <input type="hidden" name="userId" value={request.userId} />
                     <button
                       type="submit"
-                      className="rounded-md px-3 py-2 text-sm text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950"
+                      className="rounded-md px-3 py-2 text-sm text-success hover:bg-success-subtle"
                     >
                       {t("accept")}
                     </button>
@@ -82,7 +80,7 @@ export default async function ChannelRequestsPage({
                     <input type="hidden" name="userId" value={request.userId} />
                     <button
                       type="submit"
-                      className="rounded-md px-3 py-2 text-sm text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                      className="rounded-md px-3 py-2 text-sm text-danger hover:bg-danger-subtle"
                     >
                       {t("reject")}
                     </button>
@@ -92,7 +90,7 @@ export default async function ChannelRequestsPage({
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </main>
   );
 }

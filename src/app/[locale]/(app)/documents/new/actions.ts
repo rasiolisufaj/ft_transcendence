@@ -94,7 +94,7 @@ export async function uploadDocument(formData: FormData) {
 
   // Base row and typed row in one transaction: a document must never exist with
   // half its data. The switch that picks the table lives in subtypes.ts.
-  await prisma.$transaction(async (tx) => {
+  const documentId = await prisma.$transaction(async (tx) => {
     const document = await tx.document.create({
       data: {
         ownerId: user.id,
@@ -117,7 +117,11 @@ export async function uploadDocument(formData: FormData) {
     if (narrowed?.ok && narrowed.model && narrowed.data) {
       await writeSubtypeRow(tx, narrowed.model, document.id, narrowed.data);
     }
+
+    return document.id;
   });
 
-  redirect({ href: "/", locale: await getLocale() });
+  // Land on the document, not the dashboard: that page shows the AI's
+  // classification right away, ready to confirm or correct.
+  redirect({ href: `/documents/view/${documentId}`, locale: await getLocale() });
 }

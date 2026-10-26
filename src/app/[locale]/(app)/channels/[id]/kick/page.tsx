@@ -4,6 +4,8 @@ import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/policy";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { kickMembers, setChannelRole } from "./action";
 
 export default async function kickUser({
@@ -45,29 +47,19 @@ export default async function kickUser({
   const member = channel.members;
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
-      <Link
-        href="/channels"
-        className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-      >
+      <Link href="/channels" className="text-sm text-foreground-muted hover:text-foreground">
         {t("back")}
       </Link>
-      <h1 className="mt-4 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-        {channel.title}
-      </h1>
+      <h1 className="mt-4 text-2xl font-semibold text-foreground">{channel.title}</h1>
       {channel.description && (
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          {channel.description}
-        </p>
+        <p className="mt-1 text-sm text-foreground-muted">{channel.description}</p>
       )}
-      <p className="mt-2 text-xs text-zinc-400">
+      <p className="mt-2 text-xs text-foreground-subtle">
         {t("membersCount", { count: member.length })}
       </p>
       <div className="mt-6 flex flex-col gap-3">
         {member.map((membre) => (
-          <div
-            key={membre.userId}
-            className="flex items-start justify-between gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700"
-          >
+          <Card key={membre.userId} className="flex items-start justify-between gap-4 p-4">
             <form
               action={kickMembers}
               className="flex w-full items-center justify-between gap-4"
@@ -78,12 +70,14 @@ export default async function kickUser({
                   button whose formAction is a function, to encode which action to invoke. */}
               <input type="hidden" name="role" value={membre.role === "MODERATOR" ? "MEMBER" : "MODERATOR"} />
               <div className="min-w-0">
-                <h1 className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <h1 className="truncate text-sm font-medium text-foreground">
                   {membre.user.displayName}
                 </h1>
-                <p className="mt-1 text-xs text-zinc-400">
-                  {membre.role === "MODERATOR" ? t("moderator") : t("member")}
-                </p>
+                <div className="mt-1">
+                  <Badge tone={membre.role === "MODERATOR" ? "primary" : "neutral"}>
+                    {membre.role === "MODERATOR" ? t("moderator") : t("member")}
+                  </Badge>
+                </div>
               </div>
               <div className="flex shrink-0 gap-2">
                 {/* Same form, other action. */}
@@ -91,7 +85,7 @@ export default async function kickUser({
                   <button
                     type="submit"
                     formAction={setChannelRole}
-                    className="rounded-lg px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    className="rounded-lg px-3 py-1.5 text-sm text-foreground-muted hover:bg-surface-hover hover:text-foreground"
                   >
                     {membre.role === "MODERATOR" ? t("demote") : t("promote")}
                   </button>
@@ -100,14 +94,14 @@ export default async function kickUser({
                 {membre.role === "MEMBER" && membre.userId !== ctx.user.id && (
                   <button
                     type="submit"
-                    className="rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                    className="rounded-lg px-3 py-1.5 text-sm text-danger hover:bg-danger-subtle"
                   >
                     {t("kick")}
                   </button>
                 )}
               </div>
             </form>
-          </div>
+          </Card>
         ))}
       </div>
     </main>

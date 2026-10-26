@@ -2,17 +2,18 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/Button";
 import { createChannel } from "./action";
+
+const fieldClass =
+  "w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-primary";
 
 export default function ChannelForm() {
   const t = useTranslations("channels.create");
   return (
     <form className="flex flex-col gap-4" action={createChannel}>
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="name"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-        >
+        <label htmlFor="name" className="text-sm font-medium text-foreground">
           {t("nameLabel")}
         </label>
         <input
@@ -22,15 +23,12 @@ export default function ChannelForm() {
           required
           maxLength={50}
           placeholder={t("namePlaceholder")}
-          className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
+          className={fieldClass}
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="description"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-        >
+        <label htmlFor="description" className="text-sm font-medium text-foreground">
           {t("descriptionLabel")}
         </label>
         <textarea
@@ -38,14 +36,11 @@ export default function ChannelForm() {
           name="description"
           rows={3}
           placeholder={t("descriptionPlaceholder")}
-          className="resize-none rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
+          className={`resize-none ${fieldClass}`}
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="question"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-        >
+        <label htmlFor="question" className="text-sm font-medium text-foreground">
           {t("questionLabel")}
         </label>
         <textarea
@@ -53,33 +48,35 @@ export default function ChannelForm() {
           name="question"
           rows={3}
           placeholder={t("questionPlaceholder")}
-          className="resize-none rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
+          className={`resize-none ${fieldClass}`}
         />
       </div>
-      <legend>prive/public</legend>
 
-      <label>
-        <input type="radio" name="visibility" value="public" />
-        <p>public</p>
-      </label>
+      <fieldset className="flex flex-col gap-1.5">
+        <legend className="text-sm font-medium text-foreground">{t("visibilityLabel")}</legend>
+        <div className="flex gap-3">
+          <label className="flex flex-1 items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-sm text-foreground has-checked:border-primary has-checked:bg-primary-subtle has-checked:text-primary-subtle-foreground">
+            <input type="radio" name="visibility" value="public" defaultChecked className="accent-primary" />
+            {t("public")}
+          </label>
 
-      <label>
-        <input type="radio" name="visibility" value="private" />
-        <p>privée</p>
-      </label>
+          <label className="flex flex-1 items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-sm text-foreground has-checked:border-primary has-checked:bg-primary-subtle has-checked:text-primary-subtle-foreground">
+            <input type="radio" name="visibility" value="private" className="accent-primary" />
+            {t("private")}
+          </label>
+        </div>
+      </fieldset>
+
       <div className="mt-2 flex gap-3">
         <Link
           href="/channels"
-          className="flex-1 rounded-lg border border-zinc-200 py-2.5 text-center text-sm text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="flex-1 rounded-lg border border-border py-2.5 text-center text-sm text-foreground-muted transition hover:border-border-strong hover:text-foreground"
         >
           {t("cancel")}
         </Link>
-        <button
-          type="submit"
-          className="flex-1 rounded-lg bg-zinc-900 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+        <Button type="submit" className="flex-1">
           {t("submit")}
-        </button>
+        </Button>
       </div>
     </form>
   );
