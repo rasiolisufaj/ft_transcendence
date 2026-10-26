@@ -227,7 +227,8 @@
       "passwordRequired": "Enter your password.",
       "emailTaken": "That email address is already registered.",
       "invalidCredentials": "Incorrect email or password.",
-      "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes."
+      "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
+      "oauthFailed": "Signing in with Google did not work. Try again."
     },
     "fields": {
       "email": "Email",
@@ -247,7 +248,8 @@
       "pending": "Creating account…",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in"
-    }
+    },
+    "continueWithGoogle": "Continue with Google"
   },
   "admin": {
     "forbiddenTitle": "Access denied",

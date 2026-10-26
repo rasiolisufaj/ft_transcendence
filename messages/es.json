@@ -227,7 +227,8 @@
       "passwordRequired": "Introduzca su contraseña.",
       "emailTaken": "Esta dirección de correo electrónico ya está registrada.",
       "invalidCredentials": "Correo electrónico o contraseña incorrectos.",
-      "tooManyAttempts": "Demasiados intentos fallidos. Vuelva a intentarlo dentro de 15 minutos."
+      "tooManyAttempts": "Demasiados intentos fallidos. Vuelva a intentarlo dentro de 15 minutos.",
+      "oauthFailed": "No se pudo iniciar sesión con Google. Vuelva a intentarlo."
     },
     "fields": {
       "email": "Correo electrónico",
@@ -247,7 +248,8 @@
       "pending": "Creando la cuenta…",
       "hasAccount": "¿Ya tiene una cuenta?",
       "loginLink": "Iniciar sesión"
-    }
+    },
+    "continueWithGoogle": "Continuar con Google"
   },
   "admin": {
     "forbiddenTitle": "Acceso denegado",
