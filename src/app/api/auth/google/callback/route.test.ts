@@ -76,17 +76,28 @@ describe("GET /api/auth/google/callback", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("ends on the login page, not a 500, when the user cancels or Google is down", async () => {
+  it("ends on the login page, not a 500, when the user cancels, Google is down, or Google answers an error page", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const cancelled = await callback(`error=access_denied&state=${STATE}`);
     fetchMock.mockRejectedValueOnce(new TypeError("fetch failed"));
     const down = await callback(`code=c&state=${STATE}`);
+    fetchMock.mockResolvedValueOnce(new Response("<html>Bad Gateway</html>", { status: 502 }));
+    const errorPage = await callback(`code=c&state=${STATE}`);
 
-    expect(cancelled.headers.get("location")).toBe(LOGIN_ERROR);
-    expect(down.headers.get("location")).toBe(LOGIN_ERROR);
+    for (const res of [cancelled, down, errorPage]) expect(res.headers.get("location")).toBe(LOGIN_ERROR);
     expect(setSessionCookie).not.toHaveBeenCalled();
-    expect(log).toHaveBeenCalledOnce();
+    expect(log).toHaveBeenCalledTimes(2); // a cancel is the user's choice, not an error to log
+    log.mockRestore();
+  });
+
+  it("logs why Google refused the code", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    fetchMock.mockResolvedValueOnce(Response.json({ error: "invalid_grant" }, { status: 400 }));
+
+    await callback(`code=c&state=${STATE}`);
+
+    expect(String(log.mock.calls[0]?.[1])).toContain("invalid_grant");
     log.mockRestore();
   });
 });

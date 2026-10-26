@@ -56,7 +56,14 @@ export async function resolveGoogleUser(profile: GoogleProfile): Promise<string 
     select: { id: true },
   });
   if (existing) {
-    await prisma.oAuthAccount.create({ data: { ...identity, userId: existing.id } });
+    // Signup never checks that you own the address, so the password may be an impostor's who
+    // signed up first. Google has just proved the mailbox: drop that password and end every
+    // session it opened, or the impostor keeps a way into the owner's account (final review).
+    await prisma.$transaction([
+      prisma.oAuthAccount.create({ data: { ...identity, userId: existing.id } }),
+      prisma.user.update({ where: { id: existing.id }, data: { passwordHash: null } }),
+      prisma.session.deleteMany({ where: { userId: existing.id } }),
+    ]);
     return existing.id;
   }
 
@@ -67,7 +74,10 @@ export async function resolveGoogleUser(profile: GoogleProfile): Promise<string 
       email: profile.email,
       passwordHash: null,
       // The profile form's 2–50 rule is a form rule; the user can rename later (decision 4).
-      displayName: (profile.name?.trim() || profile.email.slice(0, profile.email.indexOf("@"))).slice(0, 50),
+      // Array.from cuts between characters: .slice would split an emoji, which Postgres refuses.
+      displayName: Array.from(profile.name?.trim() || profile.email.slice(0, profile.email.indexOf("@")))
+        .slice(0, 50)
+        .join(""),
       oauthAccounts: { create: identity },
     },
     select: { id: true },
