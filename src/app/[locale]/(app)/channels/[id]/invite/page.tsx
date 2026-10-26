@@ -4,6 +4,8 @@ import { can } from "@/lib/auth/policy";
 import { getAllUsers } from "../../create/data";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { inviteUser } from "./action";
 import { requireUser } from "@/lib/auth/session";
 
@@ -38,20 +40,15 @@ export default async function InviteUserPage({
   const users = await getAllUsers();
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
-      <Link
-        href="/channels"
-        className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-      >
+      <Link href="/channels" className="text-sm text-foreground-muted hover:text-foreground">
         {t("back")}
       </Link>
 
-      <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+      <Card className="mt-4">
+        <h1 className="text-2xl font-semibold text-foreground">
           {t("title", { channel: channel.title })}
         </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          {t("subtitle")}
-        </p>
+        <p className="mt-1 text-sm text-foreground-muted">{t("subtitle")}</p>
 
         <form className="mt-6 flex flex-col gap-3" action={inviteUser}>
           <input type="hidden" name="channelId" value={channel.id} />
@@ -61,7 +58,7 @@ export default async function InviteUserPage({
             required
             defaultValue=""
             aria-label={t("userAria")}
-            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-primary"
           >
             <option value="" disabled>
               {t("chooseUser")}
@@ -73,14 +70,9 @@ export default async function InviteUserPage({
             ))}
           </select>
 
-          <button
-            type="submit"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            {t("submit")}
-          </button>
+          <Button type="submit">{t("submit")}</Button>
         </form>
-      </div>
+      </Card>
     </main>
   );
 }

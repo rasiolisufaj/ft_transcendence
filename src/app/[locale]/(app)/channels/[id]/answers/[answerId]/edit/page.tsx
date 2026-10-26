@@ -1,6 +1,8 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { modifAnswerUser } from "../../../actions";
 import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/policy";
@@ -53,36 +55,33 @@ export default async function EditAnswerPage({
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-xl font-semibold">{t("title")}</h1>
+    <main className="mx-auto max-w-xl px-4 py-16">
+      <Card>
+        <h1 className="text-2xl font-semibold text-foreground">{t("title")}</h1>
 
-      <form className="flex flex-col gap-3" action={modifAnswerUser}>
-        <input type="hidden" name="answerId" value={answer.id} />
-        <input type="hidden" name="channelId" value={trueIdChannel} />
-        <textarea
-          name="content"
-          defaultValue={answer.content}
-          required
-          maxLength={1000}
-          rows={5}
-          className="rounded-lg border border-zinc-300 p-3 dark:border-zinc-700 dark:bg-zinc-900"
-        />
+        <form className="mt-6 flex flex-col gap-3" action={modifAnswerUser}>
+          <input type="hidden" name="answerId" value={answer.id} />
+          <input type="hidden" name="channelId" value={trueIdChannel} />
+          <textarea
+            name="content"
+            defaultValue={answer.content}
+            required
+            maxLength={1000}
+            rows={5}
+            className="rounded-lg border border-border-strong bg-surface p-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-primary"
+          />
 
-        <div className="flex justify-end gap-2">
-          <Link
-            href={`/channels/${channel.id}`}
-            className="rounded-lg px-4 py-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-          >
-            {t("cancel")}
-          </Link>
-          <button
-            type="submit"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            {t("save")}
-          </button>
-        </div>
-      </form>
+          <div className="flex justify-end gap-2">
+            <Link
+              href={`/channels/${channel.id}`}
+              className="rounded-lg px-4 py-2 text-sm text-foreground-muted hover:bg-surface-hover"
+            >
+              {t("cancel")}
+            </Link>
+            <Button type="submit">{t("save")}</Button>
+          </div>
+        </form>
+      </Card>
     </main>
   );
 }

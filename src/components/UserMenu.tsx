@@ -4,13 +4,14 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { logout } from "@/app/[locale]/(auth)/logout/actions";
 import { Link, usePathname } from "@/i18n/navigation";
+import { Avatar } from "@/components/ui/Avatar";
 
 // Same rows as LocaleSwitcher: a ✓ column, then the label. 44 px tall below md, where
 // only the ☰ panel shows them (touch); 36 px in the desktop dropdown.
 const item =
-  "flex w-full items-center gap-2 px-3 py-3 md:py-2 text-left text-sm hover:bg-zinc-100 focus-visible:bg-zinc-100 focus-visible:outline-none dark:hover:bg-zinc-800 dark:focus-visible:bg-zinc-800";
-const idle = "text-zinc-600 dark:text-zinc-400";
-const current = "font-semibold text-zinc-900 dark:text-zinc-100";
+  "flex w-full items-center gap-2 px-3 py-3 md:py-2 text-left text-sm transition hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none";
+const idle = "text-foreground-muted";
+const current = "font-medium text-foreground";
 
 // The account menu of the desktop bar, built like LocaleSwitcher (disclosure, not role="menu").
 export function UserMenu({ name, userId, isAdmin }: { name: string; userId: string; isAdmin: boolean }) {
@@ -55,19 +56,22 @@ export function UserMenu({ name, userId, isAdmin }: { name: string; userId: stri
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:focus-visible:outline-zinc-100"
+        className="flex items-center gap-2 rounded-full border border-border py-1 pe-3 ps-1 text-sm font-medium text-foreground transition hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <span className="sr-only">{t("account")}</span>
-        <span className="max-w-32 truncate">{name}</span>
+        <Avatar name={name} size="sm" />
+        <span className="max-w-28 truncate">{name}</span>
         <ChevronIcon className={open ? "rotate-180" : undefined} />
       </button>
 
       <ul
         id={listId}
         hidden={!open}
-        className="absolute end-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+        className="absolute end-0 top-full z-10 mt-2 min-w-48 overflow-hidden rounded-xl border border-border bg-surface py-1 shadow-elevated"
       >
-        <AccountLinks userId={userId} isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
+        {/* compact: the ☰ panel below already lists Dashboard/Channels/Friends, and the
+            desktop bar shows them next to this menu (NavLinks) — no need for them twice. */}
+        <AccountLinks userId={userId} isAdmin={isAdmin} onNavigate={() => setOpen(false)} compact />
       </ul>
     </div>
   );
@@ -78,10 +82,13 @@ export function AccountLinks({
   userId,
   isAdmin,
   onNavigate,
+  compact = false,
 }: {
   userId: string;
   isAdmin: boolean;
   onNavigate?: () => void;
+  /** Leaves out Dashboard/Channels/Friends: NavLinks already shows them next to this menu. */
+  compact?: boolean;
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
@@ -89,10 +96,14 @@ export function AccountLinks({
   return (
     <>
       {[
-        { href: "/", label: t("dashboard") },
+        ...(compact
+          ? []
+          : [
+              { href: "/", label: t("dashboard") },
+              { href: "/channels", label: t("channels") },
+              { href: "/friends", label: t("friends") },
+            ]),
         { href: `/users/${userId}`, label: t("profile") },
-        { href: "/channels", label: t("channels") },
-        { href: "/friends", label: t("friends") },
         { href: "/account/data", label: t("myData") },
         ...(isAdmin ? [{ href: "/admin/users", label: t("admin") }] : []),
       ].map((page) => {
@@ -105,19 +116,20 @@ export function AccountLinks({
               onClick={onNavigate}
               className={`${item} ${active ? current : idle}`}
             >
-              <span aria-hidden="true" className="w-4 text-center">
-                {active ? "✓" : ""}
-              </span>
+              <span
+                aria-hidden="true"
+                className={`size-1.5 shrink-0 rounded-full ${active ? "bg-primary" : "bg-transparent"}`}
+              />
               {page.label}
             </Link>
           </li>
         );
       })}
       {/* The separator is a border, not an empty <li>: a list may only hold list items. */}
-      <li className="mt-1 border-t border-zinc-200 pt-1 dark:border-zinc-800">
+      <li className="mt-1 border-t border-border pt-1">
         <form action={logout}>
           <button type="submit" className={`${item} ${idle}`}>
-            <span aria-hidden="true" className="w-4" />
+            <span aria-hidden="true" className="size-1.5 shrink-0" />
             {t("logout")}
           </button>
         </form>
