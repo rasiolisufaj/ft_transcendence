@@ -1089,16 +1089,18 @@ gh pr create --base main --title "feat(auth): sign in with Google, OAuth 2.0 + P
 Phase 8 of the roadmap (C7): the OAuth 2.0 minor, Google first.
 
 - `GET /api/auth/google/start` and `/callback`: authorization code + PKCE (S256), hand-written with `fetch`; `state` and the verifier live in one httpOnly 10-minute cookie that every callback answer clears, so a replayed callback is refused
-- account resolution: the same Google identity signs in again; a verified email that already has an account is linked to it; otherwise a new account with no password. An unverified Google email is refused
+- account resolution: the same Google identity signs in again; a verified email that already has an account is linked to it, **and that account's password and open sessions are dropped** (signup never verifies emails, so whoever signed up first with the address may not own it; plan decision 10); otherwise a new account with no password. An unverified Google email is refused
 - *Continuer avec Google* on the login and signup pages (`GoogleButton`, in the /dev/ui gallery)
 
-Plan: docs/plans/2026-10-26-c7-oauth-google.md · Manual test: docs/testing-auth.md B15
+Plan: docs/plans/2026-10-26-c7-oauth-google.md · Manual test: docs/testing-auth.md B15 · `npm test` 276/276
+
+Reviewed before this PR by a fresh reviewer ("with fixes", 0 Critical); its fixes are in `4bb79a2`: linking drops the password and ends the sessions, the display name is cut between characters (an emoji at character 50 broke sign-in), Google's error answers are tested and its refusal reason is logged.
 
 To try it: Google refuses `.local` redirect URIs, so Google sign-in runs on https://localhost (set `APP_URL=https://localhost` and the Google keys in `.env`, then `docker compose up -d web`). Without the keys, the button sends you back to the login page with a message.
 
-@Amir: `account/data/` (schemas, action, form, page): an account created by Google has no password, so it confirms its deletion by typing its email; one test in `actions.test.ts`.
+@Amir: `account/data/` (schemas, action, form, page): an account with no password (created by Google, or linked to Google, which drops the password) confirms its deletion by typing its email; one test in `actions.test.ts`. Heads-up on `prisma/seed.ts`: the seeded users have real `@gmail.com` addresses, so with Google sign-in whoever owns one of them (`rasiol@gmail.com` is ADMIN) could reach that account once the Google client leaves Testing mode; a reserved domain such as `@mespapiers.test` avoids it.
 @Alexandre: the `GoogleButton` primitive in `src/components/ui/` and its gallery entry.
-@Adrien: `docker-compose.yml` forwards `APP_URL`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to `web`.
+@Adrien: `docker-compose.yml` forwards `APP_URL`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to `web`. Heads-up: `.dockerignore` has no `.env` rule, so the next `docker compose build` bakes your `.env` (now with a real Google client secret) into the image at `/app/.env`; adding `.env` to `.dockerignore` fixes it.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
