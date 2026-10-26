@@ -227,7 +227,8 @@
       "passwordRequired": "Saisissez votre mot de passe.",
       "emailTaken": "Cette adresse e-mail est déjà associée à un compte.",
       "invalidCredentials": "Adresse e-mail ou mot de passe incorrect.",
-      "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes."
+      "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes.",
+      "oauthFailed": "La connexion avec Google n'a pas abouti. Réessayez."
     },
     "fields": {
       "email": "Adresse e-mail",
@@ -247,7 +248,8 @@
       "pending": "Création du compte…",
       "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter"
-    }
+    },
+    "continueWithGoogle": "Continuer avec Google"
   },
   "admin": {
     "forbiddenTitle": "Accès refusé",
