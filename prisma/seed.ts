@@ -6,18 +6,12 @@ import { hashPassword } from "../src/lib/auth/password";
 
 const prisma = new PrismaClient();
 
-// Mot de passe de dev de tous les comptes (docs/testing-auth.md)
 const DEV_PASSWORD = "motdepasse123";
-
-// ── Fichiers factices ────────────────────────────────────────────────────────
-// De petits fichiers réels (pas juste des octets magiques) : un minuscule PDF
-// et un minuscule PNG, générés ici plutôt que stockés comme fixtures binaires.
 
 function sha256Hex(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");
 }
 
-// CRC32 standard (table IEEE 802.3), nécessaire pour des chunks PNG valides.
 function crc32(buffer: Buffer): number {
     let crc = 0xffffffff;
     for (const byte of buffer) {
@@ -38,20 +32,19 @@ function pngChunk(type: string, data: Buffer): Buffer {
     return Buffer.concat([length, typeBuffer, data, crc]);
 }
 
-// Un petit PNG RGB valide, uni, de `size` x `size` pixels.
 function tinyPng(size: number, rgb: [number, number, number]): Buffer {
     const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
     const ihdrData = Buffer.alloc(13);
     ihdrData.writeUInt32BE(size, 0);
     ihdrData.writeUInt32BE(size, 4);
-    ihdrData[8] = 8; // bit depth
-    ihdrData[9] = 2; // color type: RGB
-    ihdrData[10] = 0; // compression
-    ihdrData[11] = 0; // filter
-    ihdrData[12] = 0; // interlace
+    ihdrData[8] = 8;
+    ihdrData[9] = 2;
+    ihdrData[10] = 0;
+    ihdrData[11] = 0;
+    ihdrData[12] = 0;
 
-    const rowLength = 1 + size * 3; // un octet de filtre "none" par ligne
+    const rowLength = 1 + size * 3;
     const raw = Buffer.alloc(size * rowLength);
     for (let y = 0; y < size; y++) {
         const rowStart = y * rowLength;
@@ -72,7 +65,6 @@ function tinyPng(size: number, rgb: [number, number, number]): Buffer {
     ]);
 }
 
-// Un petit PDF à une page, valide (table xref à jour), portant quelques lignes de texte.
 function tinyPdf(lines: string[]): Buffer {
     const escape = (s: string) => s.replace(/([()\\])/g, "\\$1");
 
@@ -112,10 +104,28 @@ function daysFromNow(n: number): Date {
     return new Date(Date.now() + n * 24 * 60 * 60 * 1000);
 }
 
-// ── Utilisateurs ─────────────────────────────────────────────────────────────
+async function cleanAll() {
+    await prisma.auditLog.deleteMany();
+    await prisma.notification.deleteMany();
+    await prisma.message.deleteMany();
+    await prisma.conversation.deleteMany();
+    await prisma.friendship.deleteMany();
+    await prisma.vote.deleteMany();
+    await prisma.answer.deleteMany();
+    await prisma.thread.deleteMany();
+    await prisma.channelJoinRequest.deleteMany();
+    await prisma.channelInvite.deleteMany();
+    await prisma.channelMember.deleteMany();
+    await prisma.channel.deleteMany();
+    await prisma.documentIdentity.deleteMany();
+    await prisma.documentInsuranceAuto.deleteMany();
+    await prisma.document.deleteMany();
+    await prisma.userAvatar.deleteMany();
+    await prisma.oAuthAccount.deleteMany();
+    await prisma.session.deleteMany();
+    await prisma.user.deleteMany();
+}
 
-// email@mespapiers.test, dérivé du nom affiché : accents et espaces retirés, en
-// minuscules. Le login met l'email saisi en minuscules avant de le chercher.
 function slugify(name: string): string {
     return name
         .normalize("NFD")
@@ -135,8 +145,6 @@ async function createUser(displayName: string, globalRole: GlobalRole = "USER") 
         },
     });
 }
-
-// ── Documents ────────────────────────────────────────────────────────────────
 
 type DocumentSpec = {
     owner: User;
@@ -188,10 +196,6 @@ async function createDocument(spec: DocumentSpec) {
     return document;
 }
 
-// ── Channels, réponses, invitations, demandes ───────────────────────────────
-
-// Crée un channel avec son créateur (MODERATOR), ses membres (MEMBER, sauf les
-// `moderators` listés qui sont promus), et sa question. `isPrivate` par défaut à false.
 async function createChannel(
     creator: User,
     title: string,
@@ -240,7 +244,8 @@ async function addJoinRequests(channelId: number, users: User[]) {
 }
 
 async function main() {
-    // 1. Utilisateurs : les dix d'origine, plus dix profils variés (France et étranger).
+    await cleanAll();
+
     const Amir = await createUser("Amir");
     const Adrien = await createUser("Adrien");
     const Rasiol = await createUser("Rasiol", "ADMIN");
@@ -268,8 +273,6 @@ async function main() {
         Maria, John, Wei, Fatima, Giulia, Hans, Olga, Kwame, Aiko, Liam,
     ];
 
-    // 2. Documents : certains utilisateurs en ont plusieurs, certains un seul,
-    // certains aucun (Adrien, Alexandre, Yanis, Karim, Wei, Hans, Kwame, Liam).
     const documents = [
         await createDocument({
             owner: Amir,
@@ -476,7 +479,6 @@ async function main() {
         }),
     ];
 
-    // 3. Channels publics (chaque utilisateur est dans au moins un channel).
     const auto = await createChannel(
         Amir,
         "Assurance auto",
@@ -546,7 +548,6 @@ async function main() {
         { moderators: [Liam] }
     );
 
-    // 4. Réponses et votes (pour qu'aucune page de channel ne soit vide).
     const autoAnswer = await addAnswer(
         auto.thread,
         Adrien,
@@ -601,7 +602,6 @@ async function main() {
         "Ça dépend du pays d'origine : certains permis se convertissent directement, d'autres demandent de repasser l'examen en France."
     );
 
-    // 5. Channels privés, avec invitations et demandes en attente.
     const entraide = await createChannel(
         Fatima,
         "Entraide expatriés",
@@ -622,8 +622,6 @@ async function main() {
         { isPrivate: true }
     );
 
-    // Invitations en attente (pas encore membres) : les quatre d'origine, plus
-    // celles des deux channels privés.
     await addInvites(sejour.channel.id, [Amir]);
     await addInvites(impots.channel.id, [Amir]);
     await addInvites(auto.channel.id, [Sarah]);
@@ -631,7 +629,6 @@ async function main() {
     await addInvites(entraide.channel.id, [Hans, Kwame, Liam]);
     await addInvites(voisins.channel.id, [Amir, Emma]);
 
-    // Demandes pour rejoindre en attente (pas encore acceptées).
     await addJoinRequests(entraide.channel.id, [John, Giulia]);
     await addJoinRequests(voisins.channel.id, [Syu, Yanis]);
 
