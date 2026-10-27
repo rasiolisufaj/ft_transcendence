@@ -49,7 +49,6 @@ export async function editChannel(formData: FormData) {
     return;
   }
 
-  // A moderator of this channel, or an admin. No longer "the creator only".
   assertCan(ctx, "channel:update", { channelId: intId });
 
   await prisma.channel.update({
@@ -79,8 +78,7 @@ export async function editChannel(formData: FormData) {
     channelId: intId,
   });
 
-  revalidatePath(`/channels/${intId}`);
-  // The channel page 404s for a non-member (an admin), so send them back to the list.
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
   const isMember = ctx.memberships.some((m) => m.channelId === intId);
   redirect({ href: isMember ? `/channels/${intId}` : "/channels", locale: await getLocale() });
 }

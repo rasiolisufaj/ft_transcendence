@@ -11,10 +11,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { CATEGORIES, categoryFromSlug } from "@/lib/documents/subtypes";
 import { deleteDocument } from "@/app/[locale]/action";
 
-/**
- * Splits a byte count into the number to display and the unit's message key.
- * The unit is translated rather than hardcoded: French writes o / Ko / Mo.
- */
 function splitSize(bytes: number): { value: number; unit: "b" | "kb" | "mb" } {
   if (bytes < 1024) return { value: bytes, unit: "b" };
   if (bytes < 1024 * 1024) return { value: bytes / 1024, unit: "kb" };
