@@ -49,7 +49,6 @@ export default async function EditAnswerPage({
     where: { id: trueAnswerId },
   });
 
-  // The same check as modifAnswerUser.
   if (!answer || !can(ctx, "answer:update", { ownerUserId: answer.userId })) {
     return;
   }

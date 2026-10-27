@@ -32,22 +32,15 @@ export async function deleteChannel(formData: FormData) {
   // null once the creator is deleted (§C-19): then only an admin matches.
   assertCan(ctx, "channel:delete", { channelId: trueId, ownerUserId: channel.createdBy });
 
-  const { count } = await prisma.channel.deleteMany({
-    where: {
-      id: trueId,
-    },
+  await writeAudit({
+    actorUserId: ctx.user.id,
+    action: "channel:delete",
+    targetType: "Channel",
+    targetId: String(trueId),
+    channelId: trueId,
   });
-  // After the delete, and only if it happened. AuditLog.channelId is a plain string,
-  // not a foreign key, so the row outlives the channel.
-  if (count > 0) {
-    await writeAudit({
-      actorUserId: ctx.user.id,
-      action: "channel:delete",
-      targetType: "Channel",
-      targetId: String(trueId),
-      channelId: trueId,
-    });
-  }
-  revalidatePath("/channels");
+  await prisma.channel.deleteMany({ where: { id: trueId } });
+
+  revalidatePath("/[locale]/(app)/channels", "page");
   redirect({ href: "/channels", locale: await getLocale() });
 }

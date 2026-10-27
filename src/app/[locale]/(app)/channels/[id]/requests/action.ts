@@ -25,20 +25,15 @@ export async function acceptJoinRequest(formData: FormData) {
   });
   if (!joinRequest) return;
 
-  await prisma.channelMember.create({
-    data: {
-      channelId: id,
-      userId: idUser,
-      role: "MEMBER",
-    },
-  });
-
-  await prisma.channelJoinRequest.deleteMany({
-    where: {
-      channelId: id,
-      userId: idUser,
-    },
-  });
+  await prisma.$transaction([
+    prisma.channelMember.createMany({
+      data: { channelId: id, userId: idUser, role: "MEMBER" },
+      skipDuplicates: true,
+    }),
+    prisma.channelJoinRequest.deleteMany({
+      where: { channelId: id, userId: idUser },
+    }),
+  ]);
 
   await writeAudit({
     actorUserId: ctx.user.id,
@@ -48,7 +43,7 @@ export async function acceptJoinRequest(formData: FormData) {
     channelId: id,
   });
 
-  revalidatePath("/[locale]/channels/[id]/requests", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]/requests", "page");
 }
 
 export async function rejectJoinRequest(formData: FormData) {
@@ -78,5 +73,5 @@ export async function rejectJoinRequest(formData: FormData) {
       channelId: id,
     });
 
-  revalidatePath("/[locale]/channels/[id]/requests", "page");
+  revalidatePath("/[locale]/(app)/channels/[id]/requests", "page");
 }

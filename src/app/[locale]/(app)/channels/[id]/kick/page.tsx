@@ -22,7 +22,6 @@ export default async function kickUser({
     notFound();
   }
   const ctx = await requireUser();
-  // The same check as kickMembers: a moderator of this channel, or an admin.
   if (!can(ctx, "channel:moderate", { channelId: id })) notFound();
   // The same check as setChannelRole: admins only (§C-18).
   const canManageRoles = can(ctx, "channel:manageRoles", { channelId: id });
