@@ -130,7 +130,7 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 
 - Use a **private window** at **`https://mespapiers.local`**, the name `next.config.ts` allows for dev (`allowedDevOrigins`). Every URL below uses it. It needs `127.0.0.1 mespapiers.local` in the Windows hosts file (`C:\Windows\System32\drivers\etc\hosts`), which WSL picks up too (`getent hosts mespapiers.local`). Accept the self-signed certificate.
 - Keep DevTools open, on the **Console** and **Network** tabs.
-- After `npm run db:reset` (it wipes the local database, then seeds it), the ten seeded users log in as `<first name in lowercase>@gmail.com` (`amir@gmail.com`, `rasiol@gmail.com`, …) with the dev password **`motdepasse123`**. `rasiol@gmail.com` is the only `ADMIN`; the others are `USER`. Every step below still uses a fresh account, `moi@mespapiers.test`, so that signup is tested too.
+- After `npm run db:reset` (it wipes the local database, then seeds it), the twenty seeded users log in as `<name, lowercased, accents and spaces stripped>@mespapiers.test` (`amir@mespapiers.test`, `rasiol@mespapiers.test`, …) with the dev password **`motdepasse123`**. `rasiol@mespapiers.test` is the only `ADMIN`; the others are `USER`. Every step below still uses a fresh account, `moi@mespapiers.test`, so that signup is tested too.
 
 ### B1. The guard
 
@@ -281,12 +281,12 @@ You need a second account, `autre@mespapiers.test`, signed in **at the same time
 
 ### B11. The admin surface (phase 4)
 
-Log in as `amir@gmail.com` (USER) in one browser and `rasiol@gmail.com` (ADMIN) in another; both use `motdepasse123` (B0).
+Log in as `amir@mespapiers.test` (USER) in one browser and `rasiol@mespapiers.test` (ADMIN) in another; both use `motdepasse123` (B0).
 
 | Action | Expected |
 |---|---|
 | As amir, open `/fr/admin/users`, then `/en/…` and `/es/…` | The translated "Accès refusé" card, the URL unchanged, no *Administration* link in the nav |
-| As amir, view the page source (Ctrl+U) and search for `emma@gmail.com` | **Not found.** The page checks `can()` itself; without that, the layout shows the 403 card but the user list still ships in the RSC payload |
+| As amir, view the page source (Ctrl+U) and search for `emma@mespapiers.test` | **Not found.** The page checks `can()` itself; without that, the layout shows the 403 card but the user list still ships in the RSC payload |
 | As rasiol, open the account menu (☰ below 768 px) | An *Administration* link, which opens the user table |
 | Search `EMM` | Only Emma's row (case-insensitive, on name and email) |
 | Your own row | *Vous*, no buttons |
@@ -340,7 +340,7 @@ Two browsers (or a normal and a private window). amir and lina, seeded (`motdepa
 
 | # | Do | Expect |
 |---|---|---|
-| 0 | As amir, `/fr/friends`: add `lina@gmail.com`. As lina: accept | they are friends |
+| 0 | As amir, `/fr/friends`: add `lina@mespapiers.test`. As lina: accept | they are friends |
 | 1 | As amir: account menu → *Mon profil* | `/fr/users/<id>`: initials, *Amir*, *Membre depuis le …*, his email, the edit card; no dot |
 | 2 | Save `"  Amir K  "`, then `"R"` | *Nom enregistré.* and the nav says *Amir K* without a reload; then the error, the name unchanged |
 | 3 | Upload a portrait phone photo over 2 MB | it shows at once, upright and round; `/api/users/<id>/avatar` is a 256 × 256 `image/png` with `nosniff` and `private, no-store` |
