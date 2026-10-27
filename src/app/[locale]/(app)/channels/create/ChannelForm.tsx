@@ -1,17 +1,34 @@
 "use client";
 
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { createChannel } from "./action";
+import { createChannel, type CreateChannelState } from "./action";
+
+function SubmitButton() {
+  const t = useTranslations("channels.create");
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" className="flex-1" disabled={pending}>
+      {t("submit")}
+    </Button>
+  );
+}
 
 const fieldClass =
   "w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-primary";
 
 export default function ChannelForm() {
   const t = useTranslations("channels.create");
+  const [state, formAction] = useActionState<CreateChannelState, FormData>(
+    createChannel,
+    {},
+  );
+
   return (
-    <form className="flex flex-col gap-4" action={createChannel}>
+    <form className="flex flex-col gap-4" action={formAction}>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-sm font-medium text-foreground">
           {t("nameLabel")}
@@ -21,7 +38,7 @@ export default function ChannelForm() {
           name="name"
           type="text"
           required
-          maxLength={50}
+          maxLength={100}
           placeholder={t("namePlaceholder")}
           className={fieldClass}
         />
@@ -35,10 +52,12 @@ export default function ChannelForm() {
           id="description"
           name="description"
           rows={3}
+          maxLength={250}
           placeholder={t("descriptionPlaceholder")}
           className={`resize-none ${fieldClass}`}
         />
       </div>
+
       <div className="flex flex-col gap-1.5">
         <label htmlFor="question" className="text-sm font-medium text-foreground">
           {t("questionLabel")}
@@ -47,6 +66,8 @@ export default function ChannelForm() {
           id="question"
           name="question"
           rows={3}
+          required
+          maxLength={300}
           placeholder={t("questionPlaceholder")}
           className={`resize-none ${fieldClass}`}
         />
@@ -56,7 +77,7 @@ export default function ChannelForm() {
         <legend className="text-sm font-medium text-foreground">{t("visibilityLabel")}</legend>
         <div className="flex gap-3">
           <label className="flex flex-1 items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-sm text-foreground has-checked:border-primary has-checked:bg-primary-subtle has-checked:text-primary-subtle-foreground">
-            <input type="radio" name="visibility" value="public" defaultChecked className="accent-primary" />
+            <input type="radio" name="visibility" value="public" defaultChecked required className="accent-primary" />
             {t("public")}
           </label>
 
@@ -67,6 +88,15 @@ export default function ChannelForm() {
         </div>
       </fieldset>
 
+      {state.error ? (
+        <p
+          role="alert"
+          className="rounded-lg border border-danger/40 bg-danger-subtle px-3 py-2 text-sm text-danger"
+        >
+          {t(`errors.${state.error}`)}
+        </p>
+      ) : null}
+
       <div className="mt-2 flex gap-3">
         <Link
           href="/channels"
@@ -74,9 +104,7 @@ export default function ChannelForm() {
         >
           {t("cancel")}
         </Link>
-        <Button type="submit" className="flex-1">
-          {t("submit")}
-        </Button>
+        <SubmitButton />
       </div>
     </form>
   );

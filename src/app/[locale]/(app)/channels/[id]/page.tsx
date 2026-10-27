@@ -11,6 +11,7 @@ import {
   createAnswer,
   deleteAnswer,
   leaveChannel,
+  toggleCloseChannel,
 } from "./actions";
 import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/policy";
@@ -22,6 +23,7 @@ export default async function ChannelPage({
   params: Promise<{ id: string }>;
 }) {
   const t = await getTranslations("channels.detail");
+  const tHome = await getTranslations("channels.home");
   const format = await getFormatter();
   const p = await params;
   const idChannel = p.id;
@@ -71,6 +73,11 @@ export default async function ChannelPage({
   const friendsInChannel = channel.members.filter((member) => friendIds.has(member.userId)).length;
 
   const question = channel.threads[0];
+
+  const canToggleClose = can(ctx, "channel:delete", {
+    channelId: channel.id,
+    ownerUserId: channel.createdBy,
+  });
   return (
     <div className="relative">
       <DashboardDecor />
@@ -88,17 +95,35 @@ export default async function ChannelPage({
               {channel.description && (
                 <p className="mt-2 text-sm text-foreground-muted">{channel.description}</p>
               )}
+              {channel.isClosed && (
+                <p className="mt-2 inline-block rounded-md border border-border bg-surface-hover px-2 py-0.5 text-xs text-foreground-muted">
+                  {tHome("closed")}
+                </p>
+              )}
             </div>
-            <form action={leaveChannel}>
-              <input type="hidden" name="channelId" value={channel.id} />
-              <button
-                type="submit"
-                className="flex shrink-0 items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-danger transition hover:border-danger hover:bg-danger-subtle"
-              >
-                <LeaveIcon />
-                {t("leave")}
-              </button>
-            </form>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              {canToggleClose && (
+                <form action={toggleCloseChannel}>
+                  <input type="hidden" name="channelId" value={channel.id} />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground-muted transition hover:border-border-strong hover:bg-surface-hover"
+                  >
+                    {channel.isClosed ? tHome("reopen") : tHome("close")}
+                  </button>
+                </form>
+              )}
+              <form action={leaveChannel}>
+                <input type="hidden" name="channelId" value={channel.id} />
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-danger transition hover:border-danger hover:bg-danger-subtle"
+                >
+                  <LeaveIcon />
+                  {t("leave")}
+                </button>
+              </form>
+            </div>
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -225,25 +250,27 @@ export default async function ChannelPage({
                 })}
               </ul>
             )}
-            <form
-              className="sticky bottom-0 mt-6 flex gap-2 border-t border-border bg-background py-4"
-              action={createAnswer}
-            >
-              <input type="hidden" name="threadId" value={question.id} />
+            {channel.isClosed ? null : (
+              <form
+                className="sticky bottom-0 mt-6 flex gap-2 border-t border-border bg-background py-4"
+                action={createAnswer}
+              >
+                <input type="hidden" name="threadId" value={question.id} />
 
-              <input
-                type="text"
-                name="content"
-                required
-                maxLength={300}
-                placeholder={t("replyPlaceholder")}
-                aria-label={t("replyAria")}
-                autoComplete="off"
-                className="flex-1 rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-primary"
-              />
+                <input
+                  type="text"
+                  name="content"
+                  required
+                  maxLength={300}
+                  placeholder={t("replyPlaceholder")}
+                  aria-label={t("replyAria")}
+                  autoComplete="off"
+                  className="flex-1 rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-primary"
+                />
 
-              <Button type="submit">{t("send")}</Button>
-            </form>
+                <Button type="submit">{t("send")}</Button>
+              </form>
+            )}
           </>
         ) : (
           <p className="text-sm text-foreground-muted">{t("noQuestion")}</p>

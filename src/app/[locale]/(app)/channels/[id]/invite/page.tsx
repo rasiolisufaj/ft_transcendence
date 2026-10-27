@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { can } from "@/lib/auth/policy";
-import { getAllUsers } from "../../create/data";
+import { getInvitableUsers } from "../../create/data";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { Card } from "@/components/ui/Card";
@@ -9,14 +9,12 @@ import { Button } from "@/components/ui/Button";
 import { inviteUser } from "./action";
 import { requireUser } from "@/lib/auth/session";
 
-// revoir les commentaires plus tard
 export default async function InviteUserPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const t = await getTranslations("channels.invite");
-  // recupere
   const promise = await params;
   const idChannel = promise.id;
   const trueIdChannel = parseInt(idChannel, 10);
@@ -35,9 +33,8 @@ export default async function InviteUserPage({
   });
 
   if (!channel) return;
-  // The same check as inviteUser.
   if (!can(ctx, "channel:moderate", { channelId: channel.id })) notFound();
-  const users = await getAllUsers();
+  const users = await getInvitableUsers(channel.id, ctx.user.id);
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <Link href="/channels" className="text-sm text-foreground-muted hover:text-foreground">
@@ -65,7 +62,7 @@ export default async function InviteUserPage({
             </option>
             {users.map((person) => (
               <option key={person.id} value={person.id}>
-                {person.displayName} ({person.email})
+                {person.displayName}
               </option>
             ))}
           </select>

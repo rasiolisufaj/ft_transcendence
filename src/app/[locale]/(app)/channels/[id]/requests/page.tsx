@@ -23,7 +23,6 @@ export default async function ChannelRequestsPage({
   }
 
   const ctx = await requireUser();
-  // The same check as acceptJoinRequest / rejectJoinRequest.
   if (!can(ctx, "channel:moderate", { channelId: id })) {
     notFound();
   }

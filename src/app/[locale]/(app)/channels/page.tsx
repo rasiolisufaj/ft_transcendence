@@ -86,9 +86,13 @@ export default async function ChannelsHomePage() {
                     <span className="text-xs text-foreground-subtle">
                       {t("membersCount", { count: channel._count.members })}
                     </span>
-                    <Badge tone={channel.isPrivate ? "neutral" : "primary"}>
-                      {channel.isPrivate ? t("private") : t("public")}
-                    </Badge>
+                    {channel.isClosed ? (
+                      <Badge tone="neutral">{t("closed")}</Badge>
+                    ) : (
+                      <Badge tone={channel.isPrivate ? "neutral" : "primary"}>
+                        {channel.isPrivate ? t("private") : t("public")}
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </Link>

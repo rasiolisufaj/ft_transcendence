@@ -42,16 +42,19 @@ export default async function JoinPage() {
                   {t("membersCount", { count: channel._count.members })}
                 </p>
                 {channel.isPrivate ? (
-                  <form action={requestJoinChannel} className="mt-3">
-                    <input type="hidden" name="channelId" value={channel.id} />
-                    <input type="hidden" name="userId" value={user.id} />
-                    <button
-                      type="submit"
-                      className="rounded-md px-3 py-2 text-sm text-primary hover:bg-primary-subtle"
-                    >
-                      {t("requestJoin")}
-                    </button>
-                  </form>
+                  channel.hasPendingRequest ? (
+                    <p className="mt-3 text-sm italic text-foreground-subtle">{t("pending")}</p>
+                  ) : (
+                    <form action={requestJoinChannel} className="mt-3">
+                      <input type="hidden" name="channelId" value={channel.id} />
+                      <button
+                        type="submit"
+                        className="rounded-md px-3 py-2 text-sm text-primary hover:bg-primary-subtle"
+                      >
+                        {t("requestJoin")}
+                      </button>
+                    </form>
+                  )
                 ) : (
                   <form action={joinChannel} className="mt-3">
                     <input type="hidden" name="channelId" value={channel.id} />
