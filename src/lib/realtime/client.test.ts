@@ -3,7 +3,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ServerMessage } from "@/contracts/socket";
 import { mintTicket } from "@/lib/auth/ticket";
-import { backoff, createRealtimeClient, fetchTicket, realtimeEnabled, wsUrl } from "@/lib/realtime/client";
+import { backoff, createRealtimeClient, fetchTicket, isEventOn, realtimeEnabled, wsUrl } from "@/lib/realtime/client";
 import { startServer } from "@/realtime/server";
 
 process.env.WS_TICKET_SECRET = "test-secret";
@@ -325,5 +325,25 @@ describe("realtimeEnabled", () => {
   it("stays off for any other value", () => {
     process.env.NEXT_PUBLIC_REALTIME = "true";
     expect(realtimeEnabled()).toBe(false);
+  });
+});
+
+describe("isEventOn", () => {
+  const event = {
+    type: "event",
+    topic: "channel:12",
+    event: { type: "member.left", channelId: 12, userId: "user-1", at: "2026-10-28T10:00:00.000Z" },
+  } as const;
+
+  it("is true for an event on that topic", () => {
+    expect(isEventOn(event, "channel:12")).toBe(true);
+  });
+
+  it("is false for another topic", () => {
+    expect(isEventOn(event, "channel:13")).toBe(false);
+  });
+
+  it("is false for a message that is not an event", () => {
+    expect(isEventOn({ type: "subscribed", topic: "channel:12" }, "channel:12")).toBe(false);
   });
 });

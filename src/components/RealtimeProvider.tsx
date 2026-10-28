@@ -43,6 +43,18 @@ export function useRealtimeMessage(listener: (message: ServerMessage) => void) {
   useEffect(() => client?.on((message) => onMessage(message)), [client]);
 }
 
+export function useTopic(topic: string) {
+  const { client } = useContext(RealtimeContext);
+
+  useEffect(() => {
+    if (!client) {
+      return;
+    }
+    client.subscribe(topic);
+    return () => client.unsubscribe(topic);
+  }, [client, topic]);
+}
+
 // null until the realtime server has said who is online: callers keep their lastSeenAt value.
 export function useOnlineFriends(): OnlineFriends {
   return useContext(RealtimeContext).online;
