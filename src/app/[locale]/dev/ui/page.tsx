@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { OnlineDot } from "@/components/OnlineDot";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -45,6 +46,14 @@ export default function UiGalleryPage() {
         <div className="flex items-center gap-4">
           <Avatar name="Marie Curie" />
           <Avatar name="amir" size="lg" />
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">OnlineDot</h2>
+        <div className="flex gap-6">
+          <OnlineDot online />
+          <OnlineDot online={false} />
         </div>
       </section>
 
