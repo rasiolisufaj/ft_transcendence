@@ -267,6 +267,33 @@ describe("reconnect", () => {
     expect(server.clients.size).toBe(0);
   });
 
+  it("connects again after close, as React does in development", async () => {
+    const { url } = await start();
+    const client = createRealtimeClient(url, fast);
+    void client.connect();
+    client.close();
+
+    const hello = waitFor(client, "hello");
+    await client.connect();
+
+    expect(await hello).toEqual({ type: "hello", userId: "user-1" });
+    client.close();
+  });
+
+  it("keeps one socket when close lands during a connect", async () => {
+    const { url, server } = await start();
+    const client = createRealtimeClient(url, fast);
+    const first = client.connect();
+    client.close();
+    const hello = waitFor(client, "hello");
+    await Promise.all([first, client.connect()]);
+    await hello;
+    await wait(50);
+
+    expect(server.clients.size).toBe(1);
+    client.close();
+  });
+
   it("tries again when there is no ticket yet", async () => {
     const { url } = await start();
     url.mockResolvedValueOnce(null as unknown as string);
