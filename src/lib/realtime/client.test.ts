@@ -3,7 +3,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ServerMessage } from "@/contracts/socket";
 import { mintTicket } from "@/lib/auth/ticket";
-import { createRealtimeClient, fetchTicket, wsUrl } from "@/lib/realtime/client";
+import { backoff, createRealtimeClient, fetchTicket, realtimeEnabled, wsUrl } from "@/lib/realtime/client";
 import { startServer } from "@/realtime/server";
 
 process.env.WS_TICKET_SECRET = "test-secret";
@@ -58,12 +58,12 @@ describe("createRealtimeClient", () => {
     vi.restoreAllMocks();
   });
 
-  async function start() {
+  async function start(isMember = async () => false) {
     vi.spyOn(console, "log").mockImplementation(() => {});
     const realtime = startServer({
       port: 0,
       heartbeatMs: 1000,
-      isMember: async () => false,
+      isMember,
       friendsOf: async () => [],
       publishSecret: "publish-secret",
     });
@@ -78,6 +78,16 @@ describe("createRealtimeClient", () => {
       const off = client.on((message) => {
         off();
         resolve(message);
+      });
+    });
+
+  const waitFor = (client: ReturnType<typeof createRealtimeClient>, type: ServerMessage["type"]) =>
+    new Promise<ServerMessage>((resolve) => {
+      const off = client.on((message) => {
+        if (message.type === type) {
+          off();
+          resolve(message);
+        }
       });
     });
 
@@ -113,6 +123,7 @@ describe("createRealtimeClient", () => {
     await client.connect();
 
     expect(server.clients.size).toBe(0);
+    client.close();
   });
 
   it("closes its socket", async () => {
@@ -128,5 +139,164 @@ describe("createRealtimeClient", () => {
     await closed;
 
     expect(server.clients.size).toBe(0);
+  });
+
+  it("sends a subscribe made before the socket is open", async () => {
+    const { url } = await start(async () => true);
+    const client = createRealtimeClient(url);
+    client.subscribe("channel:12");
+
+    const subscribed = waitFor(client, "subscribed");
+    await client.connect();
+
+    expect(await subscribed).toEqual({ type: "subscribed", topic: "channel:12" });
+    client.close();
+  });
+
+  it("subscribes and unsubscribes once connected", async () => {
+    const { url } = await start(async () => true);
+    const client = createRealtimeClient(url);
+    const hello = waitFor(client, "hello");
+    await client.connect();
+    await hello;
+
+    const subscribed = waitFor(client, "subscribed");
+    client.subscribe("channel:12");
+    expect(await subscribed).toEqual({ type: "subscribed", topic: "channel:12" });
+
+    const unsubscribed = waitFor(client, "unsubscribed");
+    client.unsubscribe("channel:12");
+    expect(await unsubscribed).toEqual({ type: "unsubscribed", topic: "channel:12" });
+    client.close();
+  });
+});
+
+describe("backoff", () => {
+  it("doubles from the base delay up to the max", () => {
+    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => backoff(attempt, 1000, 30_000))).toEqual([
+      1000, 2000, 4000, 8000, 16_000, 30_000, 30_000,
+    ]);
+  });
+});
+
+describe("reconnect", () => {
+  let running: { stop: () => Promise<void> } | null = null;
+  const fast = { baseDelayMs: 10, maxDelayMs: 50 };
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  afterEach(async () => {
+    await running?.stop();
+    running = null;
+    vi.restoreAllMocks();
+  });
+
+  async function start() {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const realtime = startServer({
+      port: 0,
+      heartbeatMs: 1000,
+      isMember: async () => true,
+      friendsOf: async () => [],
+      publishSecret: "publish-secret",
+    });
+    running = realtime;
+    await once(realtime.http, "listening");
+    const port = (realtime.http.address() as AddressInfo).port;
+    const url = vi.fn(async () => `ws://localhost:${port}/ws?ticket=${mintTicket("user-1")}`);
+    return { ...realtime, url };
+  }
+
+  const waitFor = (client: ReturnType<typeof createRealtimeClient>, type: ServerMessage["type"]) =>
+    new Promise<ServerMessage>((resolve) => {
+      const off = client.on((message) => {
+        if (message.type === type) {
+          off();
+          resolve(message);
+        }
+      });
+    });
+
+  function drop(server: { clients: Set<{ terminate: () => void }> }) {
+    for (const socket of server.clients) {
+      socket.terminate();
+    }
+  }
+
+  it("reconnects with a fresh ticket after the connection drops", async () => {
+    const { url, server } = await start();
+    const client = createRealtimeClient(url, fast);
+    const hello = waitFor(client, "hello");
+    await client.connect();
+    await hello;
+
+    const again = waitFor(client, "hello");
+    drop(server);
+
+    expect(await again).toEqual({ type: "hello", userId: "user-1" });
+    expect(url).toHaveBeenCalledTimes(2);
+    client.close();
+  });
+
+  it("subscribes again after reconnecting", async () => {
+    const { url, server } = await start();
+    const client = createRealtimeClient(url, fast);
+    const subscribed = waitFor(client, "subscribed");
+    client.subscribe("channel:12");
+    await client.connect();
+    await subscribed;
+
+    const again = waitFor(client, "subscribed");
+    drop(server);
+
+    expect(await again).toEqual({ type: "subscribed", topic: "channel:12" });
+    client.close();
+  });
+
+  it("does not reconnect after close", async () => {
+    const { url, server } = await start();
+    const client = createRealtimeClient(url, fast);
+    const hello = waitFor(client, "hello");
+    await client.connect();
+    await hello;
+
+    client.close();
+    await wait(100);
+
+    expect(url).toHaveBeenCalledTimes(1);
+    expect(server.clients.size).toBe(0);
+  });
+
+  it("tries again when there is no ticket yet", async () => {
+    const { url } = await start();
+    url.mockResolvedValueOnce(null as unknown as string);
+    const client = createRealtimeClient(url, fast);
+
+    const hello = waitFor(client, "hello");
+    await client.connect();
+
+    expect(await hello).toEqual({ type: "hello", userId: "user-1" });
+    client.close();
+  });
+});
+
+describe("realtimeEnabled", () => {
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_REALTIME;
+  });
+
+  it("is off by default", () => {
+    delete process.env.NEXT_PUBLIC_REALTIME;
+    expect(realtimeEnabled()).toBe(false);
+  });
+
+  it("is on with NEXT_PUBLIC_REALTIME=on", () => {
+    process.env.NEXT_PUBLIC_REALTIME = "on";
+    expect(realtimeEnabled()).toBe(true);
+  });
+
+  it("stays off for any other value", () => {
+    process.env.NEXT_PUBLIC_REALTIME = "true";
+    expect(realtimeEnabled()).toBe(false);
   });
 });

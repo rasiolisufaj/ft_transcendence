@@ -1,4 +1,9 @@
-import type { ServerMessage } from "@/contracts/socket";
+import type { ClientMessage, ServerMessage } from "@/contracts/socket";
+
+// Off until compose runs realtime and nginx proxies /ws: a failed WebSocket is a Chrome console error.
+export function realtimeEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_REALTIME === "on";
+}
 
 type PageLocation = { protocol: string; host: string };
 
@@ -38,17 +43,63 @@ function parse(data: unknown): ServerMessage | null {
   }
 }
 
-export function createRealtimeClient(connectUrl: () => Promise<string | null>) {
+export function backoff(attempt: number, baseMs: number, maxMs: number): number {
+  return Math.min(baseMs * 2 ** attempt, maxMs);
+}
+
+export function createRealtimeClient(
+  connectUrl: () => Promise<string | null>,
+  { baseDelayMs = 1000, maxDelayMs = 30_000 } = {},
+) {
   const listeners = new Set<Listener>();
+  const topics = new Set<string>();
   let socket: WebSocket | null = null;
+  let closed = false;
+  let attempt = 0;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+
+  function retry() {
+    if (closed) {
+      return;
+    }
+    timer = setTimeout(() => {
+      timer = null;
+      void connect();
+    }, backoff(attempt, baseDelayMs, maxDelayMs));
+    attempt += 1;
+  }
+
+  function send(message: ClientMessage) {
+    if (socket?.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(message));
+    }
+  }
 
   async function connect() {
     const url = await connectUrl();
-    if (!url) {
+    if (closed) {
       return;
     }
-    socket = new WebSocket(url);
-    socket.addEventListener("message", (event) => {
+    if (!url) {
+      retry();
+      return;
+    }
+    const current = new WebSocket(url);
+    socket = current;
+    current.addEventListener("open", () => {
+      attempt = 0;
+      for (const topic of topics) {
+        send({ type: "subscribe", topic });
+      }
+    });
+    current.addEventListener("close", () => {
+      if (socket !== current) {
+        return;
+      }
+      socket = null;
+      retry();
+    });
+    current.addEventListener("message", (event) => {
       const message = parse(event.data);
       if (!message) {
         return;
@@ -66,10 +117,26 @@ export function createRealtimeClient(connectUrl: () => Promise<string | null>) {
     };
   }
 
-  function close() {
-    socket?.close();
-    socket = null;
+  function subscribe(topic: string) {
+    topics.add(topic);
+    send({ type: "subscribe", topic });
   }
 
-  return { connect, on, close };
+  function unsubscribe(topic: string) {
+    topics.delete(topic);
+    send({ type: "unsubscribe", topic });
+  }
+
+  function close() {
+    closed = true;
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    const current = socket;
+    socket = null;
+    current?.close();
+  }
+
+  return { connect, on, subscribe, unsubscribe, close };
 }
