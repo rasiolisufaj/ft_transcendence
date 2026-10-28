@@ -55,6 +55,14 @@ describe("publish", () => {
     expect(JSON.parse(body)).toEqual({ topic: "channel:12", event });
   });
 
+  it("accepts a url with a trailing slash", async () => {
+    process.env.REALTIME_INTERNAL_URL += "/";
+
+    await publish(event);
+
+    expect(received[0]?.request.url).toBe("/publish");
+  });
+
   it("does not throw when realtime is down", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const closed = createServer().listen(0);

@@ -13,7 +13,7 @@ export async function publish(event: RealtimeEvent): Promise<void> {
     return;
   }
   try {
-    const response = await fetch(`${url}/publish`, {
+    const response = await fetch(new URL("/publish", url), {
       method: "POST",
       headers: {
         authorization: `Bearer ${secret}`,
