@@ -30,6 +30,10 @@ export async function fetchTicket(fetcher: Fetcher = fetch): Promise<string | nu
   }
 }
 
+export function isEventOn(message: ServerMessage, topic: string): boolean {
+  return message.type === "event" && message.topic === topic;
+}
+
 type Listener = (message: ServerMessage) => void;
 
 function parse(data: unknown): ServerMessage | null {

@@ -7,6 +7,7 @@ import { getLocale } from "next-intl/server";
 import { requireUser } from "@/lib/auth/session";
 import { writeAudit } from "@/lib/audit";
 import { assertCan } from "@/lib/auth/policy";
+import { publish } from "@/lib/realtime/publish";
 // repasser sur les commentaires plus tard
 
 export async function createAnswer(formData: FormData) {
@@ -44,12 +45,20 @@ export async function createAnswer(formData: FormData) {
   // thread row, never from the form.
   assertCan(ctx, "answer:create", { channelId: thread.channelId });
 
-  await prisma.answer.create({
+  const created = await prisma.answer.create({
     data: {
       content: trueAnswer,
       threadId: threadId,
       userId: ctx.user.id,
     },
+  });
+  await publish({
+    type: "answer.created",
+    channelId: thread.channelId,
+    threadId,
+    answerId: created.id,
+    actorUserId: ctx.user.id,
+    at: created.createdAt.toISOString(),
   });
   revalidatePath(`/channels/${thread.channelId}`);
 }
@@ -207,6 +216,7 @@ export async function leaveChannel(formData: FormData)
   await prisma.channelMember.deleteMany({
     where: { channelId: channel.id, userId: user.id },
   });
+  await publish({ type: "member.left", channelId: channel.id, userId: user.id, at: new Date().toISOString() });
 
   revalidatePath("/channels");
   redirect({ href: "/channels", locale: await getLocale() });
