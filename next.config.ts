@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "10mb",
     },
+    // The root layout lives at the dynamic `[locale]` segment (there is no
+    // app/layout.tsx), so a URL that matches no route at all (e.g. a typo
+    // with no locale prefix) never reaches [locale]/not-found.tsx — Next
+    // falls back to its own hardcoded 404 instead. global-not-found.tsx is
+    // Next's documented fix for exactly this layout shape.
+    globalNotFound: true,
   },
 };
 
