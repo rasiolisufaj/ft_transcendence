@@ -55,6 +55,7 @@ export function createRealtimeClient(
   const topics = new Set<string>();
   let socket: WebSocket | null = null;
   let closed = false;
+  let generation = 0;
   let attempt = 0;
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -76,8 +77,10 @@ export function createRealtimeClient(
   }
 
   async function connect() {
+    closed = false;
+    const mine = ++generation;
     const url = await connectUrl();
-    if (closed) {
+    if (closed || mine !== generation) {
       return;
     }
     if (!url) {
@@ -129,6 +132,7 @@ export function createRealtimeClient(
 
   function close() {
     closed = true;
+    generation += 1;
     if (timer) {
       clearTimeout(timer);
       timer = null;
