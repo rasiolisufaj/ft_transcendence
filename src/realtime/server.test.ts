@@ -60,6 +60,16 @@ describe("realtime server", () => {
     expect(code).toBe(1001);
   });
 
+  it("stops listening as soon as it starts stopping", async () => {
+    const { url, http, stop } = await start();
+    const client = new WebSocket(withTicket(url));
+    await once(client, "message");
+
+    const stopping = stop();
+    expect(http.listening).toBe(false);
+    await stopping;
+  });
+
   it("stops listening when it stops", async () => {
     const { http, stop } = await start();
     await stop();
@@ -204,6 +214,26 @@ describe("subscriptions", () => {
       code: "forbidden",
       topic: "channel:1",
     });
+  });
+
+  it("ends unsubscribed when an unsubscribe follows the subscribe at once", async () => {
+    const slow: IsMember = async () => {
+      await wait(50);
+      return true;
+    };
+    const { url } = await start(1000, slow);
+    const client = new WebSocket(withTicket(url, "user-1"));
+    await once(client, "message");
+    client.send(JSON.stringify({ type: "subscribe", topic: "channel:12" }));
+    client.send(JSON.stringify({ type: "unsubscribe", topic: "channel:12" }));
+    await wait(100);
+
+    const received = once(client, "message");
+    await publish(url, JSON.stringify({ topic: "channel:12", event: { type: "first" } }));
+    await publish(url, JSON.stringify({ topic: "user:user-1", event: { type: "second" } }));
+    const [data] = await received;
+
+    expect(JSON.parse(data.toString()).event).toEqual({ type: "second" });
   });
 
   it("unsubscribes from a topic", async () => {
@@ -469,6 +499,16 @@ describe("presence", () => {
     await marker(url, "user-1");
 
     expect((await received)[0]?.type).toBe("event");
+  });
+
+  it("looks friends up once on a first connection", async () => {
+    const lookup = vi.fn(friends);
+    const { url } = await start(1000, undefined, lookup);
+    const alice = new WebSocket(withTicket(url, "user-1"));
+    await once(alice, "message");
+    await wait(50);
+
+    expect(lookup).toHaveBeenCalledTimes(1);
   });
 
   it("tells a newcomer which friends are already online", async () => {

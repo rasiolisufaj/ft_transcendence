@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage } from "node:http";
 import type { AddressInfo } from "node:net";
 import { WebSocketServer, type WebSocket } from "ws";
+import { channelTopic, type RealtimeEvent } from "@/contracts/events";
 import { parseClientMessage, parsePublishBody, type ServerMessage } from "@/contracts/socket";
 import { verifyTicket } from "@/lib/auth/ticket";
 import { friendsOf as findFriends, type FriendsOf } from "./friends";
@@ -98,16 +99,17 @@ export function startServer({
       response.writeHead(400).end();
       return;
     }
+    // Only publish() knows the secret, and it takes a RealtimeEvent.
+    const event = body.event as RealtimeEvent;
     for (const [socket, mine] of topics) {
       if (mine.has(body.topic)) {
-        send(socket, { type: "event", topic: body.topic, event: body.event });
+        send(socket, { type: "event", topic: body.topic, event });
       }
     }
-    const { type, channelId, userId } = body.event;
-    if (type === "member.left" && typeof channelId === "number" && typeof userId === "string") {
+    if (event.type === "member.left") {
       for (const [socket, owner] of owners) {
-        if (owner === userId) {
-          topics.get(socket)?.delete(`channel:${channelId}`);
+        if (owner === event.userId) {
+          topics.get(socket)?.delete(channelTopic(event.channelId));
         }
       }
     }
@@ -133,8 +135,7 @@ export function startServer({
   }
 
   // Sends the user's state at send time, so a fast connect + disconnect still ends on the right one.
-  async function announce(userId: string) {
-    const friends = await lookup(userId);
+  function notify(userId: string, friends: string[]) {
     const online = connections.has(userId);
     for (const [socket, mine] of topics) {
       for (const friend of friends) {
@@ -145,11 +146,15 @@ export function startServer({
     }
   }
 
-  async function welcome(socket: WebSocket, userId: string) {
-    for (const friend of await lookup(userId)) {
+  async function welcome(socket: WebSocket, userId: string, first: boolean) {
+    const friends = await lookup(userId);
+    for (const friend of friends) {
       if (connections.has(friend)) {
         send(socket, { type: "presence", userId: friend, online: true });
       }
+    }
+    if (first) {
+      notify(userId, friends);
     }
   }
 
@@ -164,41 +169,42 @@ export function startServer({
     owners.set(socket, userId);
     const count = (connections.get(userId) ?? 0) + 1;
     connections.set(userId, count);
-    if (count === 1) {
-      void announce(userId);
-    }
     log("info", "client connected", { userId, clients: server.clients.size });
     send(socket, { type: "hello", userId });
-    void welcome(socket, userId);
+    void welcome(socket, userId, count === 1);
 
-    socket.on("message", async (data) => {
-      const message = parseClientMessage(data.toString());
-      if (!message) {
-        send(socket, { type: "error", code: "badRequest" });
-        return;
-      }
+    // One message at a time per socket, so an unsubscribe waits for the subscribe sent before it.
+    let queue = Promise.resolve();
+    socket.on("message", (data) => {
+      queue = queue.then(async () => {
+        const message = parseClientMessage(data.toString());
+        if (!message) {
+          send(socket, { type: "error", code: "badRequest" });
+          return;
+        }
 
-      const mine = topics.get(socket);
-      if (!mine) {
-        return;
-      }
-      if (message.type === "unsubscribe") {
-        mine.delete(message.topic);
-        send(socket, { type: "unsubscribed", topic: message.topic });
-        return;
-      }
-      let allowed = false;
-      try {
-        allowed = await canSubscribe(userId, message.topic, isMember);
-      } catch (error) {
-        log("error", "membership check failed", { userId, topic: message.topic, error: String(error) });
-      }
-      if (!allowed) {
-        send(socket, { type: "error", code: "forbidden", topic: message.topic });
-        return;
-      }
-      mine.add(message.topic);
-      send(socket, { type: "subscribed", topic: message.topic });
+        const mine = topics.get(socket);
+        if (!mine) {
+          return;
+        }
+        if (message.type === "unsubscribe") {
+          mine.delete(message.topic);
+          send(socket, { type: "unsubscribed", topic: message.topic });
+          return;
+        }
+        let allowed = false;
+        try {
+          allowed = await canSubscribe(userId, message.topic, isMember);
+        } catch (error) {
+          log("error", "membership check failed", { userId, topic: message.topic, error: String(error) });
+        }
+        if (!allowed) {
+          send(socket, { type: "error", code: "forbidden", topic: message.topic });
+          return;
+        }
+        mine.add(message.topic);
+        send(socket, { type: "subscribed", topic: message.topic });
+      });
     });
 
     socket.on("error", (error) => {
@@ -216,7 +222,7 @@ export function startServer({
       const left = (connections.get(userId) ?? 1) - 1;
       if (left === 0) {
         connections.delete(userId);
-        void announce(userId);
+        void lookup(userId).then((friends) => notify(userId, friends));
       } else {
         connections.set(userId, left);
       }
@@ -238,6 +244,7 @@ export function startServer({
 
   function stop(): Promise<void> {
     clearInterval(heartbeat);
+    const httpClosed = new Promise<void>((resolve) => http.close(() => resolve()));
 
     for (const socket of server.clients) {
       socket.close(1001, "server shutting down");
@@ -250,11 +257,10 @@ export function startServer({
     }, 5000).unref();
 
     return new Promise((resolve) => {
-      server.close(() => {
-        http.close(() => {
-          log("info", "realtime server stopped");
-          resolve();
-        });
+      server.close(async () => {
+        await httpClosed;
+        log("info", "realtime server stopped");
+        resolve();
       });
     });
   }
