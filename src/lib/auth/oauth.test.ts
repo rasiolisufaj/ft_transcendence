@@ -46,6 +46,14 @@ describe("resolveGoogleUser", () => {
     expect(await resolveGoogleUser(profile)).toBe(id);
   });
 
+  it("signs a known Google identity in even when its email has changed and is not verified yet", async () => {
+    // The sub is the identity (Google: "Always use the sub field"); the email only links or creates.
+    const profile = google({ email: newEmail() });
+    const id = await resolveGoogleUser(profile);
+
+    expect(await resolveGoogleUser({ ...profile, email: newEmail(), email_verified: false })).toBe(id);
+  });
+
   it("links an existing password account, even when Google sends its email in capitals", async () => {
     const email = newEmail("gmail.com");
     emails.push(email.toUpperCase()); // cleans up a duplicate if the normalisation ever breaks

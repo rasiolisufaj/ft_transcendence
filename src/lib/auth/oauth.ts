@@ -38,19 +38,21 @@ export type GoogleProfile = z.infer<typeof googleProfileSchema>;
 /**
  * 8.4: the user a Google identity signs in as. An identity seen before signs in to its user;
  * else the account with the same email is linked, for a Gmail address only; else a user is
- * created, with no password. Null when Google has not verified the email (anyone can put an
- * address they do not own on a Google account), or when the address already has an account
- * and is not Gmail's (Google vouches only for the mailboxes it hosts; decision 11).
+ * created, with no password. Null, for an identity not seen before, when Google has not
+ * verified the email (anyone can put an address they do not own on a Google account), or when
+ * the address already has an account and is not Gmail's (Google vouches only for the mailboxes
+ * it hosts; decision 11).
  */
 export async function resolveGoogleUser(profile: GoogleProfile): Promise<string | null> {
-  if (!profile.email_verified) return null;
-
   const identity = { provider: "google", providerUserId: profile.sub };
   const known = await prisma.oAuthAccount.findUnique({
     where: { provider_providerUserId: identity },
     select: { userId: true },
   });
+  // The sub is the identity: a changed or not-yet-verified email does not lock its owner out.
   if (known) return known.userId;
+
+  if (!profile.email_verified) return null;
 
   const existing = await prisma.user.findUnique({
     where: { email: profile.email },
