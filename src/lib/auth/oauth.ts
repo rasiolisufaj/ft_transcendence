@@ -37,9 +37,10 @@ export type GoogleProfile = z.infer<typeof googleProfileSchema>;
 
 /**
  * 8.4: the user a Google identity signs in as. An identity seen before signs in to its user;
- * else the account with the same email is linked; else a user is created, with no password.
- * Null when Google has not verified the email: anyone can put an address they do not own on
- * a Google account, and linking on it would hand them the account that owns it.
+ * else the account with the same email is linked, for a Gmail address only; else a user is
+ * created, with no password. Null when Google has not verified the email (anyone can put an
+ * address they do not own on a Google account), or when the address already has an account
+ * and is not Gmail's (Google vouches only for the mailboxes it hosts; decision 11).
  */
 export async function resolveGoogleUser(profile: GoogleProfile): Promise<string | null> {
   if (!profile.email_verified) return null;
@@ -56,6 +57,10 @@ export async function resolveGoogleUser(profile: GoogleProfile): Promise<string 
     select: { id: true },
   });
   if (existing) {
+    // Elsewhere email_verified may date from the Google account's creation, and the address may
+    // have changed hands since (Google, "Verify the Google ID token"). Refused: the account keeps
+    // its password. The email is already lowercased by emailField.
+    if (!profile.email.endsWith("@gmail.com")) return null;
     // Signup never checks that you own the address, so the password may be an impostor's who
     // signed up first. Google has just proved the mailbox: drop that password and end every
     // session it opened, or the impostor keeps a way into the owner's account (final review).

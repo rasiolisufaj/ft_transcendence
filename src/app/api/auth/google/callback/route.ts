@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     const profile = googleProfileSchema.parse(await infoRes.json());
 
     const userId = await resolveGoogleUser(profile);
-    if (!userId) return failed(); // an email Google has not verified
+    if (!userId) return failed(); // an unverified email, or a link Google cannot vouch for
 
     // A new Session row and cookie, as a password login does (C11 rotation).
     const session = await createSession(userId);
