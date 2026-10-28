@@ -14,8 +14,9 @@ describe("challengeFor", () => {
 });
 
 const emails: string[] = [];
-function newEmail() {
-  const email = `test-${randomUUID()}@mespapiers.test`;
+// Link tests use Gmail addresses: Google sign-in links only the mailboxes Google hosts (decision 11).
+function newEmail(domain = "mespapiers.test") {
+  const email = `test-${randomUUID()}@${domain}`;
   emails.push(email);
   return email;
 }
@@ -46,7 +47,7 @@ describe("resolveGoogleUser", () => {
   });
 
   it("links an existing password account, even when Google sends its email in capitals", async () => {
-    const email = newEmail();
+    const email = newEmail("gmail.com");
     emails.push(email.toUpperCase()); // cleans up a duplicate if the normalisation ever breaks
     const owner = await prisma.user.create({
       data: { email, displayName: "Owner", passwordHash: await hashPassword("motdepasse123") },
@@ -60,7 +61,7 @@ describe("resolveGoogleUser", () => {
 
   it("takes a linked account back from whoever set its password: the password and every open session end", async () => {
     // Signup never checks that you own the address, so that password may be an impostor's (final review).
-    const email = newEmail();
+    const email = newEmail("gmail.com");
     const squatter = await prisma.user.create({
       data: { email, displayName: "Squatter", passwordHash: await hashPassword("motdepasse123") },
     });
@@ -72,16 +73,39 @@ describe("resolveGoogleUser", () => {
     expect(await validateSessionToken(token)).toBeNull();
   });
 
-  it("refuses an email Google has not verified, and links nothing", async () => {
-    const email = newEmail();
+  it("refuses an email Google has not verified: nothing is linked or created", async () => {
+    const email = newEmail("gmail.com");
     await prisma.user.create({
       data: { email, displayName: "Owner", passwordHash: await hashPassword("motdepasse123") },
     });
-    const profile = google({ email, email_verified: false });
+    const link = google({ email, email_verified: false });
+    const create = google({ email: newEmail(), email_verified: false });
 
-    expect(await resolveGoogleUser(profile)).toBeNull();
-    expect(await prisma.oAuthAccount.count({ where: { providerUserId: profile.sub } })).toBe(0);
+    expect(await resolveGoogleUser(link)).toBeNull();
+    expect(await resolveGoogleUser(create)).toBeNull();
+    expect(await prisma.oAuthAccount.count({ where: { providerUserId: { in: [link.sub, create.sub] } } })).toBe(0);
+    expect(await prisma.user.count({ where: { email: create.email } })).toBe(0);
   });
+
+  it.each(["mespapiers.test", "notgmail.com"])(
+    "links only a Gmail address: on @%s the account keeps its password and sessions, and nothing is linked",
+    async (domain) => {
+      // Elsewhere email_verified may date from the Google account's creation, and the address
+      // may have changed hands since (Google, "Verify the Google ID token").
+      const email = newEmail(domain);
+      const owner = await prisma.user.create({
+        data: { email, displayName: "Owner", passwordHash: await hashPassword("motdepasse123") },
+      });
+      const { token } = await createSession(owner.id);
+      const profile = google({ email });
+
+      expect(await resolveGoogleUser(profile)).toBeNull();
+
+      expect((await prisma.user.findUniqueOrThrow({ where: { id: owner.id } })).passwordHash).not.toBeNull();
+      expect(await validateSessionToken(token)).not.toBeNull();
+      expect(await prisma.oAuthAccount.count({ where: { providerUserId: profile.sub } })).toBe(0);
+    },
+  );
 
   it("names a new user after their email when Google has no name, and cuts a long one to 50", async () => {
     const noName = google({ email: newEmail(), name: undefined });
