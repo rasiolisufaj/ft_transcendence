@@ -8,12 +8,11 @@ import { requireUser } from "@/lib/auth/session";
 import { writeAudit } from "@/lib/audit";
 import { assertCan } from "@/lib/auth/policy";
 import { publish } from "@/lib/realtime/publish";
-// repasser sur les commentaires plus tard
 
 export async function createAnswer(formData: FormData) {
   const answer = formData.get("content");
   if (typeof answer !== "string" || !answer) {
-    return
+    return;
   }
 
   const trueAnswer = answer.trim();
@@ -36,13 +35,14 @@ export async function createAnswer(formData: FormData) {
 
   const thread = await prisma.thread.findUnique({
     where: { id: threadId },
-    select: { channelId: true },
+    select: { channelId: true, channel: { select: { isClosed: true } } },
   });
   if (!thread) {
     return;
   }
-  // Members of the thread's channel only (§C-15). The channel comes from the
-  // thread row, never from the form.
+  if (thread.channel.isClosed) {
+    return;
+  }
   assertCan(ctx, "answer:create", { channelId: thread.channelId });
 
   const created = await prisma.answer.create({
@@ -60,7 +60,7 @@ export async function createAnswer(formData: FormData) {
     actorUserId: ctx.user.id,
     at: created.createdAt.toISOString(),
   });
-  revalidatePath(`/channels/${thread.channelId}`);
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
 }
 
 export async function deleteAnswer(formData: FormData) {
@@ -85,7 +85,6 @@ export async function deleteAnswer(formData: FormData) {
     return;
   }
   const channelId = answer.thread.channelId;
-  // The author, a moderator of the answer's own channel, or an admin (§5).
   assertCan(ctx, "answer:delete", { channelId, ownerUserId: answer.userId });
 
   const { count } = await prisma.answer.deleteMany({
@@ -93,7 +92,6 @@ export async function deleteAnswer(formData: FormData) {
       id: trueId,
     },
   });
-  // An author removing their own answer is not moderation: only someone else's is audited.
   if (count > 0 && answer.userId !== ctx.user.id) {
     await writeAudit({
       actorUserId: ctx.user.id,
@@ -103,18 +101,14 @@ export async function deleteAnswer(formData: FormData) {
       channelId,
     });
   }
-  revalidatePath(`/channels/${channelId}`);
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
 }
 
-// fonction pour modifier un user
 export async function modifAnswerUser(formData: FormData) {
-  // recupere les info donc id de la reponse
-  // recupere aisso la nouvelle reponse
   const answerId = formData.get("answerId");
   const newanswer = formData.get("content");
   const channelId = formData.get("channelId");
 
-  // verifie que c'est les bon types
   if (
     typeof channelId !== "string" ||
     typeof answerId !== "string" ||
@@ -125,11 +119,9 @@ export async function modifAnswerUser(formData: FormData) {
     return;
   }
 
-  // surpime les espace
   const answerIdTrim = answerId.trim();
   const newanswerTrim = newanswer.trim();
   const channelIdTrim = channelId.trim();
-  // verifie la taille
   if (
     answerIdTrim.length === 0 ||
     newanswerTrim.length === 0 ||
@@ -142,11 +134,9 @@ export async function modifAnswerUser(formData: FormData) {
   const intAnswerId = parseInt(answerIdTrim, 10);
   const intChannelId = parseInt(channelIdTrim, 10);
 
-  // convertie lid de la reponse en int
   if (Number.isNaN(intAnswerId) || intAnswerId <= 0) {
     return;
   }
-  // reucupere le user
   const ctx = await requireUser();
 
   const answer = await prisma.answer.findFirst({
@@ -154,18 +144,15 @@ export async function modifAnswerUser(formData: FormData) {
     include: { thread: { select: { channelId: true } } },
   });
 
-  // vérifie que la réponse existe
   if (!answer) {
     return;
   }
 
-  // The author, or an admin. Moderators delete answers, they do not rewrite them.
   assertCan(ctx, "answer:update", { ownerUserId: answer.userId });
   await prisma.answer.update({
     where: { id: intAnswerId },
     data: { content: newanswerTrim },
   });
-  // An admin rewriting someone else's words is moderation: audited, as deleteAnswer does.
   if (answer.userId !== ctx.user.id) {
     await writeAudit({
       actorUserId: ctx.user.id,
@@ -175,49 +162,84 @@ export async function modifAnswerUser(formData: FormData) {
       channelId: answer.thread.channelId,
     });
   }
-  // The channel page 404s for a non-member (an admin), so send them back to the list.
   const isMember = ctx.memberships.some((m) => m.channelId === intChannelId);
   redirect({ href: isMember ? `/channels/${intChannelId}` : "/channels", locale: await getLocale() });
 }
 
 
-export async function leaveChannel(formData: FormData)
-{
+export async function toggleCloseChannel(formData: FormData) {
+  const idChannel = formData.get("channelId");
+  if (typeof idChannel !== "string" || !idChannel) return;
+
+  const trim = idChannel.trim();
+  if (trim.length === 0) return;
+
+  const intId = parseInt(trim, 10);
+  if (Number.isNaN(intId) || intId <= 0 || String(intId) !== trim) return;
+
+  const ctx = await requireUser();
+
+  const channel = await prisma.channel.findUnique({
+    where: { id: intId },
+    select: { createdBy: true, isClosed: true },
+  });
+  if (!channel) return;
+
+  assertCan(ctx, "channel:delete", {
+    channelId: intId,
+    ownerUserId: channel.createdBy,
+  });
+
+  await prisma.channel.update({
+    where: { id: intId },
+    data: { isClosed: !channel.isClosed },
+  });
+
+  await writeAudit({
+    actorUserId: ctx.user.id,
+    action: channel.isClosed ? "channel:reopen" : "channel:close",
+    targetType: "Channel",
+    targetId: String(intId),
+    channelId: intId,
+  });
+
+  revalidatePath("/[locale]/(app)/channels/[id]", "page");
+  revalidatePath("/[locale]/(app)/channels", "page");
+}
+
+export async function leaveChannel(formData: FormData) {
   const channelId = formData.get("channelId");
 
-  if (typeof channelId !== "string" || !channelId)
-    return;
+  if (typeof channelId !== "string" || !channelId) return;
 
   const channelIdtrim = channelId.trim();
-  if (channelIdtrim.length === 0)
-    return;
+  if (channelIdtrim.length === 0) return;
 
   const intChannelId = parseInt(channelIdtrim, 10);
-  if (Number.isNaN(intChannelId) || intChannelId <= 0 || String(intChannelId) !== channelIdtrim)
+  if (
+    Number.isNaN(intChannelId) ||
+    intChannelId <= 0 ||
+    String(intChannelId) !== channelIdtrim
+  )
     return;
 
   const channel = await prisma.channel.findFirst({
     where: { id: intChannelId },
   });
-  if (!channel)
-    return;
+  if (!channel) return;
 
   const { user } = await requireUser();
 
   const membership = await prisma.channelMember.findFirst({
     where: { channelId: channel.id, userId: user.id },
   });
+  if (!membership) return;
 
-  if (!membership)
-    return;
-
-  // Moderators may leave too (vision §3: a moderator can do everything a member can).
-  // The channel may be left with no moderator: an admin moderates it (§C-19, §C-20).
   await prisma.channelMember.deleteMany({
     where: { channelId: channel.id, userId: user.id },
   });
   await publish({ type: "member.left", channelId: channel.id, userId: user.id, at: new Date().toISOString() });
 
-  revalidatePath("/channels");
+  revalidatePath("/[locale]/(app)/channels", "page");
   redirect({ href: "/channels", locale: await getLocale() });
 }

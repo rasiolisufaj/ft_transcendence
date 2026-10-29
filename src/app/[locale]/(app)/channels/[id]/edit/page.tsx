@@ -21,7 +21,6 @@ export default async function EditChannelPage({
   }
 
   const ctx = await requireUser();
-  // The same check as editChannel.
   if (!can(ctx, "channel:update", { channelId: id })) notFound();
 
   const channel = await prisma.channel.findFirst({

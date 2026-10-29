@@ -7,6 +7,7 @@ import {
   createAnswer,
   deleteAnswer,
   leaveChannel,
+  toggleCloseChannel,
 } from "./actions";
 import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/policy";
@@ -18,6 +19,7 @@ export default async function ChannelPage({
   params: Promise<{ id: string }>;
 }) {
   const t = await getTranslations("channels.detail");
+  const tHome = await getTranslations("channels.home");
   const format = await getFormatter();
   const p = await params;
   const idChannel = p.id;
@@ -58,6 +60,11 @@ export default async function ChannelPage({
     notFound();
   }
   const question = channel.threads[0];
+
+  const canToggleClose = can(ctx, "channel:delete", {
+    channelId: channel.id,
+    ownerUserId: channel.createdBy,
+  });
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
       <ChannelLive channelId={channel.id} />
@@ -75,6 +82,22 @@ export default async function ChannelPage({
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           {channel.description}
         </p>
+      )}
+      {channel.isClosed && (
+        <p className="mt-2 inline-block rounded-md border border-zinc-300 bg-zinc-50 px-2 py-0.5 text-xs text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+          {tHome("closed")}
+        </p>
+      )}
+      {canToggleClose && (
+        <form action={toggleCloseChannel} className="mt-3">
+          <input type="hidden" name="channelId" value={channel.id} />
+          <button
+            type="submit"
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            {channel.isClosed ? tHome("reopen") : tHome("close")}
+          </button>
+        </form>
       )}
       <form action={leaveChannel} className="mt-4">
         <input type="hidden" name="channelId" value={channel.id} />
@@ -158,8 +181,6 @@ export default async function ChannelPage({
                     )}
                   </div>
 
-                  {/* answer:delete covers everyone answer:update does (the author, an admin)
-                      plus this channel's moderators, so it gates the whole group */}
                   {can(ctx, "answer:delete", { channelId: channel.id, ownerUserId: answer.userId }) && (
                     <div className="flex shrink-0 gap-1">
                       {can(ctx, "answer:update", { ownerUserId: answer.userId }) && (
@@ -218,25 +239,27 @@ export default async function ChannelPage({
               ))}
             </ul>
           )}
-          <form
-            className="sticky bottom-0 mt-6 flex gap-2 border-t border-zinc-200 bg-white py-4 dark:border-zinc-800 dark:bg-zinc-950"
-            action={createAnswer}
-          >
-            <input type="hidden" name="threadId" value={question.id} />
+          {channel.isClosed ? null : (
+            <form
+              className="sticky bottom-0 mt-6 flex gap-2 border-t border-zinc-200 bg-white py-4 dark:border-zinc-800 dark:bg-zinc-950"
+              action={createAnswer}
+            >
+              <input type="hidden" name="threadId" value={question.id} />
 
-            <input
-              type="text"
-              name="content"
-              required
-              maxLength={300}
-              placeholder={t("replyPlaceholder")}
-              aria-label={t("replyAria")}
-              autoComplete="off"
-              className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
-            />
+              <input
+                type="text"
+                name="content"
+                required
+                maxLength={300}
+                placeholder={t("replyPlaceholder")}
+                aria-label={t("replyAria")}
+                autoComplete="off"
+                className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+              />
 
-            <Button type="submit">{t("send")}</Button>
-          </form>
+              <Button type="submit">{t("send")}</Button>
+            </form>
+          )}
         </>
       ) : (
         <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
