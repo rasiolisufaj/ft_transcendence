@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { sendMessage } from "@/lib/messages/messages";
+import { publish } from "@/lib/realtime/publish";
 import { sendMessageSchema, type MessageErrorKey, type MessageFormState } from "@/lib/messages/schemas";
 
 // The sender is the session user, never a form field.
@@ -20,6 +21,14 @@ export async function sendMessageAction(_prev: MessageFormState, formData: FormD
   if (!result.ok) {
     return { error: result.error };
   }
+  await publish({
+    type: "message.created",
+    conversationId: result.message.conversationId,
+    messageId: result.message.id,
+    senderId: user.id,
+    recipientId: parsed.data.userId,
+    at: result.message.createdAt.toISOString(),
+  });
 
   revalidatePath("/[locale]/(app)/messages", "layout");
   return {};

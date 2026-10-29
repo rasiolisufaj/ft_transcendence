@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSession, requireUser, validateSessionToken } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
+import { publish } from "@/lib/realtime/publish";
 import { sendMessageAction } from "./[userId]/actions";
 
 vi.mock("@/lib/auth/session", async (importOriginal) => ({
@@ -9,6 +10,7 @@ vi.mock("@/lib/auth/session", async (importOriginal) => ({
   requireUser: vi.fn(),
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/realtime/publish", () => ({ publish: vi.fn() }));
 
 let alice: string;
 let bob: string;
@@ -42,6 +44,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await prisma.user.deleteMany({ where: { id: { in: [alice, bob, carol] } } });
+  vi.mocked(publish).mockReset();
 });
 
 describe("sendMessageAction", () => {
@@ -69,5 +72,32 @@ describe("sendMessageAction", () => {
 
   it("refuses a form without a recipient", async () => {
     expect(await sendMessageAction({}, form({ content: "Salut" }))).toEqual({ error: "notFriends" });
+  });
+
+  it("tells the recipient once the message is saved", async () => {
+    let savedFirst = false;
+    vi.mocked(publish).mockImplementation(async () => {
+      savedFirst = (await prisma.message.count({ where: { senderId: alice } })) === 1;
+    });
+
+    await sendMessageAction({}, form({ userId: bob, content: "Salut" }));
+
+    const message = await prisma.message.findFirstOrThrow({ where: { senderId: alice } });
+    expect(publish).toHaveBeenCalledWith({
+      type: "message.created",
+      conversationId: message.conversationId,
+      messageId: message.id,
+      senderId: alice,
+      recipientId: bob,
+      at: message.createdAt.toISOString(),
+    });
+    expect(savedFirst).toBe(true);
+  });
+
+  it("tells no one when the message is refused", async () => {
+    await sendMessageAction({}, form({ userId: carol, content: "Salut" }));
+    await sendMessageAction({}, form({ userId: bob, content: "  " }));
+
+    expect(publish).not.toHaveBeenCalled();
   });
 });
