@@ -47,7 +47,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
         aria-controls={panelId}
         aria-label={open ? t("closeMenu") : t("openMenu")}
         onClick={() => setOpen((value) => !value)}
-        className="flex items-center rounded-lg border border-zinc-200 p-1.5 text-zinc-700 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:focus-visible:outline-zinc-100"
+        className="flex items-center rounded-full border border-border p-1.5 text-foreground-muted transition hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         {open ? <CloseIcon /> : <MenuIcon />}
       </button>
@@ -58,7 +58,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
         onClick={(event) => {
           if ((event.target as HTMLElement).closest("a, button")) setOpen(false);
         }}
-        className="absolute inset-x-0 top-full z-20 border-b border-zinc-200 bg-white px-3 py-2 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+        className="absolute inset-x-0 top-full z-20 mt-2 rounded-2xl border border-border bg-surface px-3 py-2 shadow-elevated"
       >
         <div className="flex flex-col text-sm">{children}</div>
       </div>

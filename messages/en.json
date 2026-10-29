@@ -41,10 +41,44 @@
   },
   "dashboard": {
     "title": "My documents",
-    "addDocument": "Add a document",
-    "empty": "No documents yet. Upload your first document to get started.",
-    "countByCategory": "{count, plural, one {# document, sorted by category.} other {# documents, sorted by category.}}",
-    "pendingClassification": "{count, plural, one {# document awaiting automatic classification.} other {# documents awaiting automatic classification.}}"
+    "welcome": "Hello {name}",
+    "categoriesLabel": "Your categories",
+    "import": "Upload",
+    "empty": "You don't have any documents yet.",
+    "countByCategory": "{count, plural, one {# document} other {# documents}} in {categories, plural, one {# category} other {# categories}}.",
+    "pendingClassification": "{count, plural, one {# document awaiting automatic classification.} other {# documents awaiting automatic classification.}}",
+    "importZone": {
+      "cta": "Upload a document",
+      "hint": "PDF, JPEG or PNG — 10 MB max",
+      "dropHere": "Drop your file here"
+    },
+    "howItWorks": {
+      "step1Title": "Upload a document",
+      "step1Body": "A photo or a PDF, from your phone or your computer.",
+      "step2Title": "AI sorts it for you",
+      "step2Body": "ID card, car insurance... every document lands in the right category.",
+      "step3Title": "Ask it questions",
+      "step3Body": "The assistant answers directly from the content of your documents.",
+      "next": "Next",
+      "skip": "Skip",
+      "cta": "Add a document",
+      "dontShowAgain": "Don't show this again"
+    },
+    "upcomingDeadlines": {
+      "title": "Upcoming deadlines"
+    },
+    "assistant": {
+      "title": "Need help with a document?",
+      "description": "The assistant answers your questions straight from a document's content: dates, amounts, next steps.",
+      "cta": "Talk to the assistant",
+      "needsDocument": "Upload a document to start chatting with the assistant",
+      "howItWorksCta": "How does it work?",
+      "dialogTitle": "How does the assistant work?",
+      "dialogPoint1": "Open a document: the assistant's chat shows up right on its page.",
+      "dialogPoint2": "Ask your questions in plain language — dates, amounts, next steps...",
+      "dialogPoint3": "Answers are based only on that document, never on your other papers.",
+      "close": "Close"
+    }
   },
   "documentCategory": {
     "back": "My documents",
@@ -89,6 +123,7 @@
       "joinDesc": "Browse public channels and join one.",
       "invitationsTitle": "View my invitations",
       "invitationsDesc": "Request access to a private channel.",
+      "myChannels": "My channels",
       "empty": "You don't belong to any channel.",
       "membersCount": "{count, plural, one {# member} other {# members}}",
       "optionsAria": "Channel options",
@@ -114,6 +149,8 @@
       "questionLabel": "Question (required)",
       "questionPlaceholder": "Ask your question with as much detail as possible so answers can be clear.",
       "visibilityLabel": "Visibility",
+      "public": "Public",
+      "private": "Private",
       "visibilityPublic": "Public",
       "visibilityPrivate": "Private",
       "cancel": "Cancel",
@@ -136,12 +173,19 @@
       "noDescription": "This channel has no description.",
       "membersCount": "{count, plural, one {# member} other {# members}}",
       "join": "Join",
+      "requestJoin": "Request to join",
       "request": "Request to join",
       "pending": "Request sent"
     },
     "detail": {
       "back": "← Back to channels",
       "leave": "Leave channel",
+      "membersCount": "{count, plural, one {# member} other {# members}}",
+      "friendsCount": "{count, plural, one {# friend} other {# friends}}",
+      "moderator": "moderator",
+      "kick": "Remove",
+      "authoredByPrefix": "by",
+      "authoredByDate": "· {date}",
       "authoredBy": "by {name} · {date}",
       "deletedUser": "Deleted user",
       "repliesCount": "{count, plural, one {# reply} other {# replies}}",
@@ -230,7 +274,10 @@
     "fields": {
       "email": "Email",
       "password": "Password",
-      "displayName": "Display name"
+      "displayName": "Display name",
+      "passwordShow": "Show password",
+      "passwordHide": "Hide password",
+      "passwordHint": "At least 8 characters."
     },
     "login": {
       "title": "Sign in",
@@ -245,6 +292,12 @@
       "pending": "Creating account…",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in"
+    },
+    "showcase": {
+      "eyebrow": "Your paperwork, finally under control",
+      "headline": "Your paperwork, simplified and supported.",
+      "subhead": "A private vault for your documents, an assistant that answers your questions, and a community to help you along.",
+      "trust": "Your documents are private: only you can open them."
     }
   },
   "admin": {

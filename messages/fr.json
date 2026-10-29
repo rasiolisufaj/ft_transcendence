@@ -9,7 +9,7 @@
     "logout": "Se déconnecter",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "channels": "Channels",
+    "channels": "Salons",
     "account": "Compte",
     "myData": "Mes données",
     "profile": "Mon profil"
@@ -41,10 +41,44 @@
   },
   "dashboard": {
     "title": "Mes documents",
-    "addDocument": "Ajouter un document",
-    "empty": "Aucun document pour l'instant. Importez votre premier document pour commencer.",
-    "countByCategory": "{count, plural, one {# document, trié par catégorie.} other {# documents, triés par catégorie.}}",
-    "pendingClassification": "{count, plural, one {# document en attente de classement automatique.} other {# documents en attente de classement automatique.}}"
+    "welcome": "Bonjour {name}",
+    "categoriesLabel": "Vos catégories",
+    "import": "Importer",
+    "empty": "Vous n'avez encore aucun document.",
+    "countByCategory": "{count, plural, one {# document} other {# documents}} dans {categories, plural, one {# catégorie} other {# catégories}}.",
+    "pendingClassification": "{count, plural, one {# document en attente de classement automatique.} other {# documents en attente de classement automatique.}}",
+    "importZone": {
+      "cta": "Importer un document",
+      "hint": "PDF, JPEG ou PNG — 10 Mo maximum",
+      "dropHere": "Déposez votre fichier ici"
+    },
+    "howItWorks": {
+      "step1Title": "Importez un document",
+      "step1Body": "Une photo ou un PDF, depuis votre téléphone ou votre ordinateur.",
+      "step2Title": "L'IA le classe pour vous",
+      "step2Body": "Carte d'identité, assurance auto... chaque document part dans la bonne catégorie.",
+      "step3Title": "Posez vos questions",
+      "step3Body": "L'assistant répond directement à partir du contenu de vos documents.",
+      "next": "Suivant",
+      "skip": "Passer",
+      "cta": "Ajouter un document",
+      "dontShowAgain": "Ne plus afficher ce tutoriel"
+    },
+    "upcomingDeadlines": {
+      "title": "Échéances à venir"
+    },
+    "assistant": {
+      "title": "Besoin d'aide avec un document ?",
+      "description": "L'assistant répond à vos questions directement à partir du contenu d'un document : dates, montants, démarches à suivre.",
+      "cta": "Parler à l'assistant",
+      "needsDocument": "Importez un document pour commencer à discuter avec l'assistant",
+      "howItWorksCta": "Comment ça marche ?",
+      "dialogTitle": "Comment fonctionne l'assistant ?",
+      "dialogPoint1": "Ouvrez un document : le chat de l'assistant apparaît directement sur sa page.",
+      "dialogPoint2": "Posez vos questions en langage naturel — dates, montants, démarches à faire...",
+      "dialogPoint3": "Les réponses se basent uniquement sur ce document, jamais sur vos autres papiers.",
+      "close": "Fermer"
+    }
   },
   "documentCategory": {
     "back": "Mes documents",
@@ -89,6 +123,7 @@
       "joinDesc": "Parcours les channels publics et rejoins-en un.",
       "invitationsTitle": "Voir mes invitations",
       "invitationsDesc": "Demande l'accès à un channel privé.",
+      "myChannels": "Mes channels",
       "empty": "Tu n'appartiens à aucun channel.",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "optionsAria": "Options du channel",
@@ -114,6 +149,8 @@
       "questionLabel": "Question (obligatoire)",
       "questionPlaceholder": "Pose ta question en donnant le plus de détails possible pour obtenir des réponses claires.",
       "visibilityLabel": "Visibilité",
+      "public": "Public",
+      "private": "Privé",
       "visibilityPublic": "Public",
       "visibilityPrivate": "Privé",
       "cancel": "Annuler",
@@ -136,12 +173,19 @@
       "noDescription": "Ce channel n'a pas de description.",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "join": "Rejoindre",
+      "requestJoin": "Demander à rejoindre",
       "request": "Demander à rejoindre",
       "pending": "Demande envoyée"
     },
     "detail": {
       "back": "← Retour aux channels",
       "leave": "Quitter le channel",
+      "membersCount": "{count, plural, one {# membre} other {# membres}}",
+      "friendsCount": "{count, plural, one {# ami} other {# amis}}",
+      "moderator": "modérateur",
+      "kick": "Retirer",
+      "authoredByPrefix": "par",
+      "authoredByDate": "· {date}",
       "authoredBy": "par {name} · {date}",
       "deletedUser": "Utilisateur supprimé",
       "repliesCount": "{count, plural, one {# réponse} other {# réponses}}",
@@ -230,7 +274,10 @@
     "fields": {
       "email": "Adresse e-mail",
       "password": "Mot de passe",
-      "displayName": "Nom d'affichage"
+      "displayName": "Nom d'affichage",
+      "passwordShow": "Afficher le mot de passe",
+      "passwordHide": "Masquer le mot de passe",
+      "passwordHint": "8 caractères minimum."
     },
     "login": {
       "title": "Connexion",
@@ -245,6 +292,12 @@
       "pending": "Création du compte…",
       "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter"
+    },
+    "showcase": {
+      "eyebrow": "Vos papiers, enfin sous contrôle",
+      "headline": "Vos démarches administratives, simplifiées et accompagnées.",
+      "subhead": "Un coffre-fort privé pour vos documents, un assistant qui répond à vos questions, et une communauté pour vous entraider.",
+      "trust": "Vos documents sont privés : vous seul(e) pouvez les consulter."
     }
   },
   "admin": {

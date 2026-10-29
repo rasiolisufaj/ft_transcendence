@@ -52,9 +52,8 @@ export function LocaleSwitcher() {
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium uppercase text-zinc-700 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:focus-visible:outline-zinc-100"
+        className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-xs font-medium uppercase text-foreground-muted transition hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <LanguageIcon />
         <span className="sr-only">{t("label")}</span>
         <span lang={current}>{current}</span>
         <ChevronIcon className={open ? "rotate-180" : undefined} />
@@ -63,7 +62,7 @@ export function LocaleSwitcher() {
       <ul
         id={listId}
         hidden={!open}
-        className="absolute end-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+        className="absolute end-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-xl border border-border bg-surface py-1 shadow-elevated"
       >
         {routing.locales.map((locale) => {
           const active = locale === current;
@@ -76,15 +75,14 @@ export function LocaleSwitcher() {
                 lang={locale}
                 aria-current={active ? "true" : undefined}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-100 focus-visible:bg-zinc-100 focus-visible:outline-none dark:hover:bg-zinc-800 dark:focus-visible:bg-zinc-800 ${
-                  active
-                    ? "font-semibold text-zinc-900 dark:text-zinc-100"
-                    : "text-zinc-600 dark:text-zinc-400"
+                className={`flex items-center gap-2 px-3 py-2 text-sm transition hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none ${
+                  active ? "font-medium text-foreground" : "text-foreground-muted"
                 }`}
               >
-                <span aria-hidden="true" className="w-4 text-center">
-                  {active ? "✓" : ""}
-                </span>
+                <span
+                  aria-hidden="true"
+                  className={`size-1.5 shrink-0 rounded-full ${active ? "bg-primary" : "bg-transparent"}`}
+                />
                 {t(`names.${locale}`)}
               </Link>
             </li>
@@ -92,25 +90,6 @@ export function LocaleSwitcher() {
         })}
       </ul>
     </div>
-  );
-}
-
-function LanguageIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802"
-      />
-    </svg>
   );
 }
 

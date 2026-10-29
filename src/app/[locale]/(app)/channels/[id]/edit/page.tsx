@@ -2,9 +2,14 @@ import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { editChannel } from "./action";
 import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/policy";
+
+const fieldClass =
+  "rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-primary";
 
 export default async function EditChannelPage({
   params,
@@ -41,23 +46,16 @@ export default async function EditChannelPage({
   const question = channel.threads[0];
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("title")}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          {t("subtitle")}
-        </p>
+      <Card>
+        <h1 className="text-2xl font-semibold text-foreground">{t("title")}</h1>
+        <p className="mt-1 text-sm text-foreground-muted">{t("subtitle")}</p>
 
         <form className="mt-6 flex flex-col gap-4" action={editChannel}>
           <input type="hidden" name="channelId" value={channel.id} />
           <input type="hidden" name="questionId" value={question?.id ?? ""} />
 
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="name"
-              className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-            >
+            <label htmlFor="name" className="text-sm font-medium text-foreground">
               {t("nameLabel")}
             </label>
             <input
@@ -67,15 +65,12 @@ export default async function EditChannelPage({
               required
               maxLength={99}
               defaultValue={channel.title}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              className={fieldClass}
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="description"
-              className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-            >
+            <label htmlFor="description" className="text-sm font-medium text-foreground">
               {t("descriptionLabel")}
             </label>
             <textarea
@@ -84,15 +79,12 @@ export default async function EditChannelPage({
               rows={3}
               maxLength={250}
               defaultValue={channel.description ?? ""}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              className={fieldClass}
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="question"
-              className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-            >
+            <label htmlFor="question" className="text-sm font-medium text-foreground">
               {t("questionLabel")}
             </label>
             <textarea
@@ -102,26 +94,21 @@ export default async function EditChannelPage({
               required
               maxLength={300}
               defaultValue={question?.content}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              className={fieldClass}
             />
           </div>
 
           <div className="mt-2 flex justify-end gap-2">
             <Link
               href="/channels"
-              className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg px-4 py-2 text-sm text-foreground-muted hover:bg-surface-hover"
             >
               {t("cancel")}
             </Link>
-            <button
-              type="submit"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-            >
-              {t("save")}
-            </button>
+            <Button type="submit">{t("save")}</Button>
           </div>
         </form>
-      </div>
+      </Card>
     </main>
   );
 }

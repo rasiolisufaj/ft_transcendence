@@ -41,10 +41,44 @@
   },
   "dashboard": {
     "title": "Mis documentos",
-    "addDocument": "Añadir un documento",
-    "empty": "Todavía no hay documentos. Suba su primer documento para empezar.",
-    "countByCategory": "{count, plural, one {# documento, ordenado por categoría.} other {# documentos, ordenados por categoría.}}",
-    "pendingClassification": "{count, plural, one {# documento pendiente de clasificación automática.} other {# documentos pendientes de clasificación automática.}}"
+    "welcome": "Hola {name}",
+    "categoriesLabel": "Sus categorías",
+    "import": "Subir",
+    "empty": "Todavía no tiene ningún documento.",
+    "countByCategory": "{count, plural, one {# documento} other {# documentos}} en {categories, plural, one {# categoría} other {# categorías}}.",
+    "pendingClassification": "{count, plural, one {# documento pendiente de clasificación automática.} other {# documentos pendientes de clasificación automática.}}",
+    "importZone": {
+      "cta": "Subir un documento",
+      "hint": "PDF, JPEG o PNG — 10 MB máximo",
+      "dropHere": "Suelte su archivo aquí"
+    },
+    "howItWorks": {
+      "step1Title": "Sube un documento",
+      "step1Body": "Una foto o un PDF, desde tu teléfono o tu ordenador.",
+      "step2Title": "La IA lo clasifica por ti",
+      "step2Body": "DNI, seguro de coche... cada documento va a la categoría correcta.",
+      "step3Title": "Haz tus preguntas",
+      "step3Body": "El asistente responde directamente a partir del contenido de tus documentos.",
+      "next": "Siguiente",
+      "skip": "Omitir",
+      "cta": "Añadir un documento",
+      "dontShowAgain": "No volver a mostrar esto"
+    },
+    "upcomingDeadlines": {
+      "title": "Próximos vencimientos"
+    },
+    "assistant": {
+      "title": "¿Necesita ayuda con un documento?",
+      "description": "El asistente responde a sus preguntas directamente a partir del contenido de un documento: fechas, importes, próximos pasos.",
+      "cta": "Hablar con el asistente",
+      "needsDocument": "Suba un documento para empezar a chatear con el asistente",
+      "howItWorksCta": "¿Cómo funciona?",
+      "dialogTitle": "¿Cómo funciona el asistente?",
+      "dialogPoint1": "Abra un documento: el chat del asistente aparece directamente en su página.",
+      "dialogPoint2": "Haga sus preguntas en lenguaje natural: fechas, importes, próximos pasos...",
+      "dialogPoint3": "Las respuestas se basan únicamente en ese documento, nunca en sus otros papeles.",
+      "close": "Cerrar"
+    }
   },
   "documentCategory": {
     "back": "Mis documentos",
@@ -89,6 +123,7 @@
       "joinDesc": "Explora los canales públicos y únete a uno.",
       "invitationsTitle": "Ver mis invitaciones",
       "invitationsDesc": "Solicita acceso a un canal privado.",
+      "myChannels": "Mis canales",
       "empty": "No perteneces a ningún canal.",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
       "optionsAria": "Opciones del canal",
@@ -114,6 +149,8 @@
       "questionLabel": "Pregunta (obligatoria)",
       "questionPlaceholder": "Haz tu pregunta con el mayor detalle posible para obtener respuestas claras.",
       "visibilityLabel": "Visibilidad",
+      "public": "Público",
+      "private": "Privado",
       "visibilityPublic": "Público",
       "visibilityPrivate": "Privado",
       "cancel": "Cancelar",
@@ -136,12 +173,19 @@
       "noDescription": "Este canal no tiene descripción.",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
       "join": "Unirse",
+      "requestJoin": "Solicitar unirse",
       "request": "Solicitar unirse",
       "pending": "Solicitud enviada"
     },
     "detail": {
       "back": "← Volver a los canales",
       "leave": "Salir del canal",
+      "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
+      "friendsCount": "{count, plural, one {# amigo} other {# amigos}}",
+      "moderator": "moderador",
+      "kick": "Expulsar",
+      "authoredByPrefix": "por",
+      "authoredByDate": "· {date}",
       "authoredBy": "por {name} · {date}",
       "deletedUser": "Usuario eliminado",
       "repliesCount": "{count, plural, one {# respuesta} other {# respuestas}}",
@@ -230,7 +274,10 @@
     "fields": {
       "email": "Correo electrónico",
       "password": "Contraseña",
-      "displayName": "Nombre visible"
+      "displayName": "Nombre visible",
+      "passwordShow": "Mostrar la contraseña",
+      "passwordHide": "Ocultar la contraseña",
+      "passwordHint": "Mínimo 8 caracteres."
     },
     "login": {
       "title": "Iniciar sesión",
@@ -245,6 +292,12 @@
       "pending": "Creando la cuenta…",
       "hasAccount": "¿Ya tiene una cuenta?",
       "loginLink": "Iniciar sesión"
+    },
+    "showcase": {
+      "eyebrow": "Sus papeles, por fin bajo control",
+      "headline": "Sus trámites, simplificados y acompañados.",
+      "subhead": "Una caja fuerte privada para sus documentos, un asistente que responde sus preguntas, y una comunidad para ayudarle.",
+      "trust": "Sus documentos son privados: solo usted puede verlos."
     }
   },
   "admin": {
