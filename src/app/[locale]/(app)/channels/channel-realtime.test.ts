@@ -51,7 +51,7 @@ function form(fields: Record<string, string | number>): FormData {
 }
 
 afterEach(async () => {
-  await prisma.auditLog.deleteMany({ where: { channelId: { in: created.channels.map(String) } } });
+  await prisma.auditLog.deleteMany({ where: { channelId: { in: created.channels } } });
   await prisma.channel.deleteMany({ where: { id: { in: created.channels } } });
   await prisma.user.deleteMany({ where: { id: { in: created.users } } });
   created = { users: [], channels: [] };
