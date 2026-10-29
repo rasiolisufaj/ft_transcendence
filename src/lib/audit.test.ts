@@ -6,18 +6,25 @@ import { writeAudit } from "@/lib/audit";
 describe("writeAudit", () => {
   const targetId = randomUUID();
   let userId: string;
+  let channelId: number;
 
   beforeEach(async () => {
     const user = await prisma.user.create({
       data: { email: `test-${randomUUID()}@mespapiers.test`, displayName: "Test" },
     });
     userId = user.id;
+    const channel = await prisma.channel.create({
+      data: { createdBy: userId, title: `test-${randomUUID()}` },
+    });
+    channelId = channel.id;
   });
 
   afterEach(async () => {
     vi.restoreAllMocks();
-    // AuditLog.actor is onDelete: SetNull, so deleting the user would leave the rows behind.
+    // AuditLog.actor et AuditLog.channel sont onDelete: SetNull, donc les lignes
+    // survivent a la suppression du user et du channel : on les nettoie d'abord.
     await prisma.auditLog.deleteMany({ where: { targetId } });
+    await prisma.channel.delete({ where: { id: channelId } }).catch(() => {});
     await prisma.user.delete({ where: { id: userId } });
   });
 
@@ -27,7 +34,7 @@ describe("writeAudit", () => {
       action: "channel:kick",
       targetType: "User",
       targetId,
-      channelId: 7,
+      channelId,
       metadata: { reason: "spam" },
     });
 
@@ -37,7 +44,7 @@ describe("writeAudit", () => {
       actorUserId: userId,
       action: "channel:kick",
       targetType: "User",
-      channelId: "7",
+      channelId,
       metadata: { reason: "spam" },
     });
   });

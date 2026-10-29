@@ -107,7 +107,9 @@ export default async function ChannelsHomePage() {
                 <p className="mt-1 text-xs text-zinc-400">
                   {t("membersCount", { count: channel._count.members })}
                 </p>
-                {channel.isPrivate === true ? (
+                {channel.isClosed ? (
+                  <p>{t("closed")}</p>
+                ) : channel.isPrivate ? (
                   <p>{t("private")}</p>
                 ) : (
                   <p>{t("public")}</p>

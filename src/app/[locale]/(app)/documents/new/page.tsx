@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
-// Barre de chargement affichee pendant l'envoi du formulaire.
 export function UploadBar() {
   const t = useTranslations("documentsNew");
   const { pending } = useFormStatus();
