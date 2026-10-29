@@ -1,11 +1,14 @@
 import { z } from "zod";
+import type { RealtimeEvent } from "./events";
 
 // server -> browser
 export type ServerMessage =
 	| { type: "hello"; userId: string }
 	| { type: "subscribed"; topic: string }
 	| { type: "unsubscribed"; topic: string }
-	| { type: "error"; code: "badRequest" | "forbidden"; topic?: string };
+	| { type: "error"; code: "badRequest" | "forbidden"; topic?: string }
+	| { type: "event"; topic: string; event: RealtimeEvent }
+	| { type: "presence"; userId: string; online: boolean };
 
 // browser -> server
 export type ClientMessage =
@@ -49,6 +52,28 @@ export function parseClientMessage(raw: string): ClientMessage | null {
 	}
 
 	const result = clientMessageSchema.safeParse(data);
+	if (!result.success) {
+		return null;
+	}
+	return result.data;
+}
+
+const publishBodySchema = z.object({
+	topic: topicSchema,
+	event: z.looseObject({ type: z.string() }),
+});
+
+export type PublishBody = z.infer<typeof publishBodySchema>;
+
+export function parsePublishBody(raw: string): PublishBody | null {
+	let data: unknown;
+	try {
+		data = JSON.parse(raw);
+	} catch {
+		return null;
+	}
+
+	const result = publishBodySchema.safeParse(data);
 	if (!result.success) {
 		return null;
 	}
