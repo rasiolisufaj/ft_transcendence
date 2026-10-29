@@ -143,6 +143,64 @@ body {
   }
 }
 
+/* Auth preview (login/signup): a 24s loop through real screenshots of the
+   app (AuthPreviewSlot) — drag a file in, the upload in progress, the "ask
+   the assistant" button appearing, then two full question/thinking/answer
+   round-trips in the real chat — crossfading between the nine scenes
+   instead of using a video asset. Slow enough to actually read each one. */
+@keyframes auth-preview-drag {
+  0%, 13% { opacity: 1; }
+  14%, 100% { opacity: 0; }
+}
+@keyframes auth-preview-loading {
+  0%, 13% { opacity: 0; }
+  14%, 23% { opacity: 1; }
+  25%, 100% { opacity: 0; }
+}
+@keyframes auth-preview-cta {
+  0%, 23% { opacity: 0; }
+  25%, 34% { opacity: 1; }
+  35%, 100% { opacity: 0; }
+}
+@keyframes auth-preview-chat-typing1 {
+  0%, 34% { opacity: 0; }
+  35%, 43% { opacity: 1; }
+  44%, 100% { opacity: 0; }
+}
+@keyframes auth-preview-chat-thinking1 {
+  0%, 43% { opacity: 0; }
+  44%, 51% { opacity: 1; }
+  52%, 100% { opacity: 0; }
+}
+@keyframes auth-preview-chat-answer1 {
+  0%, 51% { opacity: 0; }
+  52%, 64% { opacity: 1; }
+  65%, 100% { opacity: 0; }
+}
+@keyframes auth-preview-chat-typing2 {
+  0%, 64% { opacity: 0; }
+  65%, 72% { opacity: 1; }
+  74%, 100% { opacity: 0; }
+}
+@keyframes auth-preview-chat-thinking2 {
+  0%, 72% { opacity: 0; }
+  74%, 80% { opacity: 1; }
+  82%, 100% { opacity: 0; }
+}
+@keyframes auth-preview-chat-answer2 {
+  0%, 80% { opacity: 0; }
+  82%, 100% { opacity: 1; }
+}
+.auth-preview-scene-drag { animation: auth-preview-drag 24s ease-in-out infinite; }
+.auth-preview-scene-loading { animation: auth-preview-loading 24s ease-in-out infinite; }
+.auth-preview-scene-cta { animation: auth-preview-cta 24s ease-in-out infinite; }
+.auth-preview-scene-chat-typing1 { animation: auth-preview-chat-typing1 24s ease-in-out infinite; }
+.auth-preview-scene-chat-thinking1 { animation: auth-preview-chat-thinking1 24s ease-in-out infinite; }
+.auth-preview-scene-chat-answer1 { animation: auth-preview-chat-answer1 24s ease-in-out infinite; }
+.auth-preview-scene-chat-typing2 { animation: auth-preview-chat-typing2 24s ease-in-out infinite; }
+.auth-preview-scene-chat-thinking2 { animation: auth-preview-chat-thinking2 24s ease-in-out infinite; }
+.auth-preview-scene-chat-answer2 { animation: auth-preview-chat-answer2 24s ease-in-out infinite; }
+
 /* prefers-reduced-motion: every transition/animation collapses to instant. */
 @media (prefers-reduced-motion: reduce) {
   *,

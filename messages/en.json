@@ -295,37 +295,8 @@
     },
     "showcase": {
       "eyebrow": "Your paperwork, finally under control",
-      "headline": "We track your deadlines. You never miss one.",
-      "subhead": "A private vault for your paperwork, with a reminder before every deadline.",
-      "stepsTitle": "How it works",
-      "steps": {
-        "step1": {
-          "title": "Add a photo",
-          "description": "Take a photo of a document, like your passport or your car insurance."
-        },
-        "step2": {
-          "title": "We read the dates for you",
-          "description": "The app finds the expiry date, so you never have to look for it."
-        },
-        "step3": {
-          "title": "We remind you in time",
-          "description": "A reminder arrives before every important deadline."
-        }
-      },
-      "pillars": {
-        "vault": {
-          "title": "Private vault",
-          "description": "Your documents stay yours. No one else can see them."
-        },
-        "assistant": {
-          "title": "An assistant that answers",
-          "description": "Ask questions about your documents, in French, English or Spanish."
-        },
-        "community": {
-          "title": "A mutual-aid community",
-          "description": "Talk with other people going through the same paperwork."
-        }
-      },
+      "headline": "Your paperwork, simplified and supported.",
+      "subhead": "A private vault for your documents, an assistant that answers your questions, and a community to help you along.",
       "trust": "Your documents are private: only you can open them."
     }
   },
