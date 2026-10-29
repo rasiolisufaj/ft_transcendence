@@ -15,7 +15,13 @@ if (!process.env.WS_TICKET_SECRET) {
   process.exit(1);
 }
 
-const realtime = startServer({ port, heartbeatMs });
+const publishSecret = process.env.REALTIME_PUBLISH_SECRET;
+if (!publishSecret) {
+  log("error", "REALTIME_PUBLISH_SECRET is not set");
+  process.exit(1);
+}
+
+const realtime = startServer({ port, heartbeatMs, publishSecret });
 
 let shuttingDown = false;
 
