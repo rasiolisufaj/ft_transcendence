@@ -2,8 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
+import { AuthPreviewSlot } from "@/components/auth/AuthPreviewSlot";
 import { AuthShowcase } from "@/components/auth/AuthShowcase";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Link } from "@/i18n/navigation";
 import type { AuthFormState } from "@/lib/auth/schemas";
@@ -25,64 +27,68 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-      <div className="mx-auto w-full max-w-sm lg:mx-0 lg:py-6">
-        <h1 className="text-2xl font-semibold text-foreground">{t("signup.title")}</h1>
+    <div className="space-y-12">
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
+        <Card className="mx-auto w-full max-w-sm lg:mx-0">
+          <h1 className="text-2xl font-semibold text-foreground">{t("signup.title")}</h1>
 
-        {/* noValidate: the user sees the shared schema's messages, in their locale. */}
-        <form action={formAction} className="mt-6 space-y-4" noValidate>
-          <Input
-            label={t("fields.displayName")}
-            name="displayName"
-            autoComplete="nickname"
-            required
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            error={fieldError("displayName")}
-          />
-          <Input
-            label={t("fields.email")}
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={fieldError("email")}
-          />
-          <Input
-            label={t("fields.password")}
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            revealable
-            showPasswordLabel={t("fields.passwordShow")}
-            hidePasswordLabel={t("fields.passwordHide")}
-            hint={t("fields.passwordHint")}
-            error={fieldError("password")}
-          />
+          {/* noValidate: the user sees the shared schema's messages, in their locale. */}
+          <form action={formAction} className="mt-6 space-y-4" noValidate>
+            <Input
+              label={t("fields.displayName")}
+              name="displayName"
+              autoComplete="nickname"
+              required
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              error={fieldError("displayName")}
+            />
+            <Input
+              label={t("fields.email")}
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={fieldError("email")}
+            />
+            <Input
+              label={t("fields.password")}
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              revealable
+              showPasswordLabel={t("fields.passwordShow")}
+              hidePasswordLabel={t("fields.passwordHide")}
+              hint={t("fields.passwordHint")}
+              error={fieldError("password")}
+            />
 
-          {state.error ? (
-            <p role="alert" className="text-sm text-danger">
-              {t(`errors.${state.error}`)}
-            </p>
-          ) : null}
+            {state.error ? (
+              <p role="alert" className="text-sm text-danger">
+                {t(`errors.${state.error}`)}
+              </p>
+            ) : null}
 
-          <Button type="submit" disabled={pending} className="w-full">
-            {pending ? t("signup.pending") : t("signup.submit")}
-          </Button>
-        </form>
+            <Button type="submit" disabled={pending} className="w-full">
+              {pending ? t("signup.pending") : t("signup.submit")}
+            </Button>
+          </form>
 
-        <p className="mt-6 text-sm text-foreground-muted">
-          {t("signup.hasAccount")}{" "}
-          <Link href="/login" className="font-medium text-primary hover:text-primary-hover">
-            {t("signup.loginLink")}
-          </Link>
-        </p>
+          <p className="mt-6 text-sm text-foreground-muted">
+            {t("signup.hasAccount")}{" "}
+            <Link href="/login" className="font-medium text-primary hover:text-primary-hover">
+              {t("signup.loginLink")}
+            </Link>
+          </p>
+        </Card>
+
+        <AuthShowcase />
       </div>
 
-      <AuthShowcase />
+      <AuthPreviewSlot />
     </div>
   );
 }

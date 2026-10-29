@@ -295,37 +295,8 @@
     },
     "showcase": {
       "eyebrow": "Sus papeles, por fin bajo control",
-      "headline": "Nos ocupamos de sus plazos. No se le pasará ninguno.",
-      "subhead": "Una caja fuerte privada para sus papeles, con un aviso antes de cada plazo.",
-      "stepsTitle": "Cómo funciona",
-      "steps": {
-        "step1": {
-          "title": "Añada una foto",
-          "description": "Fotografíe un documento, como su pasaporte o su seguro del coche."
-        },
-        "step2": {
-          "title": "Leemos las fechas por usted",
-          "description": "La aplicación encuentra la fecha de caducidad sin que usted tenga que buscarla."
-        },
-        "step3": {
-          "title": "Le avisamos a tiempo",
-          "description": "Recibirá un aviso antes de cada plazo importante."
-        }
-      },
-      "pillars": {
-        "vault": {
-          "title": "Caja fuerte privada",
-          "description": "Sus documentos siguen siendo suyos. Nadie más puede verlos."
-        },
-        "assistant": {
-          "title": "Un asistente que responde",
-          "description": "Haga sus preguntas sobre sus documentos, en francés, inglés o español."
-        },
-        "community": {
-          "title": "Una comunidad de ayuda mutua",
-          "description": "Converse con otras personas que están haciendo los mismos trámites."
-        }
-      },
+      "headline": "Sus trámites, simplificados y acompañados.",
+      "subhead": "Una caja fuerte privada para sus documentos, un asistente que responde sus preguntas, y una comunidad para ayudarle.",
       "trust": "Sus documentos son privados: solo usted puede verlos."
     }
   },

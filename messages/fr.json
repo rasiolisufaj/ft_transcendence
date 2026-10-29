@@ -295,37 +295,8 @@
     },
     "showcase": {
       "eyebrow": "Vos papiers, enfin sous contrôle",
-      "headline": "On s'occupe de vos dates. Vous ne ratez plus rien.",
-      "subhead": "Un coffre-fort privé pour vos papiers administratifs, avec un rappel avant chaque échéance.",
-      "stepsTitle": "Comment ça marche",
-      "steps": {
-        "step1": {
-          "title": "Ajoutez une photo",
-          "description": "Prenez en photo un document, comme votre passeport ou votre assurance auto."
-        },
-        "step2": {
-          "title": "On lit les dates pour vous",
-          "description": "L'application retrouve la date d'expiration, sans que vous ayez à la chercher."
-        },
-        "step3": {
-          "title": "On vous prévient à temps",
-          "description": "Un rappel arrive avant chaque échéance importante."
-        }
-      },
-      "pillars": {
-        "vault": {
-          "title": "Coffre-fort privé",
-          "description": "Vos documents restent les vôtres. Personne d'autre n'y a accès."
-        },
-        "assistant": {
-          "title": "Un assistant qui répond",
-          "description": "Posez vos questions sur vos papiers, en français, en anglais ou en espagnol."
-        },
-        "community": {
-          "title": "Une communauté d'entraide",
-          "description": "Échangez avec d'autres personnes qui vivent les mêmes démarches."
-        }
-      },
+      "headline": "Vos démarches administratives, simplifiées et accompagnées.",
+      "subhead": "Un coffre-fort privé pour vos documents, un assistant qui répond à vos questions, et une communauté pour vous entraider.",
       "trust": "Vos documents sont privés : vous seul(e) pouvez les consulter."
     }
   },
