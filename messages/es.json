@@ -12,7 +12,8 @@
     "channels": "Canales",
     "account": "Cuenta",
     "myData": "Mis datos",
-    "profile": "Mi perfil"
+    "profile": "Mi perfil",
+    "messages": "Mensajes"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -304,7 +305,8 @@
       "cancel": "Cancelar",
       "remove": "Eliminar",
       "block": "Bloquear",
-      "unblock": "Desbloquear"
+      "unblock": "Desbloquear",
+      "message": "Escribir"
     },
     "errors": {
       "emailInvalid": "Introduzca un correo electrónico válido.",
@@ -534,5 +536,24 @@
     "exportMailBody": "Hola,\n\nSus datos personales se exportaron.\n\nSi no ha sido usted, cambie su contraseña.\n\nEl equipo de MesPapiers",
     "deleteMailSubject": "MesPapiers – Su cuenta ha sido eliminada",
     "deleteMailBody": "Hola,\n\nSu cuenta de MesPapiers y sus documentos se eliminaron de forma definitiva.\n\nSus respuestas en los canales permanecen visibles, pero sin su nombre.\n\nEl equipo de MesPapiers"
+  },
+  "chat": {
+    "title": "Mensajes",
+    "subtitle": "Tus conversaciones privadas con tus amigos.",
+    "empty": "Aún no hay conversaciones. Escribe a un amigo desde la página Amigos.",
+    "youSaid": "Tú: {content}",
+    "back": "Todas las conversaciones",
+    "with": "Conversación con {name}",
+    "noMessages": "Aún no hay mensajes.",
+    "label": "Tu mensaje",
+    "submit": "Enviar",
+    "pending": "Enviando…",
+    "cannotWrite": "Solo puedes escribir a tus amigos.",
+    "errors": {
+      "self": "No puedes escribirte a ti mismo.",
+      "notFriends": "Solo puedes escribir a tus amigos.",
+      "empty": "El mensaje está vacío.",
+      "tooLong": "El mensaje supera los 1000 caracteres."
+    }
   }
 }

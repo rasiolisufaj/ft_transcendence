@@ -8,7 +8,7 @@ export function pair(a: string, b: string) {
 }
 
 // A block deletes the friendship (see block()), so friends-only also refuses a blocked sender.
-async function areFriends(a: string, b: string): Promise<boolean> {
+export async function areFriends(a: string, b: string): Promise<boolean> {
   const count = await prisma.friendship.count({
     where: {
       status: "ACCEPTED",
