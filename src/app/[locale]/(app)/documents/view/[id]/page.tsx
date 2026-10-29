@@ -63,9 +63,7 @@ export default async function DocumentPage({
         <span className="min-w-0 truncate text-zinc-900 dark:text-zinc-100">{doc.fileName}</span>
       </div>
 
-      {/* grid-cols-1, not the implicit auto column: a long file name would widen the track. */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Left: document info + preview */}
         <div className="space-y-4">
           <Card>
             <div className="space-y-3 sm:p-4">

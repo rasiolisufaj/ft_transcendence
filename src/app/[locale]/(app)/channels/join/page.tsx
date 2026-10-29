@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth/session";
 import { getJoinableChannels } from "./data";
 import { joinChannel } from "./actions";
 import requestJoinChannel from "./actions";
+
 export default async function JoinPage() {
   const t = await getTranslations("channels.join");
   const { user } = await requireUser();
@@ -53,13 +54,21 @@ export default async function JoinPage() {
                   {t("membersCount", { count: channel._count.members })}
                 </p>
                 {channel.isPrivate ? (
-                  <form action={requestJoinChannel} className="mt-3">
-                    <input type="hidden" name="channelId" value={channel.id} />
-                    <input type="hidden" name="userId" value={user.id} />
-                    <button type="submit" className="...">
-                      requestJoinChannel
-                    </button>
-                  </form>
+                  channel.hasPendingRequest ? (
+                    <p className="mt-3 text-sm italic text-zinc-500 dark:text-zinc-400">
+                      {t("pending")}
+                    </p>
+                  ) : (
+                    <form action={requestJoinChannel} className="mt-3">
+                      <input type="hidden" name="channelId" value={channel.id} />
+                      <button
+                        type="submit"
+                        className="rounded-md px-3 py-2 text-sm text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950"
+                      >
+                        {t("request")}
+                      </button>
+                    </form>
+                  )
                 ) : (
                   <form action={joinChannel} className="mt-3">
                     <input type="hidden" name="channelId" value={channel.id} />

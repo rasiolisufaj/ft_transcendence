@@ -122,13 +122,111 @@ npm run lint
 
 ## Database Schema
 
-<!-- TODO(amkhelif): the schema is being rewritten. Document here the entity list,
-     the relations, key fields and types, plus a diagram. The subject requires
-     "a clear schema and well-defined relations" — every foreign key must be a
-     real `@relation`, not a loose integer column. -->
+PostgreSQL 17, accessed through Prisma 6 with the `prisma-client` generator
+(output: `src/generated/prisma/`). The whole schema lives in [`prisma/schema.prisma`](prisma/schema.prisma)
+and is applied by a single consolidated migration `prisma/migrations/20261019000000_init/`.
+Every foreign key is declared with a real `@relation`, timestamps are stored in UTC and
+`updatedAt` is set by Prisma on each write.
 
-TODO — see `PROJECT_PLAN.md` §3 for the target design (class-table inheritance for documents,
-identity and access, and the community tables).
+### Tables (grouped)
+
+**Identity and access**
+
+| Table | Key fields | Purpose |
+|---|---|---|
+| `User` | `id (cuid)`, `email` unique, `displayName`, `passwordHash?`, `globalRole (USER/ADMIN)`, `locale`, `totpEnabled`, `reputation` | A site account. `passwordHash` is Argon2id, `totpSecret` is encrypted when stored. |
+| `Session` | `id (sha256 of token)`, `userId`, `expiresAt`, `twoFactorVerified` | A browser session. Only the hash of the token lives in the DB; the raw token is in the cookie. |
+| `OAuthAccount` | `(provider, providerUserId)` unique, `userId` | Links a user to an external identity (Google, GitHub). |
+| `AuditLog` | `actorUserId?`, `action`, `targetType`, `targetId`, `channelId?` (FK, `SetNull`) | One row per privileged action. Rows survive the deletion of their actor and channel. |
+
+**Document vault — class-table inheritance**
+
+The document vault uses class-table inheritance (one base row + one typed row per category).
+The base `Document` holds everything shared across categories; a typed table (`DocumentIdentity`,
+`DocumentInsuranceAuto`, …) adds the fields specific to its category.
+
+Why class-table inheritance rather than one `jsonb` blob or one wide table:
+
+- Each typed field is a real column with a real type and a `NOT NULL` where the field is
+  mandatory, so an invalid document cannot land in the DB.
+- Adding a new category is one Prisma enum value + one new typed table, with no change to
+  rows of other categories.
+- Common queries (dashboard, deadline scan) read the base table only; typed queries join one
+  typed table at a time.
+
+| Table | Key fields | Purpose |
+|---|---|---|
+| `Document` | `id`, `ownerId` (FK Cascade), `fileName`, `fileType`, `fileSize`, `fileData (bytes)`, `fileHash`, `category (enum)`, `extractionStatus (enum)`, `targetDate?`, `deadlineType?`, `@@unique([ownerId, fileHash])` | The shared base row. The unique index blocks the same file content from being uploaded twice by the same user. |
+| `DocumentIdentity` | `documentId` unique (FK Cascade), `fullName`, `birthDate`, `documentNumber`, `expiryDate` | Fields read from an identity document. |
+| `DocumentInsuranceAuto` | `documentId` unique (FK Cascade), `provider`, `policyNumber`, `vehiclePlate`, `expiryDate` | Fields read from a car-insurance document. |
+
+**Community**
+
+| Table | Key fields | Purpose |
+|---|---|---|
+| `Channel` | `id`, `title (VarChar 100)` unique insensitive, `description? (VarChar 250)`, `isPrivate`, `isClosed`, `createdBy?` (FK `SetNull`) | A topic. Title uniqueness is enforced by a `LOWER(title)` unique index. |
+| `ChannelMember` | `(channelId, userId)` PK, `role (MEMBER/MODERATOR)`, `joinedAt` | Membership + per-channel role. |
+| `ChannelInvite` | `(channelId, userId)` PK | An invite waiting to be accepted. |
+| `ChannelJoinRequest` | `(channelId, userId)` PK | A request to join a private channel. |
+| `Thread` | `id`, `channelId` unique (FK Cascade), `title (VarChar 150)`, `content (VarChar 300)`, `userId?` (FK `SetNull`) | The main question of a channel. The `@unique` on `channelId` enforces one thread per channel. |
+| `Answer` | `id`, `threadId` (FK Cascade), `userId?` (FK `SetNull`), `content (VarChar 300)` | A reply inside a thread. |
+| `Vote` | `(answerId, userId)` PK, `value Int` with `CHECK (value IN (-1, 1))` | A vote. The PK prevents double votes; the CHECK prevents junk values at the SQL layer, not just in app code. |
+| `Friendship` | `(requesterId, receiverId)` unique, `status (PENDING/ACCEPTED/BLOCKED)` | A friend link. |
+| `Conversation` | `(participant1Id, participant2Id)` unique | A private 1-to-1 chat. |
+| `Message` | `id`, `conversationId` (FK Cascade), `senderId` (FK Cascade), `content Text` | A message in a conversation. |
+| `Notification` | `id`, `recipientId` (FK Cascade), `type (enum)`, `content (VarChar 255)`, `isRead` | A notification for one user. |
+
+### Enums
+
+- `GlobalRole` — `USER`, `ADMIN`
+- `ChannelRole` — `MEMBER`, `MODERATOR`
+- `DocumentCategory` — `IDENTITY`, `INSURANCE_AUTO`, `OTHER`
+- `DeadlineType` — `HARD`, `SOFT`, `PERIODIC`, `NONE`
+- `ExtractionStatus` — `PENDING`, `NEEDS_REVIEW`, `CONFIRMED`, `FAILED`
+- `FriendshipStatus` — `PENDING`, `ACCEPTED`, `BLOCKED`
+- `NotificationType` — `DEADLINE`, `REPLY`, `MESSAGE`, `FRIEND_REQUEST`, `OTHER`
+
+### Diagram
+
+```mermaid
+erDiagram
+  User ||--o{ Document : owns
+  User ||--o{ Session : has
+  User ||--o{ OAuthAccount : links
+  User ||--o{ Channel : creates
+  User ||--o{ ChannelMember : joins
+  User ||--o{ Thread : authors
+  User ||--o{ Answer : writes
+  User ||--o{ Vote : casts
+  User ||--o{ Friendship : requests
+  User ||--o{ Message : sends
+  User ||--o{ Notification : receives
+  User ||--o{ AuditLog : acts
+
+  Document ||--o| DocumentIdentity : "typed row"
+  Document ||--o| DocumentInsuranceAuto : "typed row"
+
+  Channel ||--o{ ChannelMember : contains
+  Channel ||--|| Thread : "has one question"
+  Channel ||--o{ ChannelInvite : "pending invites"
+  Channel ||--o{ ChannelJoinRequest : "pending requests"
+  Channel ||--o{ AuditLog : "audited in"
+
+  Thread ||--o{ Answer : receives
+  Answer ||--o{ Vote : collects
+
+  Conversation ||--o{ Message : contains
+```
+
+### Rules worth highlighting
+
+- A document's **status** (`VALID / EXPIRING_SOON / EXPIRED / ACTION_REQUIRED`) is derived at
+  read time from `extractionStatus`, `deadlineType` and `targetDate`. It is never stored.
+- Deletion of a `User` cascades to their own data (documents, sessions, memberships, friends,
+  conversations, votes, notifications, OAuth accounts). Content they wrote in channels
+  (threads, answers) switches `userId` to `NULL` so the discussion stays readable.
+- Deletion of a `Channel` cascades to its members, invites, join requests, threads and
+  answers; audit rows survive with `channelId` set to `NULL`.
 
 ## Features List
 
