@@ -243,9 +243,11 @@ model Conversation {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
 
-  participant1 User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
-  participant2 User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
-  messages     Message[]
+  participant1ReadAt DateTime? @map("participant1_read_at")
+  participant2ReadAt DateTime? @map("participant2_read_at")
+  participant1       User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2       User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  messages           Message[]
 
   @@unique([participant1Id, participant2Id])
 }
@@ -327,8 +329,8 @@ model ChannelInvite {
   userId    String   @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([channelId, userId])
 }
