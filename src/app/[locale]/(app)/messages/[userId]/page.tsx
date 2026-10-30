@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { areFriends, listMessages } from "@/lib/messages/messages";
+import { MessagesLive } from "../MessagesLive";
 import { MessageForm } from "./MessageForm";
 
 export default async function ConversationPage({ params }: { params: Promise<{ userId: string }> }) {
@@ -26,6 +27,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ u
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <MessagesLive from={other.id} />
       <div>
         <Link
           href="/messages"

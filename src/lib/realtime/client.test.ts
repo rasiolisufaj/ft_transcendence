@@ -3,7 +3,15 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ServerMessage } from "@/contracts/socket";
 import { mintTicket } from "@/lib/auth/ticket";
-import { backoff, createRealtimeClient, fetchTicket, isEventOn, realtimeEnabled, wsUrl } from "@/lib/realtime/client";
+import {
+  backoff,
+  createRealtimeClient,
+  fetchTicket,
+  isEventOn,
+  isNewMessage,
+  realtimeEnabled,
+  wsUrl,
+} from "@/lib/realtime/client";
 import { startServer } from "@/realtime/server";
 
 process.env.WS_TICKET_SECRET = "test-secret";
@@ -345,5 +353,35 @@ describe("isEventOn", () => {
 
   it("is false for a message that is not an event", () => {
     expect(isEventOn({ type: "subscribed", topic: "channel:12" }, "channel:12")).toBe(false);
+  });
+});
+
+describe("isNewMessage", () => {
+  const from = (senderId: string) =>
+    ({
+      type: "event",
+      topic: "user:me",
+      event: { type: "message.created", conversationId: 1, messageId: 2, senderId, recipientId: "me", at: "2026-10-30T10:00:00.000Z" },
+    }) as const;
+
+  it("is true for a message from that person", () => {
+    expect(isNewMessage(from("bob"), "bob")).toBe(true);
+  });
+
+  it("is false for a message from someone else", () => {
+    expect(isNewMessage(from("carol"), "bob")).toBe(false);
+  });
+
+  it("is true for any message when no sender is given", () => {
+    expect(isNewMessage(from("carol"))).toBe(true);
+  });
+
+  it("is false for another event", () => {
+    const left = {
+      type: "event",
+      topic: "channel:1",
+      event: { type: "member.left", channelId: 1, userId: "bob", at: "2026-10-30T10:00:00.000Z" },
+    } as const;
+    expect(isNewMessage(left)).toBe(false);
   });
 });
