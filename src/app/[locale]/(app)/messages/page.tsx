@@ -4,6 +4,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { listConversations } from "@/lib/messages/messages";
+import { MessagesLive } from "./MessagesLive";
 
 export default async function MessagesPage() {
   const t = await getTranslations("chat");
@@ -14,6 +15,7 @@ export default async function MessagesPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
+      <MessagesLive />
       <div>
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t("subtitle")}</p>
