@@ -122,7 +122,7 @@ describe("deleteAccount", () => {
 describe("deleteAccount, the last-admin guard", () => {
   let seededAdmins: string[] = [];
 
-  // The seed's admin (rasiol@gmail.com) would count as "another admin":
+  // The seed's admin (rasiol@mespapiers.test) would count as "another admin":
   // set the existing admins aside for each test, and put them back after.
   beforeEach(async () => {
     const admins = await prisma.user.findMany({ where: { globalRole: "ADMIN" }, select: { id: true } });

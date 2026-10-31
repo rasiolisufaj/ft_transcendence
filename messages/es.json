@@ -531,6 +531,19 @@
     "deleteMailSubject": "MesPapiers – Su cuenta ha sido eliminada",
     "deleteMailBody": "Hola,\n\nSu cuenta de MesPapiers y sus documentos se eliminaron de forma definitiva.\n\nSus respuestas en los canales permanecen visibles, pero sin su nombre.\n\nEl equipo de MesPapiers"
   },
+  "errors": {
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "Esta página no existe, o ha sido movida.",
+      "backHome": "Volver al inicio"
+    },
+    "generic": {
+      "title": "Ha ocurrido un error",
+      "description": "Algo ha salido mal. Puede volver a intentarlo o volver al inicio.",
+      "retry": "Reintentar",
+      "backHome": "Volver al inicio"
+    }
+  },
   "chat": {
     "title": "Mensajes",
     "subtitle": "Tus conversaciones privadas con tus amigos.",
