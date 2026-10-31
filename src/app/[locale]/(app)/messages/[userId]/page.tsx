@@ -5,7 +5,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
-import { areFriends, listMessages } from "@/lib/messages/messages";
+import { areFriends, listMessages, markRead, readTimes, seenMessageId } from "@/lib/messages/messages";
 import { MessagesLive } from "../MessagesLive";
 import { MessageForm } from "./MessageForm";
 
@@ -23,7 +23,13 @@ export default async function ConversationPage({ params }: { params: Promise<{ u
   if (!other) {
     notFound();
   }
-  const [messages, canWrite] = await Promise.all([listMessages(user.id, other.id), areFriends(user.id, other.id)]);
+  await markRead(user.id, other.id);
+  const [messages, canWrite, { theirs }] = await Promise.all([
+    listMessages(user.id, other.id),
+    areFriends(user.id, other.id),
+    readTimes(user.id, other.id),
+  ]);
+  const seen = seenMessageId(messages, user.id, theirs);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -55,9 +61,12 @@ export default async function ConversationPage({ params }: { params: Promise<{ u
                 >
                   {message.content}
                 </p>
-                <time dateTime={message.createdAt.toISOString()} className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                  {format.dateTime(message.createdAt, { dateStyle: "short", timeStyle: "short" })}
-                </time>
+                <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                  <time dateTime={message.createdAt.toISOString()}>
+                    {format.dateTime(message.createdAt, { dateStyle: "short", timeStyle: "short" })}
+                  </time>
+                  {message.id === seen ? ` · ${t("seen")}` : null}
+                </p>
               </li>
             );
           })}

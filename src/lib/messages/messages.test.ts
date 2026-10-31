@@ -2,7 +2,15 @@ import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
 import { block } from "@/lib/friends/friendships";
-import { listConversations, listMessages, pair, sendMessage } from "@/lib/messages/messages";
+import {
+  listConversations,
+  listMessages,
+  markRead,
+  pair,
+  readTimes,
+  seenMessageId,
+  sendMessage,
+} from "@/lib/messages/messages";
 
 let alice: string;
 let bob: string;
@@ -137,5 +145,89 @@ describe("listConversations", () => {
     await sendMessage(alice, bob, "Salut");
 
     expect(await listConversations(carol)).toEqual([]);
+  });
+});
+
+describe("markRead", () => {
+  it("records when I read, on my side only", async () => {
+    await sendMessage(bob, alice, "Salut");
+
+    await markRead(alice, bob);
+
+    const times = await readTimes(alice, bob);
+    expect(times.mine).toBeInstanceOf(Date);
+    expect(times.theirs).toBeNull();
+    expect((await readTimes(bob, alice)).theirs).toEqual(times.mine);
+  });
+
+  it("does nothing before the first message", async () => {
+    await markRead(alice, bob);
+
+    expect(await conversationsOf(alice, bob)).toHaveLength(0);
+    expect(await readTimes(alice, bob)).toEqual({ mine: null, theirs: null });
+  });
+
+  it("does not move the conversation up", async () => {
+    await sendMessage(bob, alice, "Salut");
+    const [before] = await conversationsOf(alice, bob);
+    await later();
+
+    await markRead(alice, bob);
+
+    const [after] = await conversationsOf(alice, bob);
+    expect(after!.updatedAt).toEqual(before!.updatedAt);
+  });
+});
+
+describe("unread", () => {
+  const unreadFor = async (me: string) => (await listConversations(me))[0]?.unread;
+
+  it("counts the other's messages I have not read", async () => {
+    await sendMessage(bob, alice, "Salut");
+    await sendMessage(bob, alice, "Tu es là ?");
+
+    expect(await unreadFor(alice)).toBe(2);
+  });
+
+  it("does not count my own messages", async () => {
+    await sendMessage(alice, bob, "Salut");
+
+    expect(await unreadFor(alice)).toBe(0);
+  });
+
+  it("drops to zero once read, and counts what comes after", async () => {
+    await sendMessage(bob, alice, "Salut");
+    await markRead(alice, bob);
+    expect(await unreadFor(alice)).toBe(0);
+    await later();
+
+    await sendMessage(bob, alice, "Encore moi");
+
+    expect(await unreadFor(alice)).toBe(1);
+  });
+});
+
+describe("seenMessageId", () => {
+  const at = (minute: number) => new Date(`2026-10-31T10:${String(minute).padStart(2, "0")}:00.000Z`);
+  const messages = [
+    { id: 1, senderId: "me", createdAt: at(1) },
+    { id: 2, senderId: "me", createdAt: at(2) },
+    { id: 3, senderId: "them", createdAt: at(3) },
+  ];
+
+  it("marks my last message once they read after it", () => {
+    expect(seenMessageId(messages, "me", at(5))).toBe(2);
+  });
+
+  it("marks nothing before they read my last message", () => {
+    expect(seenMessageId(messages, "me", at(1))).toBeNull();
+  });
+
+  it("marks nothing when they never read", () => {
+    expect(seenMessageId(messages, "me", null)).toBeNull();
+  });
+
+  it("marks nothing when I sent nothing", () => {
+    expect(seenMessageId(messages, "someone", at(5))).toBeNull();
   });
 });

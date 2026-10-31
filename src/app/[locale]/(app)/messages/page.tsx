@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { getFormatter, getTranslations } from "next-intl/server";
+import { Badge } from "@/components/ui/Badge";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { listConversations } from "@/lib/messages/messages";
@@ -32,7 +33,14 @@ export default async function MessagesPage() {
                 className="block px-4 py-3 hover:bg-zinc-50 focus-visible:bg-zinc-50 dark:hover:bg-zinc-800/50 dark:focus-visible:bg-zinc-800/50"
               >
                 <div className="flex items-baseline justify-between gap-4">
-                  <span className="min-w-0 truncate text-sm font-medium">{conversation.other.displayName}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className={`truncate text-sm ${conversation.unread > 0 ? "font-semibold" : "font-medium"}`}>
+                      {conversation.other.displayName}
+                    </span>
+                    {conversation.unread > 0 ? (
+                      <Badge tone="danger">{t("unread", { count: conversation.unread })}</Badge>
+                    ) : null}
+                  </span>
                   <time
                     dateTime={conversation.updatedAt.toISOString()}
                     className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400"
