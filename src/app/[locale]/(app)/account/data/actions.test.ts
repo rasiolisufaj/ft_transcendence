@@ -117,12 +117,33 @@ describe("deleteAccount", () => {
     expect(await auditRows(user.id)).toHaveLength(1);
     expect(sendMail).toHaveBeenCalledOnce();
   });
+
+  it("lets an account with no password (Google sign-in) confirm with its email instead", async () => {
+    const google = await prisma.user.create({
+      data: { email: `test-${randomUUID()}@mespapiers.test`, displayName: "Google" },
+    });
+    created.push(google.id);
+    await signInAs(google.id);
+    const typed = (email: string) => {
+      const f = new FormData();
+      f.set("email", email);
+      return f;
+    };
+
+    await expect(deleteAccount({}, typed("someone-else@mespapiers.test"))).resolves.toEqual({
+      error: "wrongEmail",
+    });
+    expect(await prisma.user.findUnique({ where: { id: google.id } })).not.toBeNull();
+
+    await deleteAccount({}, typed(` ${google.email.toUpperCase()} `));
+    expect(await prisma.user.findUnique({ where: { id: google.id } })).toBeNull();
+  });
 });
 
 describe("deleteAccount, the last-admin guard", () => {
   let seededAdmins: string[] = [];
 
-  // The seed's admin (rasiol@gmail.com) would count as "another admin":
+  // The seed's admin (rasiol@mespapiers.test) would count as "another admin":
   // set the existing admins aside for each test, and put them back after.
   beforeEach(async () => {
     const admins = await prisma.user.findMany({ where: { globalRole: "ADMIN" }, select: { id: true } });

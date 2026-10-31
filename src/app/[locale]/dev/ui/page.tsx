@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { GoogleButton } from "@/components/ui/GoogleButton";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -23,6 +24,11 @@ export default function UiGalleryPage() {
           <Button variant="secondary">Secondary</Button>
           <Button disabled>Disabled</Button>
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">GoogleButton</h2>
+        <GoogleButton href="#">Continue with Google</GoogleButton>
       </section>
 
       <section className="space-y-3">

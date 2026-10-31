@@ -1,0 +1,418 @@
+diff --git a/messages/en.json b/messages/en.json
+index b38122d..6047c2f 100644
+--- a/messages/en.json
++++ b/messages/en.json
+@@ -12,7 +12,8 @@
+     "channels": "Channels",
+     "account": "Account",
+     "myData": "My data",
+-    "profile": "My profile"
++    "profile": "My profile",
++    "security": "Security"
+   },
+   "localeSwitcher": {
+     "label": "Language",
+@@ -226,7 +227,9 @@
+       "emailTaken": "That email address is already registered.",
+       "invalidCredentials": "Incorrect email or password.",
+       "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
+-      "oauthFailed": "Signing in with Google did not work. Try again."
++      "oauthFailed": "Signing in with Google did not work. Try again.",
++      "invalidCode": "Invalid code. Try again.",
++      "codeRequired": "Enter a verification code."
+     },
+     "fields": {
+       "email": "Email",
+@@ -247,7 +250,15 @@
+       "hasAccount": "Already have an account?",
+       "loginLink": "Sign in"
+     },
+-    "continueWithGoogle": "Continue with Google"
++    "continueWithGoogle": "Continue with Google",
++    "twoFactor": {
++      "title": "Two-step verification",
++      "description": "Enter the 6-digit code from your authenticator app, or a recovery code.",
++      "codeLabel": "Verification code",
++      "submit": "Verify",
++      "pending": "Verifying…",
++      "recoveryHint": "You can also use a 10-character recovery code."
++    }
+   },
+   "admin": {
+     "forbiddenTitle": "Access denied",
+@@ -545,5 +556,39 @@
+       "retry": "Try again",
+       "backHome": "Back to home"
+     }
++  },
++  "security": {
++    "title": "Security",
++    "intro": "Manage your account security.",
++    "twoFactor": {
++      "title": "Two-factor authentication (2FA)",
++      "enabledDescription": "2FA is enabled on your account. Your account is protected by a one-time code.",
++      "disabledDescription": "Add an extra layer of security by enabling 2FA with an authenticator app.",
++      "setup": {
++        "start": "Enable 2FA",
++        "pending": "Loading…",
++        "scanQr": "Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.).",
++        "manualEntry": "Manual key",
++        "codeLabel": "Verification code",
++        "confirm": "Enable"
++      },
++      "recoveryCodes": {
++        "title": "Recovery codes",
++        "description": "Save these codes somewhere safe. Each code can only be used once. If you lose access to your authenticator app, these codes will let you sign in.",
++        "copy": "Copy codes"
++      },
++      "disable": {
++        "codeLabel": "Current code to disable",
++        "submit": "Disable 2FA",
++        "pending": "Disabling…",
++        "success": "2FA has been disabled."
++      },
++      "errors": {
++        "invalidCode": "Invalid code. Try again.",
++        "codeRequired": "Enter the code shown in your app.",
++        "alreadyEnabled": "2FA is already enabled.",
++        "notEnabled": "2FA is not enabled."
++      }
++    }
+   }
+ }
+diff --git a/messages/es.json b/messages/es.json
+index 8f8dd4c..f074750 100644
+--- a/messages/es.json
++++ b/messages/es.json
+@@ -12,7 +12,8 @@
+     "channels": "Canales",
+     "account": "Cuenta",
+     "myData": "Mis datos",
+-    "profile": "Mi perfil"
++    "profile": "Mi perfil",
++    "security": "Seguridad"
+   },
+   "localeSwitcher": {
+     "label": "Idioma",
+@@ -226,7 +227,9 @@
+       "emailTaken": "Esta dirección de correo electrónico ya está registrada.",
+       "invalidCredentials": "Correo electrónico o contraseña incorrectos.",
+       "tooManyAttempts": "Demasiados intentos fallidos. Vuelva a intentarlo dentro de 15 minutos.",
+-      "oauthFailed": "No se pudo iniciar sesión con Google. Vuelva a intentarlo."
++      "oauthFailed": "No se pudo iniciar sesión con Google. Vuelva a intentarlo.",
++      "invalidCode": "Código inválido. Inténtalo de nuevo.",
++      "codeRequired": "Introduce un código de verificación."
+     },
+     "fields": {
+       "email": "Correo electrónico",
+@@ -247,7 +250,15 @@
+       "hasAccount": "¿Ya tiene una cuenta?",
+       "loginLink": "Iniciar sesión"
+     },
+-    "continueWithGoogle": "Continuar con Google"
++    "continueWithGoogle": "Continuar con Google",
++    "twoFactor": {
++      "title": "Verificación en dos pasos",
++      "description": "Introduce el código de 6 dígitos de tu aplicación de autenticación, o un código de recuperación.",
++      "codeLabel": "Código de verificación",
++      "submit": "Verificar",
++      "pending": "Verificando…",
++      "recoveryHint": "También puedes usar un código de recuperación de 10 caracteres."
++    }
+   },
+   "admin": {
+     "forbiddenTitle": "Acceso denegado",
+@@ -545,5 +556,39 @@
+       "retry": "Reintentar",
+       "backHome": "Volver al inicio"
+     }
++  },
++  "security": {
++    "title": "Seguridad",
++    "intro": "Gestiona la seguridad de tu cuenta.",
++    "twoFactor": {
++      "title": "Autenticación de dos factores (2FA)",
++      "enabledDescription": "La 2FA está activada en tu cuenta. Tu cuenta está protegida por un código de un solo uso.",
++      "disabledDescription": "Añade una capa extra de seguridad activando la 2FA con una aplicación de autenticación.",
++      "setup": {
++        "start": "Activar 2FA",
++        "pending": "Cargando…",
++        "scanQr": "Escanea este código QR con tu aplicación de autenticación (Google Authenticator, Authy, etc.).",
++        "manualEntry": "Clave manual",
++        "codeLabel": "Código de verificación",
++        "confirm": "Activar"
++      },
++      "recoveryCodes": {
++        "title": "Códigos de recuperación",
++        "description": "Guarda estos códigos en un lugar seguro. Cada código solo se puede usar una vez. Si pierdes el acceso a tu aplicación de autenticación, estos códigos te permitirán iniciar sesión.",
++        "copy": "Copiar códigos"
++      },
++      "disable": {
++        "codeLabel": "Código actual para desactivar",
++        "submit": "Desactivar 2FA",
++        "pending": "Desactivando…",
++        "success": "La 2FA ha sido desactivada."
++      },
++      "errors": {
++        "invalidCode": "Código inválido. Inténtalo de nuevo.",
++        "codeRequired": "Introduce el código de tu aplicación.",
++        "alreadyEnabled": "La 2FA ya está activada.",
++        "notEnabled": "La 2FA no está activada."
++      }
++    }
+   }
+ }
+diff --git a/messages/fr.json b/messages/fr.json
+index 0c1db45..77bc25e 100644
+--- a/messages/fr.json
++++ b/messages/fr.json
+@@ -12,7 +12,8 @@
+     "channels": "Channels",
+     "account": "Compte",
+     "myData": "Mes données",
+-    "profile": "Mon profil"
++    "profile": "Mon profil",
++    "security": "Sécurité"
+   },
+   "localeSwitcher": {
+     "label": "Langue",
+@@ -226,7 +227,9 @@
+       "emailTaken": "Cette adresse e-mail est déjà associée à un compte.",
+       "invalidCredentials": "Adresse e-mail ou mot de passe incorrect.",
+       "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes.",
+-      "oauthFailed": "La connexion avec Google n'a pas abouti. Réessayez."
++      "oauthFailed": "La connexion avec Google n'a pas abouti. Réessayez.",
++      "invalidCode": "Code invalide. Réessayez.",
++      "codeRequired": "Saisissez un code de vérification."
+     },
+     "fields": {
+       "email": "Adresse e-mail",
+@@ -247,7 +250,15 @@
+       "hasAccount": "Déjà un compte ?",
+       "loginLink": "Se connecter"
+     },
+-    "continueWithGoogle": "Continuer avec Google"
++    "continueWithGoogle": "Continuer avec Google",
++    "twoFactor": {
++      "title": "Vérification en deux étapes",
++      "description": "Entrez le code à 6 chiffres de votre application d'authentification, ou un code de récupération.",
++      "codeLabel": "Code de vérification",
++      "submit": "Vérifier",
++      "pending": "Vérification…",
++      "recoveryHint": "Vous pouvez aussi utiliser un code de récupération à 10 caractères."
++    }
+   },
+   "admin": {
+     "forbiddenTitle": "Accès refusé",
+@@ -545,5 +556,39 @@
+       "retry": "Réessayer",
+       "backHome": "Retour à l'accueil"
+     }
++  },
++  "security": {
++    "title": "Sécurité",
++    "intro": "Gérez la sécurité de votre compte.",
++    "twoFactor": {
++      "title": "Authentification à deux facteurs (2FA)",
++      "enabledDescription": "La 2FA est activée sur votre compte. Votre compte est protégé par un code à usage unique.",
++      "disabledDescription": "Ajoutez une couche de sécurité supplémentaire en activant la 2FA avec une application d'authentification.",
++      "setup": {
++        "start": "Activer la 2FA",
++        "pending": "Chargement…",
++        "scanQr": "Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, etc.).",
++        "manualEntry": "Clé manuelle",
++        "codeLabel": "Code de vérification",
++        "confirm": "Activer"
++      },
++      "recoveryCodes": {
++        "title": "Codes de récupération",
++        "description": "Sauvegardez ces codes dans un endroit sûr. Chaque code ne peut être utilisé qu'une seule fois. Si vous perdez l'accès à votre application d'authentification, ces codes vous permettront de vous connecter.",
++        "copy": "Copier les codes"
++      },
++      "disable": {
++        "codeLabel": "Code actuel pour désactiver",
++        "submit": "Désactiver la 2FA",
++        "pending": "Désactivation…",
++        "success": "La 2FA a été désactivée."
++      },
++      "errors": {
++        "invalidCode": "Code invalide. Réessayez.",
++        "codeRequired": "Saisissez le code affiché dans votre application.",
++        "alreadyEnabled": "La 2FA est déjà activée.",
++        "notEnabled": "La 2FA n'est pas activée."
++      }
++    }
+   }
+ }
+diff --git a/package.json b/package.json
+index 10cd1f5..f167285 100644
+--- a/package.json
++++ b/package.json
+@@ -32,6 +32,8 @@
+     "next": "16.3.4",
+     "next-intl": "^4.14.7",
+     "nodemailer": "^10.1.1",
++    "otpauth": "^9.5.2",
++    "qrcode": "^1.5.4",
+     "react": "19.2.8",
+     "react-dom": "19.2.8",
+     "ws": "^8.22.0",
+@@ -41,6 +43,7 @@
+     "@tailwindcss/postcss": "^4",
+     "@types/node": "^22.20.4",
+     "@types/nodemailer": "^8.0.2",
++    "@types/qrcode": "^1.5.6",
+     "@types/react": "^19",
+     "@types/react-dom": "^19",
+     "@types/ws": "^8.18.2",
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 16fbdda..72b6ca9 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -64,8 +64,9 @@ model User {
+   avatarKey    String?
+   locale       String     @default("fr")
+   totpSecret   String?
+-  totpEnabled  Boolean    @default(false)
+-  globalRole   GlobalRole @default(USER)
++  totpEnabled    Boolean    @default(false)
++  recoveryCodes  String[]
++  globalRole     GlobalRole @default(USER)
+   reputation   Int        @default(0)
+   lastSeenAt   DateTime?
+ 
+@@ -282,8 +283,9 @@ model Session {
+   userId            String
+   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+   expiresAt         DateTime
+-  twoFactorVerified Boolean  @default(false)
+-  ipAddress         String?
++  twoFactorVerified   Boolean   @default(false)
++  twoFactorVerifiedAt DateTime?
++  ipAddress           String?
+   userAgent         String?
+   createdAt         DateTime @default(now())
+   updatedAt         DateTime @default(now()) @updatedAt
+diff --git a/src/app/[locale]/(auth)/login/actions.ts b/src/app/[locale]/(auth)/login/actions.ts
+index 6ba39b9..25cd892 100644
+--- a/src/app/[locale]/(auth)/login/actions.ts
++++ b/src/app/[locale]/(auth)/login/actions.ts
+@@ -40,6 +40,11 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
+   // A new Session row and a new cookie on every login: the session id rotates (C11).
+   const { token, expiresAt } = await createSession(user.id);
+   await setSessionCookie(token, expiresAt);
++
++  const locale = await getLocale();
++  if (user.totpEnabled) {
++    return redirect({ href: "/login/2fa", locale });
++  }
+   // `return`: TS only sees redirect() as never-returning with an explicit type.
+-  return redirect({ href: "/", locale: await getLocale() });
++  return redirect({ href: "/", locale });
+ }
+diff --git a/src/app/[locale]/dev/ui/page.tsx b/src/app/[locale]/dev/ui/page.tsx
+index 326e98a..af09429 100644
+--- a/src/app/[locale]/dev/ui/page.tsx
++++ b/src/app/[locale]/dev/ui/page.tsx
+@@ -23,6 +23,7 @@ export default function UiGalleryPage() {
+         <div className="flex gap-3">
+           <Button>Primary</Button>
+           <Button variant="secondary">Secondary</Button>
++          <Button variant="danger">Danger</Button>
+           <Button disabled>Disabled</Button>
+         </div>
+       </section>
+diff --git a/src/app/api/auth/google/callback/route.ts b/src/app/api/auth/google/callback/route.ts
+index 46a57be..4b98ac4 100644
+--- a/src/app/api/auth/google/callback/route.ts
++++ b/src/app/api/auth/google/callback/route.ts
+@@ -8,6 +8,7 @@ import {
+   resolveGoogleUser,
+ } from "@/lib/auth/oauth";
+ import { createSession, setSessionCookie } from "@/lib/auth/session";
++import { prisma } from "@/lib/db";
+ 
+ const tokenSchema = z.object({ access_token: z.string().min(1) });
+ 
+@@ -58,6 +59,9 @@ export async function GET(request: NextRequest) {
+     // A new Session row and cookie, as a password login does (C11 rotation).
+     const session = await createSession(userId);
+     await setSessionCookie(session.token, session.expiresAt);
++
++    const user = await prisma.user.findUnique({ where: { id: userId }, select: { totpEnabled: true } });
++    if (user?.totpEnabled) return finish("/login/2fa");
+   } catch (error) {
+     // Google unreachable or refusing, an answer we cannot read, a database error.
+     console.error("Google sign-in failed:", error);
+diff --git a/src/components/UserMenu.tsx b/src/components/UserMenu.tsx
+index fcaec87..a138efb 100644
+--- a/src/components/UserMenu.tsx
++++ b/src/components/UserMenu.tsx
+@@ -93,6 +93,7 @@ export function AccountLinks({
+         { href: `/users/${userId}`, label: t("profile") },
+         { href: "/channels", label: t("channels") },
+         { href: "/friends", label: t("friends") },
++        { href: "/account/security", label: t("security") },
+         { href: "/account/data", label: t("myData") },
+         ...(isAdmin ? [{ href: "/admin/users", label: t("admin") }] : []),
+       ].map((page) => {
+diff --git a/src/components/ui/Button.tsx b/src/components/ui/Button.tsx
+index 82e8a59..70b9663 100644
+--- a/src/components/ui/Button.tsx
++++ b/src/components/ui/Button.tsx
+@@ -1,7 +1,7 @@
+ import { ButtonHTMLAttributes } from "react";
+ 
+ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+-  variant?: "primary" | "secondary";
++  variant?: "primary" | "secondary" | "danger";
+ };
+ 
+ export function Button({ variant = "primary", className = "", ...props }: ButtonProps) {
+@@ -13,6 +13,8 @@ export function Button({ variant = "primary", className = "", ...props }: Button
+       "border-zinc-900 bg-zinc-900 text-white hover:border-zinc-700 hover:bg-zinc-700 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:border-zinc-300 dark:hover:bg-zinc-300",
+     secondary:
+       "border-zinc-200 bg-transparent text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100",
++    danger:
++      "border-red-600 bg-red-600 text-white hover:border-red-700 hover:bg-red-700 dark:border-red-500 dark:bg-red-500 dark:hover:border-red-600 dark:hover:bg-red-600",
+   };
+ 
+   return (
+diff --git a/src/lib/auth/session.ts b/src/lib/auth/session.ts
+index 1023c4b..b49b92f 100644
+--- a/src/lib/auth/session.ts
++++ b/src/lib/auth/session.ts
+@@ -98,11 +98,14 @@ export async function invalidateAllSessions(userId: string): Promise<void> {
+   await prisma.session.deleteMany({ where: { userId } });
+ }
+ 
+-/** Reads the session cookie. Returns null when absent or invalid. */
++/** Reads the session cookie. Returns null when absent, invalid, or pending 2FA. */
+ export async function getCurrentUser(): Promise<SessionContext | null> {
+   const token = (await cookies()).get(SESSION_COOKIE)?.value;
+   if (!token) return null;
+-  return validateSessionToken(token);
++  const ctx = await validateSessionToken(token);
++  if (!ctx) return null;
++  if (ctx.user.totpEnabled && !ctx.session.twoFactorVerified) return null;
++  return ctx;
+ }
+ 
+ /** The guard. Redirects to /login when there is no valid session. */
+@@ -112,6 +115,16 @@ export async function requireUser(): Promise<SessionContext> {
+   return ctx;
+ }
+ 
++/** For the /login/2fa page only: returns the session even when 2FA is pending. */
++export async function getPendingTwoFactorSession(): Promise<SessionContext | null> {
++  const token = (await cookies()).get(SESSION_COOKIE)?.value;
++  if (!token) return null;
++  const ctx = await validateSessionToken(token);
++  if (!ctx) return null;
++  if (!ctx.user.totpEnabled || ctx.session.twoFactorVerified) return null;
++  return ctx;
++}
++
+ /** Server Actions and Route Handlers only — Next cannot set cookies while rendering. */
+ export async function setSessionCookie(token: string, expiresAt: Date): Promise<void> {
+   (await cookies()).set(SESSION_COOKIE, token, {
