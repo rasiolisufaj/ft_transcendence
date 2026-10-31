@@ -11,6 +11,7 @@ import {
 } from "./actions";
 import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/policy";
+import { ChannelLive } from "./ChannelLive";
 
 export default async function ChannelPage({
   params,
@@ -66,6 +67,7 @@ export default async function ChannelPage({
   });
   return (
     <main className="mx-auto max-w-xl px-4 py-16">
+      <ChannelLive channelId={channel.id} />
       <Link
         href="/channels"
         className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"

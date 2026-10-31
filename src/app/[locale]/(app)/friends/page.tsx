@@ -163,7 +163,7 @@ function PeopleList({
             ) : (
               <span className="min-w-0 truncate text-sm font-medium">{person.displayName}</span>
             )}
-            {onlineIds ? <OnlineDot online={onlineIds.has(person.id)} /> : null}
+            {onlineIds ? <OnlineDot online={onlineIds.has(person.id)} userId={person.id} /> : null}
           </div>
           <div className="flex items-center gap-3">{children(person)}</div>
         </li>
