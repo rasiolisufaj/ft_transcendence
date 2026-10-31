@@ -561,6 +561,8 @@
       "notFriends": "You can only message your friends.",
       "empty": "The message is empty.",
       "tooLong": "The message is over 1,000 characters."
-    }
+    },
+    "unread": "{count, plural, one {# unread} other {# unread}}",
+    "seen": "Seen"
   }
 }

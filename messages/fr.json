@@ -561,6 +561,8 @@
       "notFriends": "Vous ne pouvez écrire qu'à vos amis.",
       "empty": "Le message est vide.",
       "tooLong": "Le message dépasse 1 000 caractères."
-    }
+    },
+    "unread": "{count, plural, one {# non lu} other {# non lus}}",
+    "seen": "Vu"
   }
 }
