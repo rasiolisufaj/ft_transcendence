@@ -14,6 +14,7 @@ services:
     entrypoint: ["/entrypoint.sh"]
     depends_on:
       - web
+      - realtime
 
   # ── Next.js application ────────────────────────────────────────────────────
   web:
@@ -30,6 +31,14 @@ services:
       # Signs WebSocket tickets (POST /api/auth/ws-ticket). Absent = that route
       # answers 500; the rest of the app runs.
       WS_TICKET_SECRET: "${WS_TICKET_SECRET:-}"
+      # Realtime: web posts events to the realtime service over internal HTTP.
+      REALTIME_INTERNAL_URL: "http://realtime:3001"
+      REALTIME_PUBLISH_SECRET: "${REALTIME_PUBLISH_SECRET:-}"
+      # OAuth (phase 8). APP_URL must be the origin the browser is on; empty Google
+      # keys make the Google button go back to the login page.
+      APP_URL: "${APP_URL:-https://mespapiers.local}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
       # Mailpit catches every email in dev (web UI on http://localhost:8025).
       SMTP_HOST: "mailpit"
       # Mailpit's port inside the network; .env's SMTP_PORT is for `npm run dev` on the host.
@@ -48,6 +57,28 @@ services:
       # parce que `next dev` redémarre tout seul quand il change.
       - ./next.config.ts:/app/next.config.ts
       - ./messages:/app/messages
+
+  # ── Realtime WebSocket server ───────────────────────────────────────────────
+  realtime:
+    build: .
+    container_name: mespapiers_realtime
+    restart: unless-stopped
+    command: ["sh", "-c", "npx prisma generate && npx tsx src/realtime/main.ts"]
+    expose:
+      - "3001"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
+      WS_TICKET_SECRET: "${WS_TICKET_SECRET:-}"
+      REALTIME_PUBLISH_SECRET: "${REALTIME_PUBLISH_SECRET:-}"
+      REALTIME_PORT: "3001"
+      HEARTBEAT_MS: "30000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+      - /app/src/generated 
 
   # ── PostgreSQL database ────────────────────────────────────────────────────
   db:
