@@ -30,6 +30,11 @@ services:
       # Signs WebSocket tickets (POST /api/auth/ws-ticket). Absent = that route
       # answers 500; the rest of the app runs.
       WS_TICKET_SECRET: "${WS_TICKET_SECRET:-}"
+      # OAuth (phase 8). APP_URL must be the origin the browser is on; empty Google
+      # keys make the Google button go back to the login page.
+      APP_URL: "${APP_URL:-https://mespapiers.local}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
       # Mailpit catches every email in dev (web UI on http://localhost:8025).
       SMTP_HOST: "mailpit"
       # Mailpit's port inside the network; .env's SMTP_PORT is for `npm run dev` on the host.
