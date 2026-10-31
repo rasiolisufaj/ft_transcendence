@@ -531,6 +531,19 @@
     "deleteMailSubject": "MesPapiers – Your account has been deleted",
     "deleteMailBody": "Hello,\n\nYour MesPapiers account and your documents were permanently deleted.\n\nYour answers in channels remain visible, but without your name.\n\nThe MesPapiers team"
   },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "This page does not exist, or has been moved.",
+      "backHome": "Back to home"
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "description": "Something went wrong. You can try again or go back to home.",
+      "retry": "Try again",
+      "backHome": "Back to home"
+    }
+  },
   "chat": {
     "title": "Messages",
     "subtitle": "Your private conversations with your friends.",

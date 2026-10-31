@@ -531,6 +531,19 @@
     "deleteMailSubject": "MesPapiers – Votre compte a été supprimé",
     "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement.\n\nVos réponses dans les channels restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
   },
+  "errors": {
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "Cette page n'existe pas, ou a été déplacée.",
+      "backHome": "Retour à l'accueil"
+    },
+    "generic": {
+      "title": "Une erreur est survenue",
+      "description": "Quelque chose s'est mal passé. Vous pouvez réessayer ou revenir à l'accueil.",
+      "retry": "Réessayer",
+      "backHome": "Retour à l'accueil"
+    }
+  },
   "chat": {
     "title": "Messages",
     "subtitle": "Vos conversations privées avec vos amis.",
