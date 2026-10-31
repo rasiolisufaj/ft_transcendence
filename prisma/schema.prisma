@@ -64,8 +64,9 @@ model User {
   avatarKey    String?
   locale       String     @default("fr")
   totpSecret   String?
-  totpEnabled  Boolean    @default(false)
-  globalRole   GlobalRole @default(USER)
+  totpEnabled    Boolean    @default(false)
+  recoveryCodes  String[]
+  globalRole     GlobalRole @default(USER)
   reputation   Int        @default(0)
   lastSeenAt   DateTime?
 
@@ -282,8 +283,9 @@ model Session {
   userId            String
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt         DateTime
-  twoFactorVerified Boolean  @default(false)
-  ipAddress         String?
+  twoFactorVerified   Boolean   @default(false)
+  twoFactorVerifiedAt DateTime?
+  ipAddress           String?
   userAgent         String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
