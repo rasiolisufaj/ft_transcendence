@@ -3,15 +3,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ServerMessage } from "@/contracts/socket";
 import { mintTicket } from "@/lib/auth/ticket";
-import {
-  backoff,
-  createRealtimeClient,
-  fetchTicket,
-  isEventOn,
-  isNewMessage,
-  realtimeEnabled,
-  wsUrl,
-} from "@/lib/realtime/client";
+import { backoff, createRealtimeClient, fetchTicket, isEventOn, isNewMessage, wsUrl } from "@/lib/realtime/client";
 import { startServer } from "@/realtime/server";
 
 process.env.WS_TICKET_SECRET = "test-secret";
@@ -312,27 +304,6 @@ describe("reconnect", () => {
 
     expect(await hello).toEqual({ type: "hello", userId: "user-1" });
     client.close();
-  });
-});
-
-describe("realtimeEnabled", () => {
-  afterEach(() => {
-    delete process.env.NEXT_PUBLIC_REALTIME;
-  });
-
-  it("is off by default", () => {
-    delete process.env.NEXT_PUBLIC_REALTIME;
-    expect(realtimeEnabled()).toBe(false);
-  });
-
-  it("is on with NEXT_PUBLIC_REALTIME=on", () => {
-    process.env.NEXT_PUBLIC_REALTIME = "on";
-    expect(realtimeEnabled()).toBe(true);
-  });
-
-  it("stays off for any other value", () => {
-    process.env.NEXT_PUBLIC_REALTIME = "true";
-    expect(realtimeEnabled()).toBe(false);
   });
 });
 
