@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import type { ServerMessage } from "@/contracts/socket";
-import { createRealtimeClient, fetchTicket, realtimeEnabled, wsUrl } from "@/lib/realtime/client";
+import { createRealtimeClient, fetchTicket, wsUrl } from "@/lib/realtime/client";
 import { applyPresence, type OnlineFriends } from "@/lib/realtime/presence";
 
 type RealtimeClient = ReturnType<typeof createRealtimeClient>;
@@ -18,13 +18,10 @@ async function connectUrl() {
 }
 
 export function RealtimeProvider({ children }: { children: ReactNode }) {
-  const [client] = useState(() => (realtimeEnabled() ? createRealtimeClient(connectUrl) : null));
+  const [client] = useState(() => createRealtimeClient(connectUrl));
   const [online, setOnline] = useState<OnlineFriends>(null);
 
   useEffect(() => {
-    if (!client) {
-      return;
-    }
     const off = client.on((message) => setOnline((current) => applyPresence(current, message)));
     void client.connect();
     return () => {
