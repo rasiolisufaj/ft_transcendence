@@ -14,7 +14,8 @@
     "myData": "My data",
     "profile": "My profile",
     "notifications": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
-    "messages": "Messages"
+    "messages": "Messages",
+    "security": "Security"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -266,7 +267,9 @@
       "emailTaken": "That email address is already registered.",
       "invalidCredentials": "Incorrect email or password.",
       "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
-      "oauthFailed": "Signing in with Google did not work. Try again."
+      "oauthFailed": "Signing in with Google did not work. Try again.",
+      "invalidCode": "Invalid code. Try again.",
+      "codeRequired": "Enter a verification code."
     },
     "fields": {
       "email": "Email",
@@ -296,7 +299,15 @@
       "subhead": "A private vault for your documents, an assistant that answers your questions, and a community to help you along.",
       "trust": "Your documents are private: only you can open them."
     },
-    "continueWithGoogle": "Continue with Google"
+    "continueWithGoogle": "Continue with Google",
+    "twoFactor": {
+      "title": "Two-step verification",
+      "description": "Enter the 6-digit code from your authenticator app, or a recovery code.",
+      "codeLabel": "Verification code",
+      "submit": "Verify",
+      "pending": "Verifying…",
+      "recoveryHint": "You can also use a 10-character recovery code."
+    }
   },
   "admin": {
     "forbiddenTitle": "Access denied",
@@ -695,6 +706,41 @@
       "carInsurance": "Car insurance",
       "expiringSoon": "Expiring soon",
       "valid": "Valid"
+    }
+  },
+  "security": {
+    "title": "Security",
+    "intro": "Manage your account security.",
+    "twoFactor": {
+      "title": "Two-factor authentication (2FA)",
+      "enabledDescription": "2FA is enabled on your account. Your account is protected by a one-time code.",
+      "disabledDescription": "Add an extra layer of security by enabling 2FA with an authenticator app.",
+      "setup": {
+        "start": "Enable 2FA",
+        "pending": "Loading…",
+        "scanQr": "Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.).",
+        "manualEntry": "Manual key",
+        "codeLabel": "Verification code",
+        "confirm": "Enable",
+        "qrAlt": "Two-factor authentication QR code"
+      },
+      "recoveryCodes": {
+        "title": "Recovery codes",
+        "description": "Save these codes somewhere safe. Each code can only be used once. If you lose access to your authenticator app, these codes will let you sign in.",
+        "copy": "Copy codes"
+      },
+      "disable": {
+        "codeLabel": "TOTP code or recovery code",
+        "submit": "Disable 2FA",
+        "pending": "Disabling…",
+        "success": "2FA has been disabled."
+      },
+      "errors": {
+        "invalidCode": "Invalid code. Try again.",
+        "codeRequired": "Enter the code shown in your app.",
+        "alreadyEnabled": "2FA is already enabled.",
+        "notEnabled": "2FA is not enabled."
+      }
     }
   }
 }

@@ -40,6 +40,11 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
   // A new Session row and a new cookie on every login: the session id rotates (C11).
   const { token, expiresAt } = await createSession(user.id);
   await setSessionCookie(token, expiresAt);
+
+  const locale = await getLocale();
+  if (user.totpEnabled) {
+    return redirect({ href: "/login/2fa", locale });
+  }
   // `return`: TS only sees redirect() as never-returning with an explicit type.
-  return redirect({ href: "/", locale: await getLocale() });
+  return redirect({ href: "/", locale });
 }
