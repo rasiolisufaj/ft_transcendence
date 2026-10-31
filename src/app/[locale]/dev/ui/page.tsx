@@ -23,6 +23,7 @@ export default function UiGalleryPage() {
         <div className="flex gap-3">
           <Button>Primary</Button>
           <Button variant="secondary">Secondary</Button>
+          <Button variant="danger">Danger</Button>
           <Button disabled>Disabled</Button>
         </div>
       </section>

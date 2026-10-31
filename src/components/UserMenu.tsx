@@ -93,6 +93,7 @@ export function AccountLinks({
         { href: `/users/${userId}`, label: t("profile") },
         { href: "/channels", label: t("channels") },
         { href: "/friends", label: t("friends") },
+        { href: "/account/security", label: t("security") },
         { href: "/account/data", label: t("myData") },
         ...(isAdmin ? [{ href: "/admin/users", label: t("admin") }] : []),
       ].map((page) => {

@@ -78,7 +78,7 @@ services:
     volumes:
       - ./src:/app/src
       - ./prisma:/app/prisma
-      - /app/src/generated 
+      - /app/src/generated
 
   # ── PostgreSQL database ────────────────────────────────────────────────────
   db:

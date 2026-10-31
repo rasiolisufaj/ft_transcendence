@@ -12,7 +12,8 @@
     "channels": "Channels",
     "account": "Compte",
     "myData": "Mes données",
-    "profile": "Mon profil"
+    "profile": "Mon profil",
+    "security": "Sécurité"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -226,7 +227,9 @@
       "emailTaken": "Cette adresse e-mail est déjà associée à un compte.",
       "invalidCredentials": "Adresse e-mail ou mot de passe incorrect.",
       "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes.",
-      "oauthFailed": "La connexion avec Google n'a pas abouti. Réessayez."
+      "oauthFailed": "La connexion avec Google n'a pas abouti. Réessayez.",
+      "invalidCode": "Code invalide. Réessayez.",
+      "codeRequired": "Saisissez un code de vérification."
     },
     "fields": {
       "email": "Adresse e-mail",
@@ -247,7 +250,15 @@
       "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter"
     },
-    "continueWithGoogle": "Continuer avec Google"
+    "continueWithGoogle": "Continuer avec Google",
+    "twoFactor": {
+      "title": "Vérification en deux étapes",
+      "description": "Entrez le code à 6 chiffres de votre application d'authentification, ou un code de récupération.",
+      "codeLabel": "Code de vérification",
+      "submit": "Vérifier",
+      "pending": "Vérification…",
+      "recoveryHint": "Vous pouvez aussi utiliser un code de récupération à 10 caractères."
+    }
   },
   "admin": {
     "forbiddenTitle": "Accès refusé",
@@ -544,6 +555,40 @@
       "description": "Quelque chose s'est mal passé. Vous pouvez réessayer ou revenir à l'accueil.",
       "retry": "Réessayer",
       "backHome": "Retour à l'accueil"
+    }
+  },
+  "security": {
+    "title": "Sécurité",
+    "intro": "Gérez la sécurité de votre compte.",
+    "twoFactor": {
+      "title": "Authentification à deux facteurs (2FA)",
+      "enabledDescription": "La 2FA est activée sur votre compte. Votre compte est protégé par un code à usage unique.",
+      "disabledDescription": "Ajoutez une couche de sécurité supplémentaire en activant la 2FA avec une application d'authentification.",
+      "setup": {
+        "start": "Activer la 2FA",
+        "pending": "Chargement…",
+        "scanQr": "Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, etc.).",
+        "manualEntry": "Clé manuelle",
+        "codeLabel": "Code de vérification",
+        "confirm": "Activer"
+      },
+      "recoveryCodes": {
+        "title": "Codes de récupération",
+        "description": "Sauvegardez ces codes dans un endroit sûr. Chaque code ne peut être utilisé qu'une seule fois. Si vous perdez l'accès à votre application d'authentification, ces codes vous permettront de vous connecter.",
+        "copy": "Copier les codes"
+      },
+      "disable": {
+        "codeLabel": "Code actuel pour désactiver",
+        "submit": "Désactiver la 2FA",
+        "pending": "Désactivation…",
+        "success": "La 2FA a été désactivée."
+      },
+      "errors": {
+        "invalidCode": "Code invalide. Réessayez.",
+        "codeRequired": "Saisissez le code affiché dans votre application.",
+        "alreadyEnabled": "La 2FA est déjà activée.",
+        "notEnabled": "La 2FA n'est pas activée."
+      }
     }
   }
 }
