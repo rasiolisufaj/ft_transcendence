@@ -1,11 +1,18 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { DeleteAccountForm } from "./DeleteAccountForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function MyDataPage() {
-  await requireUser();
+  const { user } = await requireUser();
+  const account = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { passwordHash: true },
+  });
   const t = await getTranslations("myData");
   const locale = await getLocale();
 
@@ -33,7 +40,7 @@ export default async function MyDataPage() {
             {t("deleteTitle")}
           </h2>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t("deleteDesc")}</p>
-          <DeleteAccountForm />
+          <DeleteAccountForm hasPassword={Boolean(account?.passwordHash)} />
         </section>
       </Card>
     </section>
