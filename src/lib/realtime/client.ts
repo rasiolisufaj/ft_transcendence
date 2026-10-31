@@ -29,6 +29,14 @@ export function isEventOn(message: ServerMessage, topic: string): boolean {
   return message.type === "event" && message.topic === topic;
 }
 
+export function isNewMessage(message: ServerMessage, from?: string): boolean {
+  return (
+    message.type === "event" &&
+    message.event.type === "message.created" &&
+    (from === undefined || message.event.senderId === from)
+  );
+}
+
 type Listener = (message: ServerMessage) => void;
 
 function parse(data: unknown): ServerMessage | null {

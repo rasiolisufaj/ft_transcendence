@@ -12,7 +12,8 @@
     "channels": "Channels",
     "account": "Compte",
     "myData": "Mes données",
-    "profile": "Mon profil"
+    "profile": "Mon profil",
+    "messages": "Messages"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -304,7 +305,8 @@
       "cancel": "Annuler",
       "remove": "Retirer",
       "block": "Bloquer",
-      "unblock": "Débloquer"
+      "unblock": "Débloquer",
+      "message": "Écrire"
     },
     "errors": {
       "emailInvalid": "Saisissez une adresse e-mail valide.",
@@ -545,5 +547,26 @@
       "retry": "Réessayer",
       "backHome": "Retour à l'accueil"
     }
+  },
+  "chat": {
+    "title": "Messages",
+    "subtitle": "Vos conversations privées avec vos amis.",
+    "empty": "Aucune conversation pour l'instant. Écrivez à un ami depuis la page Amis.",
+    "youSaid": "Vous : {content}",
+    "back": "Toutes les conversations",
+    "with": "Conversation avec {name}",
+    "noMessages": "Aucun message pour l'instant.",
+    "label": "Votre message",
+    "submit": "Envoyer",
+    "pending": "Envoi…",
+    "cannotWrite": "Vous ne pouvez écrire qu'à vos amis.",
+    "errors": {
+      "self": "Vous ne pouvez pas vous écrire à vous-même.",
+      "notFriends": "Vous ne pouvez écrire qu'à vos amis.",
+      "empty": "Le message est vide.",
+      "tooLong": "Le message dépasse 1 000 caractères."
+    },
+    "unread": "{count, plural, one {# non lu} other {# non lus}}",
+    "seen": "Vu"
   }
 }
