@@ -8,6 +8,7 @@ import {
   resolveGoogleUser,
 } from "@/lib/auth/oauth";
 import { createSession, setSessionCookie } from "@/lib/auth/session";
+import { prisma } from "@/lib/db";
 
 const tokenSchema = z.object({ access_token: z.string().min(1) });
 
@@ -58,6 +59,9 @@ export async function GET(request: NextRequest) {
     // A new Session row and cookie, as a password login does (C11 rotation).
     const session = await createSession(userId);
     await setSessionCookie(session.token, session.expiresAt);
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { totpEnabled: true } });
+    if (user?.totpEnabled) return finish("/login/2fa");
   } catch (error) {
     // Google unreachable or refusing, an answer we cannot read, a database error.
     console.error("Google sign-in failed:", error);
