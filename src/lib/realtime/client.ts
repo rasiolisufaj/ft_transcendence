@@ -1,10 +1,5 @@
 import type { ClientMessage, ServerMessage } from "@/contracts/socket";
 
-// Off until compose runs realtime and nginx proxies /ws: a failed WebSocket is a Chrome console error.
-export function realtimeEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_REALTIME === "on";
-}
-
 type PageLocation = { protocol: string; host: string };
 
 export function wsUrl(location: PageLocation, ticket: string): string {
