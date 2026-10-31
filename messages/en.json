@@ -225,7 +225,8 @@
       "passwordRequired": "Enter your password.",
       "emailTaken": "That email address is already registered.",
       "invalidCredentials": "Incorrect email or password.",
-      "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes."
+      "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
+      "oauthFailed": "Signing in with Google did not work. Try again."
     },
     "fields": {
       "email": "Email",
@@ -245,7 +246,8 @@
       "pending": "Creating account…",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in"
-    }
+    },
+    "continueWithGoogle": "Continue with Google"
   },
   "admin": {
     "forbiddenTitle": "Access denied",
@@ -519,14 +521,29 @@
     "deleteTitle": "Delete my account",
     "deleteDesc": "Your account and your documents will be deleted forever. Your answers in channels will stay, but without your name.",
     "passwordLabel": "Password",
+    "emailLabel": "Your email address, to confirm",
     "deleteButton": "Delete my account",
     "deletePending": "Deleting…",
     "wrongPassword": "Wrong password.",
+    "wrongEmail": "That is not this account's email address.",
     "lastAdmin": "You are the only administrator: name another administrator before deleting your account.",
     "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
     "exportMailSubject": "MesPapiers – Export of your data",
     "exportMailBody": "Hello,\n\nYour personal data was exported.\n\nIf this wasn't you, change your password.\n\nThe MesPapiers team",
     "deleteMailSubject": "MesPapiers – Your account has been deleted",
     "deleteMailBody": "Hello,\n\nYour MesPapiers account and your documents were permanently deleted.\n\nYour answers in channels remain visible, but without your name.\n\nThe MesPapiers team"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "This page does not exist, or has been moved.",
+      "backHome": "Back to home"
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "description": "Something went wrong. You can try again or go back to home.",
+      "retry": "Try again",
+      "backHome": "Back to home"
+    }
   }
 }

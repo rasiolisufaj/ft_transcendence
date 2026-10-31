@@ -1,0 +1,2 @@
+# Secrets stay out of the image: compose's `environment:` gives web every variable it reads.
+.env*
