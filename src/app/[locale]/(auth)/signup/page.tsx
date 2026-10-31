@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { GoogleButton } from "@/components/ui/GoogleButton";
 import { Input } from "@/components/ui/Input";
 import { Link } from "@/i18n/navigation";
 import type { AuthFormState } from "@/lib/auth/schemas";
@@ -67,6 +68,10 @@ export default function SignupPage() {
           {pending ? t("signup.pending") : t("signup.submit")}
         </Button>
       </form>
+
+      <GoogleButton href="/api/auth/google/start" className="mt-4 w-full">
+        {t("continueWithGoogle")}
+      </GoogleButton>
 
       <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
         {t("signup.hasAccount")}{" "}

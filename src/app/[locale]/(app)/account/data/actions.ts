@@ -11,12 +11,12 @@ import { createRateLimiter } from "@/lib/auth/rate-limit";
 import type { AuthErrorKey } from "@/lib/auth/schemas";
 import { writeAudit } from "@/lib/audit";
 import { sendMail } from "@/lib/mail";
-import { deleteAccountSchema } from "./schemas";
+import { deleteAccountSchema, deleteWithEmailSchema } from "./schemas";
 
 const deleteLimiter = createRateLimiter();
 
 export type DeleteAccountState = {
-  error?: "wrongPassword" | "lastAdmin" | "tooManyAttempts";
+  error?: "wrongPassword" | "wrongEmail" | "lastAdmin" | "tooManyAttempts";
   fieldErrors?: Record<string, AuthErrorKey[] | undefined>;
 };
 
@@ -28,12 +28,6 @@ export async function deleteAccount(
   assertCan(ctx, "gdpr:delete");
   const { user } = ctx;
 
-  const parsed = deleteAccountSchema.safeParse({ password: formData.get("password") });
-  if (!parsed.success) {
-    return { fieldErrors: z.flattenError(parsed.error, (i) => i.message as AuthErrorKey).fieldErrors };
-  }
-  const { password } = parsed.data;
-
   if (deleteLimiter.tooManyAttempts(user.id)) {
     return { error: "tooManyAttempts" };
   }
@@ -42,9 +36,25 @@ export async function deleteAccount(
     where: { id: user.id },
     select: { passwordHash: true },
   });
-  if (!account?.passwordHash || !(await verifyPassword(password, account.passwordHash))) {
+
+  let confirmed: boolean;
+  if (account?.passwordHash) {
+    const parsed = deleteAccountSchema.safeParse({ password: formData.get("password") });
+    if (!parsed.success) {
+      return { fieldErrors: z.flattenError(parsed.error, (i) => i.message as AuthErrorKey).fieldErrors };
+    }
+    confirmed = await verifyPassword(parsed.data.password, account.passwordHash);
+  } else {
+    // An account made by Google sign-in (phase 8) has no password to re-type: it types its email.
+    const parsed = deleteWithEmailSchema.safeParse({ email: formData.get("email") });
+    if (!parsed.success) {
+      return { fieldErrors: z.flattenError(parsed.error, (i) => i.message as AuthErrorKey).fieldErrors };
+    }
+    confirmed = parsed.data.email === user.email;
+  }
+  if (!confirmed) {
     deleteLimiter.recordFailure(user.id);
-    return { error: "wrongPassword" };
+    return { error: account?.passwordHash ? "wrongPassword" : "wrongEmail" };
   }
   deleteLimiter.clearAttempts(user.id);
 
