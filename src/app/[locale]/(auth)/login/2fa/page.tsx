@@ -25,13 +25,17 @@ export default function TwoFactorPage() {
           label={t("twoFactor.codeLabel")}
           name="code"
           type="text"
-          inputMode="numeric"
           autoComplete="one-time-code"
           autoFocus
           required
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          error={state.error ? t(`errors.${state.error}`) : undefined}
+          error={
+            state.error === "tooManyAttempts" ? t("errors.tooManyAttempts")
+            : state.error === "codeRequired" ? t("errors.codeRequired")
+            : state.error === "invalidCode" ? t("errors.invalidCode")
+            : undefined
+          }
         />
 
         <Button type="submit" disabled={pending} className="w-full">

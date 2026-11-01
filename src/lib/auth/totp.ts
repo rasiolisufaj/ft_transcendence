@@ -54,22 +54,13 @@ export async function consumeRecoveryCode(
   code: string,
 ): Promise<boolean> {
   const digest = hashRecoveryCode(code);
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { recoveryCodes: true },
-  });
-  if (!user) return false;
-
-  const idx = user.recoveryCodes.indexOf(digest);
-  if (idx === -1) return false;
-
-  const remaining = [...user.recoveryCodes];
-  remaining.splice(idx, 1);
-  await prisma.user.update({
-    where: { id: userId },
-    data: { recoveryCodes: remaining },
-  });
-  return true;
+  const removed = await prisma.$executeRaw`
+    UPDATE "User"
+    SET "recoveryCodes" = array_remove("recoveryCodes", ${digest}),
+        "updatedAt" = NOW()
+    WHERE "id" = ${userId}
+      AND ${digest} = ANY("recoveryCodes")`;
+  return removed === 1;
 }
 
 export async function enableTotp(
