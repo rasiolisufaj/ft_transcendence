@@ -3,7 +3,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ServerMessage } from "@/contracts/socket";
 import { mintTicket } from "@/lib/auth/ticket";
-import { backoff, createRealtimeClient, fetchTicket, isEventOn, wsUrl } from "@/lib/realtime/client";
+import { backoff, createRealtimeClient, fetchTicket, isEventOn, isNewNotification, wsUrl } from "@/lib/realtime/client";
 import { startServer } from "@/realtime/server";
 
 process.env.WS_TICKET_SECRET = "test-secret";
@@ -324,5 +324,31 @@ describe("isEventOn", () => {
 
   it("is false for a message that is not an event", () => {
     expect(isEventOn({ type: "subscribed", topic: "channel:12" }, "channel:12")).toBe(false);
+  });
+});
+
+describe("isNewNotification", () => {
+  it("is true for notification.created", () => {
+    expect(
+      isNewNotification({
+        type: "event",
+        topic: "user:me",
+        event: { type: "notification.created", notificationId: 1, recipientId: "me", at: "2026-11-01T10:00:00.000Z" },
+      }),
+    ).toBe(true);
+  });
+
+  it("is false for another event", () => {
+    expect(
+      isNewNotification({
+        type: "event",
+        topic: "channel:1",
+        event: { type: "member.left", channelId: 1, userId: "bob", at: "2026-11-01T10:00:00.000Z" },
+      }),
+    ).toBe(false);
+  });
+
+  it("is false for a message that is not an event", () => {
+    expect(isNewNotification({ type: "hello", userId: "me" })).toBe(false);
   });
 });

@@ -12,7 +12,8 @@
     "channels": "Channels",
     "account": "Compte",
     "myData": "Mes données",
-    "profile": "Mon profil"
+    "profile": "Mon profil",
+    "notifications": "{count, plural, =0 {Notifications} one {Notifications, # non lue} other {Notifications, # non lues}}"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -545,5 +546,19 @@
       "retry": "Réessayer",
       "backHome": "Retour à l'accueil"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune notification pour l'instant.",
+    "markAllRead": "Tout marquer comme lu",
+    "unreadLabel": "Non lue",
+    "deletedUser": "Un utilisateur supprimé",
+    "deletedChannel": "un channel supprimé",
+    "friendRequest": "{name} vous a envoyé une demande d'ami.",
+    "reply": "{name} a répondu à votre question dans {channel}.",
+    "message": "{name} vous a envoyé un message.",
+    "other": "Nouvelle notification.",
+    "nothingNew": "Rien de nouveau pour le moment.",
+    "seeAll": "Voir tout"
   }
 }
