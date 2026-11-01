@@ -8,7 +8,7 @@ import { consumeRecoveryCode, markTwoFactorVerified, verifyCode } from "@/lib/au
 
 const twoFactorLimiter = createRateLimiter();
 
-export type TwoFactorState = { error?: string };
+export type TwoFactorState = { error?: "tooManyAttempts" | "codeRequired" | "invalidCode" };
 
 export async function verifyTwoFactor(
   _prev: TwoFactorState,
@@ -24,20 +24,22 @@ export async function verifyTwoFactor(
   const code = (formData.get("code") as string | null)?.trim() ?? "";
   if (!code) return { error: "codeRequired" };
 
+  twoFactorLimiter.recordFailure(ctx.user.id);
+
   const secret = await getSecret(ctx.user.id);
   if (!secret) return redirect({ href: "/login", locale: await getLocale() });
 
-  const isRecovery = code.length === 10 && /^[0-9a-f]{10}$/.test(code);
+  const plain = code.replace(/\s/g, "");
+  const isRecovery = plain.length === 10 && /^[0-9a-f]{10}$/.test(plain);
   let valid = false;
 
   if (isRecovery) {
-    valid = await consumeRecoveryCode(ctx.user.id, code);
+    valid = await consumeRecoveryCode(ctx.user.id, plain);
   } else {
-    valid = verifyCode(secret, code.replace(/\s/g, ""));
+    valid = verifyCode(secret, plain);
   }
 
   if (!valid) {
-    twoFactorLimiter.recordFailure(ctx.user.id);
     return { error: "invalidCode" };
   }
 

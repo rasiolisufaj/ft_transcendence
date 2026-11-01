@@ -4,10 +4,12 @@ import { revalidatePath } from "next/cache";
 import { writeAudit } from "@/lib/audit";
 import { requireUser } from "@/lib/auth/session";
 import {
+  consumeRecoveryCode,
   createSecret,
   disableTotp,
   enableTotp,
   generateRecoveryCodes,
+  markTwoFactorVerified,
   otpauthUri,
   verifyCode,
 } from "@/lib/auth/totp";
@@ -18,7 +20,7 @@ export type SetupState = {
   secret?: string;
   uri?: string;
   recoveryCodes?: string[];
-  error?: string;
+  error?: "alreadyEnabled" | "codeRequired" | "invalidCode";
 };
 
 export async function startSetup(): Promise<SetupState> {
@@ -35,6 +37,7 @@ export async function confirmSetup(
   formData: FormData,
 ): Promise<SetupState> {
   const ctx = await requireUser();
+  if (ctx.user.totpEnabled) return { step: "idle", error: "alreadyEnabled" };
   const secret = formData.get("secret") as string | null;
   const code = (formData.get("code") as string | null)?.trim() ?? "";
 
@@ -46,11 +49,12 @@ export async function confirmSetup(
 
   const { codes, digests } = generateRecoveryCodes();
   await enableTotp(ctx.user.id, secret, digests);
+  await markTwoFactorVerified(ctx.session.id);
   await writeAudit({ actorUserId: ctx.user.id, action: "totp:enable", targetType: "user", targetId: ctx.user.id });
   return { step: "recovery", recoveryCodes: codes };
 }
 
-export type DisableState = { error?: string; success?: boolean };
+export type DisableState = { error?: "notEnabled" | "codeRequired" | "invalidCode"; success?: boolean };
 
 export async function disableTwoFactor(
   _prev: DisableState,
@@ -68,7 +72,17 @@ export async function disableTwoFactor(
   });
   if (!user?.totpSecret) return { error: "notEnabled" };
 
-  if (!verifyCode(user.totpSecret, code.replace(/\s/g, ""))) {
+  const plain = code.replace(/\s/g, "");
+  const isRecovery = plain.length === 10 && /^[0-9a-f]{10}$/.test(plain);
+  let valid = false;
+
+  if (isRecovery) {
+    valid = await consumeRecoveryCode(ctx.user.id, plain);
+  } else {
+    valid = verifyCode(user.totpSecret, plain);
+  }
+
+  if (!valid) {
     return { error: "invalidCode" };
   }
 

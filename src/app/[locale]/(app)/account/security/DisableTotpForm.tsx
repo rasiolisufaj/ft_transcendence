@@ -26,10 +26,14 @@ export function DisableTotpForm() {
         label={t("disable.codeLabel")}
         name="code"
         type="text"
-        inputMode="numeric"
         autoComplete="one-time-code"
         required
-        error={state.error ? t(`errors.${state.error}`) : undefined}
+        error={
+          state.error === "notEnabled" ? t("errors.notEnabled")
+          : state.error === "codeRequired" ? t("errors.codeRequired")
+          : state.error === "invalidCode" ? t("errors.invalidCode")
+          : undefined
+        }
       />
       <Button type="submit" variant="danger" disabled={pending}>
         {pending ? t("disable.pending") : t("disable.submit")}

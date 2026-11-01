@@ -64,7 +64,7 @@ export function SetupTotpForm() {
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={qrDataUrl}
-            alt="TOTP QR Code"
+            alt={t("setup.qrAlt")}
             className="mx-auto mt-4 rounded-lg"
             width={256}
             height={256}
@@ -83,7 +83,12 @@ export function SetupTotpForm() {
             autoComplete="one-time-code"
             autoFocus
             required
-            error={current.error ? t(`errors.${current.error}`) : undefined}
+            error={
+              current.error === "alreadyEnabled" ? t("errors.alreadyEnabled")
+              : current.error === "codeRequired" ? t("errors.codeRequired")
+              : current.error === "invalidCode" ? t("errors.invalidCode")
+              : undefined
+            }
           />
           <Button type="submit" disabled={confirmPending} className="w-full">
             {confirmPending ? t("setup.pending") : t("setup.confirm")}
