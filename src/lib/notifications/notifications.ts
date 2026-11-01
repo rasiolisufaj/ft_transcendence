@@ -74,6 +74,15 @@ export async function openNotification(me: string, id: number): Promise<string> 
   return notification ? notificationHref(notification) : "/notifications";
 }
 
+// content is written by notify(), so the same JSON finds this person's messages.
+export async function markMessagesRead(me: string, from: string): Promise<number> {
+  const { count } = await prisma.notification.updateMany({
+    where: { recipientId: me, type: "MESSAGE", isRead: false, content: JSON.stringify({ userId: from }) },
+    data: { isRead: true },
+  });
+  return count;
+}
+
 export function unreadCount(me: string) {
   return prisma.notification.count({ where: { recipientId: me, isRead: false } });
 }

@@ -13,7 +13,8 @@
     "account": "Account",
     "myData": "My data",
     "profile": "My profile",
-    "notifications": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}"
+    "notifications": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+    "messages": "Messages"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -305,7 +306,8 @@
       "cancel": "Cancel",
       "remove": "Remove",
       "block": "Block",
-      "unblock": "Unblock"
+      "unblock": "Unblock",
+      "message": "Message"
     },
     "errors": {
       "emailInvalid": "Enter a valid email address.",
@@ -560,5 +562,26 @@
     "other": "New notification.",
     "nothingNew": "Nothing new for now.",
     "seeAll": "See all"
+  },
+  "chat": {
+    "title": "Messages",
+    "subtitle": "Your private conversations with your friends.",
+    "empty": "No conversations yet. Message a friend from the Friends page.",
+    "youSaid": "You: {content}",
+    "back": "All conversations",
+    "with": "Conversation with {name}",
+    "noMessages": "No messages yet.",
+    "label": "Your message",
+    "submit": "Send",
+    "pending": "Sending…",
+    "cannotWrite": "You can only message your friends.",
+    "errors": {
+      "self": "You cannot message yourself.",
+      "notFriends": "You can only message your friends.",
+      "empty": "The message is empty.",
+      "tooLong": "The message is over 1,000 characters."
+    },
+    "unread": "{count, plural, one {# unread} other {# unread}}",
+    "seen": "Seen"
   }
 }
