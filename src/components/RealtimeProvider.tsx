@@ -17,18 +17,21 @@ async function connectUrl() {
   return ticket ? wsUrl(window.location, ticket) : null;
 }
 
-export function RealtimeProvider({ children }: { children: ReactNode }) {
+export function RealtimeProvider({ signedIn, children }: { signedIn: boolean; children: ReactNode }) {
   const [client] = useState(() => createRealtimeClient(connectUrl));
   const [online, setOnline] = useState<OnlineFriends>(null);
 
   useEffect(() => {
+    if (!signedIn) {
+      return;
+    }
     const off = client.on((message) => setOnline((current) => applyPresence(current, message)));
     void client.connect();
     return () => {
       off();
       client.close();
     };
-  }, [client]);
+  }, [client, signedIn]);
 
   return <RealtimeContext value={{ client, online }}>{children}</RealtimeContext>;
 }

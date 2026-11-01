@@ -1,7 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/db";
-import { listNotifications, markAllRead, notify, unreadCount } from "@/lib/notifications/notifications";
+import {
+  listNotifications,
+  markAllRead,
+  notificationHref,
+  notify,
+  openNotification,
+  unreadCount,
+} from "@/lib/notifications/notifications";
 import { publish } from "@/lib/realtime/publish";
 
 vi.mock("@/lib/realtime/publish", () => ({ publish: vi.fn() }));
@@ -112,5 +119,62 @@ describe("unread", () => {
 
     expect(await unreadCount(alice)).toBe(0);
     expect(await unreadCount(bob)).toBe(1);
+  });
+});
+
+describe("notificationHref", () => {
+  const actor = { id: "bob", displayName: "Bob" };
+  const channel = { id: 3, title: "Impots" };
+
+  it("sends a friend request to the friends page", () => {
+    expect(notificationHref({ type: "FRIEND_REQUEST", actor, channel: null })).toBe("/friends");
+  });
+
+  it("sends a reply to its channel", () => {
+    expect(notificationHref({ type: "REPLY", actor, channel })).toBe("/channels/3");
+  });
+
+  it("sends a reply whose channel is gone to the channel list", () => {
+    expect(notificationHref({ type: "REPLY", actor, channel: null })).toBe("/channels");
+  });
+
+  it("sends a message to the conversation", () => {
+    expect(notificationHref({ type: "MESSAGE", actor, channel: null })).toBe("/messages/bob");
+  });
+
+  it("stays on the list when there is nowhere to go", () => {
+    expect(notificationHref({ type: "MESSAGE", actor: null, channel: null })).toBe("/notifications");
+    expect(notificationHref({ type: "OTHER", actor, channel: null })).toBe("/notifications");
+  });
+});
+
+describe("openNotification", () => {
+  const idOf = async (recipientId: string) =>
+    (await prisma.notification.findFirstOrThrow({ where: { recipientId } })).id;
+
+  it("marks that one as read, leaves the others, and gives its link", async () => {
+    await notify(alice, "REPLY", { userId: bob, channelId });
+    const replyId = await idOf(alice);
+    await notify(alice, "FRIEND_REQUEST", { userId: bob });
+
+    expect(await openNotification(alice, replyId)).toBe(`/channels/${channelId}`);
+
+    expect((await prisma.notification.findUniqueOrThrow({ where: { id: replyId } })).isRead).toBe(true);
+    expect(await unreadCount(alice)).toBe(1);
+  });
+
+  it("does not touch someone else's notification", async () => {
+    await notify(bob, "FRIEND_REQUEST", { userId: alice });
+    const theirs = await idOf(bob);
+
+    expect(await openNotification(alice, theirs)).toBe("/notifications");
+
+    expect(await unreadCount(bob)).toBe(1);
+  });
+
+  it("sends a reply whose channel is gone to the channel list", async () => {
+    await notify(alice, "REPLY", { userId: bob, channelId: 999_999_999 });
+
+    expect(await openNotification(alice, await idOf(alice))).toBe("/channels");
   });
 });

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { NotificationType } from "@/generated/prisma/client";
+import type { Notification, NotificationType } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { publish } from "@/lib/realtime/publish";
 
@@ -36,12 +36,7 @@ export async function notify(recipientId: string, type: NotificationType, data: 
   }
 }
 
-export async function listNotifications(me: string, take = 30) {
-  const rows = await prisma.notification.findMany({
-    where: { recipientId: me },
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    take,
-  });
+async function withNames(rows: Notification[]) {
   const data = rows.map((row) => parse(row.content));
   const userIds = [...new Set(data.flatMap((d) => (d ? [d.userId] : [])))];
   const channelIds = [...new Set(data.flatMap((d) => (d?.channelId ? [d.channelId] : [])))];
@@ -59,10 +54,47 @@ export async function listNotifications(me: string, take = 30) {
   }));
 }
 
+export async function listNotifications(me: string, take = 30) {
+  const rows = await prisma.notification.findMany({
+    where: { recipientId: me },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take,
+  });
+  return withNames(rows);
+}
+
+// Scoped to the recipient: someone else's id reads and changes nothing.
+export async function openNotification(me: string, id: number): Promise<string> {
+  const row = await prisma.notification.findFirst({ where: { id, recipientId: me } });
+  if (!row) {
+    return "/notifications";
+  }
+  await prisma.notification.update({ where: { id }, data: { isRead: true } });
+  const [notification] = await withNames([row]);
+  return notification ? notificationHref(notification) : "/notifications";
+}
+
 export function unreadCount(me: string) {
   return prisma.notification.count({ where: { recipientId: me, isRead: false } });
 }
 
 export async function markAllRead(me: string) {
   await prisma.notification.updateMany({ where: { recipientId: me, isRead: false }, data: { isRead: true } });
+}
+
+export function notificationHref(notification: {
+  type: NotificationType;
+  actor: { id: string } | null;
+  channel: { id: number } | null;
+}): string {
+  switch (notification.type) {
+    case "FRIEND_REQUEST":
+      return "/friends";
+    case "REPLY":
+      return notification.channel ? `/channels/${notification.channel.id}` : "/channels";
+    case "MESSAGE":
+      return notification.actor ? `/messages/${notification.actor.id}` : "/notifications";
+    default:
+      return "/notifications";
+  }
 }
