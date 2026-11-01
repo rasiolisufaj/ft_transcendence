@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import {
   listNotifications,
   markAllRead,
+  markMessagesRead,
   notificationHref,
   notify,
   openNotification,
@@ -176,5 +177,29 @@ describe("openNotification", () => {
     await notify(alice, "REPLY", { userId: bob, channelId: 999_999_999 });
 
     expect(await openNotification(alice, await idOf(alice))).toBe("/channels");
+  });
+});
+
+describe("markMessagesRead", () => {
+  it("clears my message notifications from that person only, and says how many", async () => {
+    const carol = await createUser("Carol");
+    await notify(alice, "MESSAGE", { userId: bob });
+    await notify(alice, "MESSAGE", { userId: bob });
+    await notify(alice, "MESSAGE", { userId: carol });
+    await notify(alice, "FRIEND_REQUEST", { userId: bob });
+    await notify(bob, "MESSAGE", { userId: alice });
+
+    expect(await markMessagesRead(alice, bob)).toBe(2);
+
+    expect(await unreadCount(alice)).toBe(2);
+    expect(await unreadCount(bob)).toBe(1);
+    await prisma.user.delete({ where: { id: carol } });
+  });
+
+  it("clears nothing the second time", async () => {
+    await notify(alice, "MESSAGE", { userId: bob });
+    await markMessagesRead(alice, bob);
+
+    expect(await markMessagesRead(alice, bob)).toBe(0);
   });
 });
