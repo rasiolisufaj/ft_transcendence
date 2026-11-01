@@ -415,6 +415,16 @@
     },
     "expiry": "Expiry date",
     "extractedFields": "Extracted fields",
+    "changeCategory": "Change category",
+    "categoryChanged": "Category updated",
+    "save": "Save",
+    "saving": "Saving…",
+    "errors": {
+      "missingFields": "Missing fields",
+      "invalidId": "Document not found",
+      "invalidCategory": "Invalid category",
+      "notFound": "Document not found"
+    },
     "fields": {
       "fullName": "Full name",
       "documentNumber": "Document number",
@@ -722,7 +732,7 @@
         "manualEntry": "Manual key",
         "codeLabel": "Verification code",
         "confirm": "Enable",
-        "qrAlt": "Two-factor authentication QR code"
+        "qrAlt": "QR code for two-factor authentication"
       },
       "recoveryCodes": {
         "title": "Recovery codes",
