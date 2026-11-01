@@ -20,15 +20,20 @@ export async function notify(recipientId: string, type: NotificationType, data: 
   if (data.userId === recipientId) {
     return;
   }
-  const notification = await prisma.notification.create({
-    data: { recipientId, type, content: JSON.stringify(data) },
-  });
-  await publish({
-    type: "notification.created",
-    notificationId: notification.id,
-    recipientId,
-    at: notification.createdAt.toISOString(),
-  });
+  try {
+    const notification = await prisma.notification.create({
+      data: { recipientId, type, content: JSON.stringify(data) },
+    });
+    await publish({
+      type: "notification.created",
+      notificationId: notification.id,
+      recipientId,
+      at: notification.createdAt.toISOString(),
+    });
+  } catch (error) {
+    // The action that called this has already succeeded.
+    console.error("notification failed", type, error);
+  }
 }
 
 export async function listNotifications(me: string, take = 30) {

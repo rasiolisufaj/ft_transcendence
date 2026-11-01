@@ -7,6 +7,7 @@ import { getLocale } from "next-intl/server";
 import { requireUser } from "@/lib/auth/session";
 import { writeAudit } from "@/lib/audit";
 import { assertCan } from "@/lib/auth/policy";
+import { notify } from "@/lib/notifications/notifications";
 import { publish } from "@/lib/realtime/publish";
 
 export async function createAnswer(formData: FormData) {
@@ -35,7 +36,7 @@ export async function createAnswer(formData: FormData) {
 
   const thread = await prisma.thread.findUnique({
     where: { id: threadId },
-    select: { channelId: true, channel: { select: { isClosed: true } } },
+    select: { channelId: true, userId: true, channel: { select: { isClosed: true } } },
   });
   if (!thread) {
     return;
@@ -60,6 +61,9 @@ export async function createAnswer(formData: FormData) {
     actorUserId: ctx.user.id,
     at: created.createdAt.toISOString(),
   });
+  if (thread.userId) {
+    await notify(thread.userId, "REPLY", { userId: ctx.user.id, channelId: thread.channelId });
+  }
   revalidatePath("/[locale]/(app)/channels/[id]", "page");
 }
 

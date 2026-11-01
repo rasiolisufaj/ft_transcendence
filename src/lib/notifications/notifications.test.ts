@@ -60,6 +60,17 @@ describe("notify", () => {
   });
 });
 
+describe("notify, when it fails", () => {
+  it("logs instead of breaking the action that called it", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await expect(notify("no-such-user", "FRIEND_REQUEST", { userId: bob })).resolves.toBeUndefined();
+
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+});
+
 describe("listNotifications", () => {
   it("lists mine newest first, with the person and the channel", async () => {
     await notify(alice, "FRIEND_REQUEST", { userId: bob });
