@@ -32,6 +32,18 @@ describe("topicFor", () => {
     });
   }
 
+  it("sends message.created to the recipient only", () => {
+    const event: RealtimeEvent = {
+      type: "message.created",
+      conversationId: 3,
+      messageId: 8,
+      senderId: alice,
+      recipientId: "cmbob0000000000000000000",
+      at,
+    };
+    expect(topicFor(event)).toBe("user:cmbob0000000000000000000");
+  });
+
   it("uses the event's own channel", () => {
     const event: RealtimeEvent = { type: "member.joined", channelId: 99, userId: alice, at };
     expect(topicFor(event)).toBe("channel:99");
