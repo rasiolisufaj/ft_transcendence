@@ -153,8 +153,6 @@
       "visibilityLabel": "Visibility",
       "public": "Public",
       "private": "Private",
-      "visibilityPublic": "Public",
-      "visibilityPrivate": "Private",
       "cancel": "Cancel",
       "submit": "Create channel",
       "errors": {
@@ -176,7 +174,6 @@
       "membersCount": "{count, plural, one {# member} other {# members}}",
       "join": "Join",
       "requestJoin": "Request to join",
-      "request": "Request to join",
       "pending": "Request sent"
     },
     "detail": {
@@ -184,11 +181,8 @@
       "leave": "Leave channel",
       "membersCount": "{count, plural, one {# member} other {# members}}",
       "friendsCount": "{count, plural, one {# friend} other {# friends}}",
-      "moderator": "moderator",
-      "kick": "Remove",
       "authoredByPrefix": "by",
       "authoredByDate": "· {date}",
-      "authoredBy": "by {name} · {date}",
       "deletedUser": "Deleted user",
       "repliesCount": "{count, plural, one {# reply} other {# replies}}",
       "noReplies": "Nobody has replied yet.",
