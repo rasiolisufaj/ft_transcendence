@@ -5,8 +5,8 @@ services:
     container_name: mespapiers_nginx
     restart: unless-stopped
     ports:
-      - "443:443"
-      - "80:80"
+      - "8443:443"
+      - "8080:80"
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/nginx/entrypoint.sh:/entrypoint.sh:ro
