@@ -95,12 +95,12 @@ export default async function DocumentPage({
                 </dd>
 
                 <dt className="text-zinc-500 dark:text-zinc-400">{t("documentDetail.type")}</dt>
-                <dd>{doc.fileType === "application/pdf" ? "PDF" : "Image"}</dd>
+                <dd>{doc.fileType === "application/pdf" ? "PDF" : t("documentDetail.image")}</dd>
 
                 {doc.deadlineType ? (
                   <>
                     <dt className="text-zinc-500 dark:text-zinc-400">{t("documentDetail.deadline")}</dt>
-                    <dd>{doc.deadlineType}</dd>
+                    <dd>{t(`documentDetail.deadlineTypes.${doc.deadlineType}`)}</dd>
                   </>
                 ) : null}
 

@@ -51,16 +51,16 @@
     "pendingClassification": "{count, plural, one {# documento pendiente de clasificación automática.} other {# documentos pendientes de clasificación automática.}}",
     "importZone": {
       "cta": "Subir un documento",
-      "hint": "PDF, JPEG o PNG — 10 MB máximo",
+      "hint": "PDF, JPEG, PNG o WebP — 10 MB máximo",
       "dropHere": "Suelte su archivo aquí"
     },
     "howItWorks": {
-      "step1Title": "Sube un documento",
-      "step1Body": "Una foto o un PDF, desde tu teléfono o tu ordenador.",
-      "step2Title": "La IA lo clasifica por ti",
+      "step1Title": "Suba un documento",
+      "step1Body": "Una foto o un PDF, desde su teléfono o su ordenador.",
+      "step2Title": "La IA lo clasifica por usted",
       "step2Body": "DNI, seguro de coche... cada documento va a la categoría correcta.",
-      "step3Title": "Haz tus preguntas",
-      "step3Body": "El asistente responde directamente a partir del contenido de tus documentos.",
+      "step3Title": "Haga sus preguntas",
+      "step3Body": "El asistente responde directamente a partir del contenido de sus documentos.",
       "next": "Siguiente",
       "skip": "Omitir",
       "cta": "Añadir un documento",
@@ -87,7 +87,7 @@
     "addDocument": "Añadir un documento",
     "empty": {
       "title": "No hay documentos en esta categoría",
-      "description": "Los documentos subidos se clasificarán aquí automáticamente cuando la clasificación esté activa."
+      "description": "Los documentos subidos se clasifican aquí automáticamente."
     },
     "fileKind": {
       "pdf": "PDF",
@@ -118,15 +118,15 @@
   "channels": {
     "home": {
       "title": "Canales",
-      "subtitle": "Haz preguntas, comparte consejos y ayuda a los demás con sus trámites.",
+      "subtitle": "Haga preguntas, comparta consejos y ayude a los demás con sus trámites.",
       "createTitle": "Crear un canal",
-      "createDesc": "Crea un espacio para hablar de un tema.",
+      "createDesc": "Cree un espacio para hablar de un tema.",
       "joinTitle": "Unirse a un canal",
-      "joinDesc": "Explora los canales públicos y únete a uno.",
+      "joinDesc": "Explore los canales públicos y únase a uno.",
       "invitationsTitle": "Ver mis invitaciones",
-      "invitationsDesc": "Solicita acceso a un canal privado.",
+      "invitationsDesc": "Consulte las invitaciones que ha recibido.",
       "myChannels": "Mis canales",
-      "empty": "No perteneces a ningún canal.",
+      "empty": "No pertenece a ningún canal.",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
       "optionsAria": "Opciones del canal",
       "invite": "Invitar",
@@ -143,13 +143,13 @@
     },
     "create": {
       "title": "Crear un canal",
-      "subtitle": "Crea un espacio donde la gente pueda hacer preguntas y ayudarse mutuamente sobre un tema.",
+      "subtitle": "Cree un espacio donde la gente pueda hacer preguntas y ayudarse mutuamente sobre un tema.",
       "nameLabel": "Nombre del canal",
       "namePlaceholder": "p. ej.: Seguro de coche",
       "descriptionLabel": "Descripción (opcional)",
       "descriptionPlaceholder": "¿De qué trata este canal?",
       "questionLabel": "Pregunta (obligatoria)",
-      "questionPlaceholder": "Haz tu pregunta con el mayor detalle posible para obtener respuestas claras.",
+      "questionPlaceholder": "Haga su pregunta con el mayor detalle posible para obtener respuestas claras.",
       "visibilityLabel": "Visibilidad",
       "public": "Público",
       "private": "Privado",
@@ -162,13 +162,13 @@
         "descriptionTooLong": "La descripción no puede superar los 250 caracteres.",
         "questionEmpty": "La pregunta es obligatoria.",
         "questionTooLong": "La pregunta no puede superar los 300 caracteres.",
-        "visibilityMissing": "Elige una visibilidad: público o privado."
+        "visibilityMissing": "Elija una visibilidad: público o privado."
       }
     },
     "join": {
       "back": "← Volver a los canales",
       "title": "Unirse a un canal",
-      "subtitle": "Explora los canales públicos y únete a uno.",
+      "subtitle": "Explore los canales públicos y únase a uno.",
       "empty": "No hay ningún canal al que unirse por ahora.",
       "noDescription": "Este canal no tiene descripción.",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
@@ -188,8 +188,8 @@
       "noReplies": "Nadie ha respondido todavía.",
       "editReplyAria": "Modificar la respuesta",
       "deleteReplyAria": "Eliminar la respuesta",
-      "replyPlaceholder": "Escribe una respuesta…",
-      "replyAria": "Tu respuesta",
+      "replyPlaceholder": "Escriba una respuesta…",
+      "replyAria": "Su respuesta",
       "send": "Enviar",
       "noQuestion": "No hay pregunta en este canal.",
       "editedAt": "editado a las {time}",
@@ -197,7 +197,7 @@
     },
     "edit": {
       "title": "Modificar el canal",
-      "subtitle": "Cambia el nombre, la descripción o la pregunta.",
+      "subtitle": "Cambie el nombre, la descripción o la pregunta.",
       "nameLabel": "Nombre del canal",
       "descriptionLabel": "Descripción (opcional)",
       "questionLabel": "Pregunta",
@@ -207,7 +207,7 @@
     "invite": {
       "back": "← Volver a los canales",
       "title": "Invitar a {channel}",
-      "subtitle": "Elige a alguien para invitar.",
+      "subtitle": "Elija a alguien para invitar.",
       "userAria": "Usuario a invitar",
       "chooseUser": "Elegir un usuario…",
       "submit": "Invitar"
@@ -220,9 +220,9 @@
     "invitations": {
       "back": "← Volver a los canales",
       "title": "Mis invitaciones",
-      "empty": "No tienes invitaciones pendientes por ahora.",
-      "pending": "{count, plural, one {Tienes # invitación pendiente.} other {Tienes # invitaciones pendientes.}}",
-      "intro": "Un moderador te ha invitado a unirte a su canal. Acepta para convertirte en miembro o rechaza para eliminar la invitación.",
+      "empty": "No tiene invitaciones pendientes por ahora.",
+      "pending": "{count, plural, one {Tiene # invitación pendiente.} other {Tiene # invitaciones pendientes.}}",
+      "intro": "Un moderador le ha invitado a unirse a su canal. Acepte para convertirse en miembro o rechace para eliminar la invitación.",
       "description": "descripción: {description}",
       "noDescription": "Este canal no tiene descripción.",
       "membersCount": "Número de miembros del canal: {count}",
@@ -250,7 +250,7 @@
       "back": "← Volver al canal",
       "title": "Solicitudes de acceso",
       "subtitle": "Personas que quieren unirse a este canal privado.",
-      "empty": "No tienes ninguna solicitud.",
+      "empty": "No tiene ninguna solicitud.",
       "accept": "Aceptar",
       "reject": "Rechazar"
     }
@@ -321,7 +321,7 @@
     "demote": "Quitar admin",
     "delete": "Eliminar",
     "confirmDelete": "Confirmar",
-    "you": "Tú",
+    "you": "Usted",
     "empty": "Ningún usuario coincide con «{q}»."
   },
   "friends": {
@@ -385,16 +385,23 @@
       "saved": "Foto guardada."
     },
     "errors": {
-      "avatarMissing": "Elige una imagen.",
+      "avatarMissing": "Elija una imagen.",
       "avatarTooBig": "La imagen no puede superar 2 MB.",
-      "avatarType": "Elige una imagen PNG, JPEG o WebP."
+      "avatarType": "Elija una imagen PNG, JPEG o WebP."
     }
   },
   "documentDetail": {
     "category": "Categoría",
     "size": "Tamaño",
     "type": "Tipo",
+    "image": "Imagen",
     "deadline": "Tipo de plazo",
+    "deadlineTypes": {
+      "HARD": "Caducidad legal",
+      "SOFT": "Renovación tácita",
+      "PERIODIC": "Declaración periódica",
+      "NONE": "Sin plazo"
+    },
     "expiry": "Fecha límite",
     "extractedFields": "Campos extraídos",
     "fields": {
@@ -414,7 +421,7 @@
   },
   "privacy": {
     "title": "Política de privacidad",
-    "lastUpdated": "Última actualización: octubre de 2026",
+    "lastUpdated": "Última actualización: noviembre de 2026",
     "intro": {
       "heading": "Introducción",
       "body": "MesPapiers es un servicio diseñado para ayudarle con los trámites administrativos franceses. Esta política describe qué datos personales recopilamos, cómo los utilizamos y cuáles son sus derechos. El servicio está alojado en Francia y sujeto al Reglamento General de Protección de Datos (RGPD)."
@@ -427,11 +434,11 @@
       },
       "documents": {
         "heading": "Documentos",
-        "body": "Puede importar documentos (PDF, PNG, JPEG) en su caja fuerte personal. Los archivos se almacenan en la base de datos del servicio. Solo usted, como propietario, puede acceder a sus documentos: ni siquiera los administradores pueden consultarlos."
+        "body": "Puede importar documentos (PDF, PNG, JPEG, WebP) en su caja fuerte personal. Los archivos se almacenan en la base de datos del servicio. Solo usted, como propietario, puede acceder a sus documentos: ni siquiera los administradores pueden consultarlos."
       },
       "community": {
         "heading": "Contenido comunitario",
-        "body": "Los mensajes publicados en los canales, las preguntas, las respuestas y los votos son visibles para los demás miembros del canal correspondiente. Su nombre visible está asociado a sus contribuciones."
+        "body": "Los mensajes publicados en los canales, las preguntas, las respuestas y los votos son visibles para los demás miembros del canal correspondiente. Su nombre visible está asociado a sus contribuciones. Los mensajes privados solo son visibles para las dos personas de la conversación; se eliminan si una de ellas elimina su cuenta."
       }
     },
     "aiProcessing": {
@@ -471,7 +478,7 @@
     },
     "cookies": {
       "heading": "Cookies",
-      "body": "MesPapiers utiliza dos cookies, ambas estrictamente necesarias para el funcionamiento del servicio: mp_session mantiene su sesión iniciada (30 días) y NEXT_LOCALE recuerda su idioma (hasta que se cierra el navegador). No utilizamos ninguna cookie de seguimiento, análisis ni publicidad."
+      "body": "MesPapiers utiliza tres cookies, todas estrictamente necesarias para el funcionamiento del servicio: mp_session mantiene su sesión iniciada (30 días), NEXT_LOCALE recuerda su idioma (hasta que se cierra el navegador) y mp_oauth protege el inicio de sesión con Google (10 minutos). No utilizamos ninguna cookie de seguimiento, análisis ni publicidad."
     },
     "contact": {
       "heading": "Contacto",
@@ -480,7 +487,7 @@
   },
   "terms": {
     "title": "Condiciones generales de uso",
-    "lastUpdated": "Última actualización: octubre de 2026",
+    "lastUpdated": "Última actualización: noviembre de 2026",
     "acceptance": {
       "heading": "Aceptación de las condiciones",
       "body": "Al crear una cuenta o utilizar MesPapiers, acepta las presentes condiciones generales de uso. Si no acepta estas condiciones, le rogamos que no utilice el servicio."
@@ -505,7 +512,7 @@
     },
     "documents": {
       "heading": "Documentos personales",
-      "body": "Sus documentos son privados y solo usted puede acceder a ellos. Usted es responsable de los documentos que importa. No importe documentos de los que no sea el titular legítimo. Los formatos aceptados son PDF, PNG o JPEG, con un tamaño máximo de 10 MB."
+      "body": "Sus documentos son privados y solo usted puede acceder a ellos. Usted es responsable de los documentos que importa. No importe documentos de los que no sea el titular legítimo. Los formatos aceptados son PDF, PNG, JPEG o WebP, con un tamaño máximo de 10 MB."
     },
     "ai": {
       "heading": "Inteligencia artificial",
@@ -603,32 +610,91 @@
     "unreadLabel": "Sin leer",
     "deletedUser": "Un usuario eliminado",
     "deletedChannel": "un canal eliminado",
-    "friendRequest": "{name} te ha enviado una solicitud de amistad.",
-    "reply": "{name} ha respondido a tu pregunta en {channel}.",
-    "message": "{name} te ha enviado un mensaje.",
+    "friendRequest": "{name} le ha enviado una solicitud de amistad.",
+    "reply": "{name} ha respondido a su pregunta en {channel}.",
+    "message": "{name} le ha enviado un mensaje.",
     "other": "Nueva notificación.",
     "nothingNew": "Nada nuevo por el momento.",
     "seeAll": "Ver todo"
   },
   "chat": {
     "title": "Mensajes",
-    "subtitle": "Tus conversaciones privadas con tus amigos.",
-    "empty": "Aún no hay conversaciones. Escribe a un amigo desde la página Amigos.",
-    "youSaid": "Tú: {content}",
+    "subtitle": "Sus conversaciones privadas con sus amigos.",
+    "empty": "Aún no hay conversaciones. Escriba a un amigo desde la página Amigos.",
+    "youSaid": "Usted: {content}",
     "back": "Todas las conversaciones",
     "with": "Conversación con {name}",
     "noMessages": "Aún no hay mensajes.",
-    "label": "Tu mensaje",
+    "label": "Su mensaje",
     "submit": "Enviar",
     "pending": "Enviando…",
-    "cannotWrite": "Solo puedes escribir a tus amigos.",
+    "cannotWrite": "Solo puede escribir a sus amigos.",
     "errors": {
-      "self": "No puedes escribirte a ti mismo.",
-      "notFriends": "Solo puedes escribir a tus amigos.",
+      "self": "No puede escribirse a sí mismo.",
+      "notFriends": "Solo puede escribir a sus amigos.",
       "empty": "El mensaje está vacío.",
       "tooLong": "El mensaje supera los 1000 caracteres."
     },
     "unread": "{count, plural, one {# sin leer} other {# sin leer}}",
     "seen": "Visto"
+  },
+  "devUi": {
+    "title": "Galería de componentes",
+    "sections": {
+      "button": "Botón",
+      "googleButton": "Botón de Google",
+      "card": "Tarjeta",
+      "badge": "Insignia",
+      "avatar": "Avatar",
+      "onlineDot": "Indicador de presencia",
+      "input": "Campo de entrada",
+      "emptyState": "Estado vacío",
+      "dialog": "Cuadro de diálogo",
+      "table": "Tabla"
+    },
+    "button": {
+      "primary": "Principal",
+      "secondary": "Secundario",
+      "danger": "Peligro",
+      "disabled": "Desactivado"
+    },
+    "google": "Continuar con Google",
+    "cardContent": "Contenido de la tarjeta",
+    "badge": {
+      "neutral": "Neutro",
+      "primary": "Principal",
+      "success": "Éxito",
+      "warning": "Advertencia",
+      "danger": "Peligro"
+    },
+    "input": {
+      "email": "Correo electrónico",
+      "emailPlaceholder": "nombre@ejemplo.es",
+      "password": "Contraseña",
+      "showPassword": "Mostrar la contraseña",
+      "hidePassword": "Ocultar la contraseña",
+      "hint": "Mínimo 8 caracteres",
+      "passwordError": "La contraseña debe tener al menos 8 caracteres"
+    },
+    "empty": {
+      "title": "Aún no hay documentos",
+      "description": "Añada su primer documento para empezar.",
+      "action": "Añadir documento"
+    },
+    "dialog": {
+      "open": "Abrir cuadro de diálogo",
+      "title": "Confirmar la acción",
+      "body": "¿Seguro que quiere hacer esto?",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar"
+    },
+    "table": {
+      "document": "Documento",
+      "status": "Estado",
+      "residencePermit": "Permiso de residencia",
+      "carInsurance": "Seguro de coche",
+      "expiringSoon": "Caduca pronto",
+      "valid": "Válido"
+    }
   }
 }
