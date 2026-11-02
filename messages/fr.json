@@ -51,7 +51,7 @@
     "pendingClassification": "{count, plural, one {# document en attente de classement automatique.} other {# documents en attente de classement automatique.}}",
     "importZone": {
       "cta": "Importer un document",
-      "hint": "PDF, JPEG ou PNG — 10 Mo maximum",
+      "hint": "PDF, JPEG, PNG ou WebP — 10 Mo maximum",
       "dropHere": "Déposez votre fichier ici"
     },
     "howItWorks": {
@@ -117,48 +117,48 @@
   },
   "channels": {
     "home": {
-      "title": "Channels",
+      "title": "Salons",
       "subtitle": "Posez des questions, partagez vos astuces et aidez les autres avec leurs papiers.",
-      "createTitle": "Créer un channel",
+      "createTitle": "Créer un salon",
       "createDesc": "Créez un espace pour parler d'un sujet.",
-      "joinTitle": "Rejoindre un channel",
-      "joinDesc": "Parcourez les channels publics et rejoignez-en un.",
+      "joinTitle": "Rejoindre un salon",
+      "joinDesc": "Parcourez les salons publics et rejoignez-en un.",
       "invitationsTitle": "Voir mes invitations",
       "invitationsDesc": "Consultez les invitations que vous avez reçues.",
-      "myChannels": "Mes channels",
-      "empty": "Vous n'appartenez à aucun channel.",
+      "myChannels": "Mes salons",
+      "empty": "Vous n'appartenez à aucun salon.",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
-      "optionsAria": "Options du channel",
+      "optionsAria": "Options du salon",
       "invite": "Inviter",
       "edit": "Modifier",
       "delete": "Supprimer",
       "kick": "Retirer un membre",
       "leave": "Quitter",
       "requests": "Demandes d'adhésion",
-      "close": "Fermer le channel",
-      "reopen": "Rouvrir le channel",
-      "closed": "channel fermé",
-      "public": "channel public",
-      "private": "channel privé"
+      "close": "Fermer le salon",
+      "reopen": "Rouvrir le salon",
+      "closed": "salon fermé",
+      "public": "salon public",
+      "private": "salon privé"
     },
     "create": {
-      "title": "Créer un channel",
+      "title": "Créer un salon",
       "subtitle": "Créez un espace où les gens posent des questions et s'entraident sur un sujet.",
-      "nameLabel": "Nom du channel",
+      "nameLabel": "Nom du salon",
       "namePlaceholder": "ex. : Assurance auto",
       "descriptionLabel": "Description (facultatif)",
-      "descriptionPlaceholder": "De quoi parle ce channel ?",
+      "descriptionPlaceholder": "De quoi parle ce salon ?",
       "questionLabel": "Question (obligatoire)",
       "questionPlaceholder": "Posez votre question en donnant le plus de détails possible pour obtenir des réponses claires.",
       "visibilityLabel": "Visibilité",
       "public": "Public",
       "private": "Privé",
       "cancel": "Annuler",
-      "submit": "Créer le channel",
+      "submit": "Créer le salon",
       "errors": {
         "nameEmpty": "Le nom est obligatoire.",
         "nameTooLong": "Le nom ne peut pas dépasser 100 caractères.",
-        "nameTaken": "Ce nom de channel est déjà pris.",
+        "nameTaken": "Ce nom de salon est déjà pris.",
         "descriptionTooLong": "La description ne peut pas dépasser 250 caractères.",
         "questionEmpty": "La question est obligatoire.",
         "questionTooLong": "La question ne peut pas dépasser 300 caractères.",
@@ -166,19 +166,19 @@
       }
     },
     "join": {
-      "back": "← Retour aux channels",
-      "title": "Rejoindre un channel",
-      "subtitle": "Parcourez les channels publics et rejoignez-en un.",
-      "empty": "Aucun channel à rejoindre pour le moment.",
-      "noDescription": "Ce channel n'a pas de description.",
+      "back": "← Retour aux salons",
+      "title": "Rejoindre un salon",
+      "subtitle": "Parcourez les salons publics et rejoignez-en un.",
+      "empty": "Aucun salon à rejoindre pour le moment.",
+      "noDescription": "Ce salon n'a pas de description.",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "join": "Rejoindre",
       "requestJoin": "Demander à rejoindre",
       "pending": "Demande envoyée"
     },
     "detail": {
-      "back": "← Retour aux channels",
-      "leave": "Quitter le channel",
+      "back": "← Retour aux salons",
+      "leave": "Quitter le salon",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "friendsCount": "{count, plural, one {# ami} other {# amis}}",
       "authoredByPrefix": "par",
@@ -191,21 +191,21 @@
       "replyPlaceholder": "Écrire une réponse…",
       "replyAria": "Votre réponse",
       "send": "Envoyer",
-      "noQuestion": "Pas de question pour ce channel.",
+      "noQuestion": "Pas de question pour ce salon.",
       "editedAt": "modifié à {time}",
       "sentAt": "envoyé à {time}"
     },
     "edit": {
-      "title": "Modifier le channel",
+      "title": "Modifier le salon",
       "subtitle": "Changez le nom, la description ou la question.",
-      "nameLabel": "Nom du channel",
+      "nameLabel": "Nom du salon",
       "descriptionLabel": "Description (optionnelle)",
       "questionLabel": "Question",
       "cancel": "Annuler",
       "save": "Enregistrer"
     },
     "invite": {
-      "back": "← Retour aux channels",
+      "back": "← Retour aux salons",
       "title": "Inviter dans {channel}",
       "subtitle": "Choisissez une personne à inviter.",
       "userAria": "Utilisateur à inviter",
@@ -218,19 +218,19 @@
       "save": "Enregistrer"
     },
     "invitations": {
-      "back": "← Retour aux channels",
+      "back": "← Retour aux salons",
       "title": "Mes invitations",
       "empty": "Vous n'avez aucune invitation pour le moment.",
       "pending": "{count, plural, one {Vous avez # invitation en attente.} other {Vous avez # invitations en attente.}}",
-      "intro": "Un modérateur vous a invité à rejoindre son channel. Acceptez pour devenir membre, ou refusez pour supprimer l'invitation.",
+      "intro": "Un modérateur vous a invité à rejoindre son salon. Acceptez pour devenir membre, ou refusez pour supprimer l'invitation.",
       "description": "description : {description}",
-      "noDescription": "Ce channel n'a pas de description.",
-      "membersCount": "Nombre de membres du channel : {count}",
+      "noDescription": "Ce salon n'a pas de description.",
+      "membersCount": "Nombre de membres du salon : {count}",
       "accept": "Accepter",
       "decline": "Refuser"
     },
     "kick": {
-      "back": "← Retour aux channels",
+      "back": "← Retour aux salons",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "kick": "Retirer",
       "member": "membre",
@@ -239,17 +239,17 @@
       "demote": "Repasser membre"
     },
     "delete": {
-      "back": "← Retour aux channels",
-      "title": "Supprimer le channel « {channel} » ?",
-      "warning": "{count, plural, one {Ce channel compte # membre. La suppression est définitive et effacera tous les messages.} other {Ce channel compte # membres. La suppression est définitive et effacera tous les messages.}}",
+      "back": "← Retour aux salons",
+      "title": "Supprimer le salon « {channel} » ?",
+      "warning": "{count, plural, one {Ce salon compte # membre. La suppression est définitive et effacera tous les messages.} other {Ce salon compte # membres. La suppression est définitive et effacera tous les messages.}}",
       "reminder": "Cette action est irréversible.",
       "cancel": "Annuler",
-      "submit": "Supprimer le channel"
+      "submit": "Supprimer le salon"
     },
     "requests": {
-      "back": "← Retour au channel",
+      "back": "← Retour au salon",
       "title": "Demandes d'adhésion",
-      "subtitle": "Les personnes qui veulent rejoindre ce channel privé.",
+      "subtitle": "Les personnes qui veulent rejoindre ce salon privé.",
       "empty": "Vous n'avez aucune demande.",
       "accept": "Accepter",
       "reject": "Refuser"
@@ -438,7 +438,7 @@
       },
       "community": {
         "heading": "Contenus communautaires",
-        "body": "Les messages publiés dans les channels, les questions, les réponses et les votes sont visibles par les autres membres du channel concerné. Votre nom d'affichage est associé à vos contributions. Les messages privés ne sont visibles que par les deux participants à la conversation ; ils sont supprimés si l'un des deux supprime son compte."
+        "body": "Les messages publiés dans les salons, les questions, les réponses et les votes sont visibles par les autres membres du salon concerné. Votre nom d'affichage est associé à vos contributions. Les messages privés ne sont visibles que par les deux participants à la conversation ; ils sont supprimés si l'un des deux supprime son compte."
       }
     },
     "aiProcessing": {
@@ -456,7 +456,7 @@
       "items": {
         "account": "Données de compte : conservées jusqu'à la suppression de votre compte.",
         "documents": "Documents : conservés jusqu'à leur suppression par vos soins ou la suppression de votre compte.",
-        "community": "Contenus communautaires : conservés tant que le channel existe. En cas de suppression de votre compte, vos messages sont anonymisés.",
+        "community": "Contenus communautaires : conservés tant que le salon existe. En cas de suppression de votre compte, vos messages sont anonymisés.",
         "sessions": "Sessions de connexion : expiration automatique après 30 jours."
       }
     },
@@ -498,7 +498,7 @@
       "items": {
         "vault": "Un coffre-fort numérique personnel pour stocker et organiser vos documents administratifs (carte d'identité, assurances, etc.).",
         "ai": "Un assistant basé sur l'intelligence artificielle pour analyser vos documents et répondre à vos questions sur les démarches.",
-        "community": "Un espace communautaire (channels, questions-réponses) pour échanger avec d'autres utilisateurs sur les démarches administratives."
+        "community": "Un espace communautaire (salons, questions-réponses) pour échanger avec d'autres utilisateurs sur les démarches administratives."
       }
     },
     "accounts": {
@@ -520,7 +520,7 @@
     },
     "community": {
       "heading": "Règles de la communauté",
-      "body": "En participant aux channels et discussions, vous vous engagez à :",
+      "body": "En participant aux salons et discussions, vous vous engagez à :",
       "items": {
         "respectful": "Rester respectueux envers les autres utilisateurs.",
         "noSpam": "Ne pas publier de contenu promotionnel ou de spam.",
@@ -576,7 +576,7 @@
     "exportDesc": "Téléchargez une copie de vos données personnelles (profil, documents, messages et activité) dans un fichier ZIP (données en JSON + vos fichiers originaux).",
     "exportButton": "Télécharger mes données",
     "deleteTitle": "Supprimer mon compte",
-    "deleteDesc": "Votre compte et vos documents seront effacés définitivement. Vos réponses dans les channels resteront, mais sans votre nom.",
+    "deleteDesc": "Votre compte et vos documents seront effacés définitivement. Vos réponses dans les salons resteront, mais sans votre nom.",
     "passwordLabel": "Mot de passe",
     "emailLabel": "Votre adresse e-mail, pour confirmer",
     "deleteButton": "Supprimer mon compte",
@@ -588,7 +588,7 @@
     "exportMailSubject": "MesPapiers – Export de vos données",
     "exportMailBody": "Bonjour,\n\nVos données personnelles ont été exportées.\n\nSi ce n'est pas vous, changez votre mot de passe.\n\nL'équipe MesPapiers",
     "deleteMailSubject": "MesPapiers – Votre compte a été supprimé",
-    "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement.\n\nVos réponses dans les channels restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
+    "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement.\n\nVos réponses dans les salons restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
   },
   "errors": {
     "notFound": {
@@ -609,7 +609,7 @@
     "markAllRead": "Tout marquer comme lu",
     "unreadLabel": "Non lue",
     "deletedUser": "Un utilisateur supprimé",
-    "deletedChannel": "un channel supprimé",
+    "deletedChannel": "un salon supprimé",
     "friendRequest": "{name} vous a envoyé une demande d'ami.",
     "reply": "{name} a répondu à votre question dans {channel}.",
     "message": "{name} vous a envoyé un message.",

@@ -51,7 +51,7 @@
     "pendingClassification": "{count, plural, one {# document awaiting automatic classification.} other {# documents awaiting automatic classification.}}",
     "importZone": {
       "cta": "Upload a document",
-      "hint": "PDF, JPEG or PNG — 10 MB max",
+      "hint": "PDF, JPEG, PNG or WebP — 10 MB max",
       "dropHere": "Drop your file here"
     },
     "howItWorks": {
