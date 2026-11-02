@@ -583,5 +583,59 @@
     },
     "unread": "{count, plural, one {# non lu} other {# non lus}}",
     "seen": "Vu"
+  },
+  "devUi": {
+    "title": "Galerie de composants",
+    "sections": {
+      "button": "Bouton",
+      "googleButton": "Bouton Google",
+      "card": "Carte",
+      "badge": "Badge",
+      "avatar": "Avatar",
+      "onlineDot": "Pastille de présence",
+      "input": "Champ de saisie",
+      "emptyState": "État vide",
+      "dialog": "Boîte de dialogue",
+      "table": "Tableau"
+    },
+    "button": {
+      "primary": "Principal",
+      "secondary": "Secondaire",
+      "disabled": "Désactivé"
+    },
+    "google": "Continuer avec Google",
+    "cardContent": "Contenu de la carte",
+    "badge": {
+      "neutral": "Neutre",
+      "success": "Succès",
+      "warning": "Avertissement",
+      "danger": "Danger"
+    },
+    "input": {
+      "email": "E-mail",
+      "emailPlaceholder": "vous@exemple.fr",
+      "password": "Mot de passe",
+      "passwordError": "Le mot de passe doit contenir au moins 8 caractères"
+    },
+    "empty": {
+      "title": "Aucun document pour l'instant",
+      "description": "Ajoutez votre premier document pour commencer.",
+      "action": "Ajouter un document"
+    },
+    "dialog": {
+      "open": "Ouvrir la boîte de dialogue",
+      "title": "Confirmer l'action",
+      "body": "Voulez-vous vraiment faire cela ?",
+      "cancel": "Annuler",
+      "confirm": "Confirmer"
+    },
+    "table": {
+      "document": "Document",
+      "status": "Statut",
+      "residencePermit": "Titre de séjour",
+      "carInsurance": "Assurance auto",
+      "expiringSoon": "Expire bientôt",
+      "valid": "Valide"
+    }
   }
 }

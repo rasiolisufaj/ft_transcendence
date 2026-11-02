@@ -583,5 +583,59 @@
     },
     "unread": "{count, plural, one {# sin leer} other {# sin leer}}",
     "seen": "Visto"
+  },
+  "devUi": {
+    "title": "Galería de componentes",
+    "sections": {
+      "button": "Botón",
+      "googleButton": "Botón de Google",
+      "card": "Tarjeta",
+      "badge": "Insignia",
+      "avatar": "Avatar",
+      "onlineDot": "Indicador de presencia",
+      "input": "Campo de entrada",
+      "emptyState": "Estado vacío",
+      "dialog": "Cuadro de diálogo",
+      "table": "Tabla"
+    },
+    "button": {
+      "primary": "Principal",
+      "secondary": "Secundario",
+      "disabled": "Desactivado"
+    },
+    "google": "Continuar con Google",
+    "cardContent": "Contenido de la tarjeta",
+    "badge": {
+      "neutral": "Neutro",
+      "success": "Éxito",
+      "warning": "Advertencia",
+      "danger": "Peligro"
+    },
+    "input": {
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.es",
+      "password": "Contraseña",
+      "passwordError": "La contraseña debe tener al menos 8 caracteres"
+    },
+    "empty": {
+      "title": "Aún no hay documentos",
+      "description": "Añade tu primer documento para empezar.",
+      "action": "Añadir documento"
+    },
+    "dialog": {
+      "open": "Abrir cuadro de diálogo",
+      "title": "Confirmar la acción",
+      "body": "¿Seguro que quieres hacer esto?",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar"
+    },
+    "table": {
+      "document": "Documento",
+      "status": "Estado",
+      "residencePermit": "Permiso de residencia",
+      "carInsurance": "Seguro de coche",
+      "expiringSoon": "Caduca pronto",
+      "valid": "Válido"
+    }
   }
 }
