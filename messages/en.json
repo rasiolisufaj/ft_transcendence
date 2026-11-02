@@ -347,7 +347,14 @@
     "category": "Category",
     "size": "Size",
     "type": "Type",
+    "image": "Image",
     "deadline": "Deadline type",
+    "deadlineTypes": {
+      "HARD": "Legal expiry",
+      "SOFT": "Automatic renewal",
+      "PERIODIC": "Periodic declaration",
+      "NONE": "No deadline"
+    },
     "expiry": "Expiry date",
     "extractedFields": "Extracted fields",
     "fields": {
