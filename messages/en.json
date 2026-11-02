@@ -583,5 +583,59 @@
     },
     "unread": "{count, plural, one {# unread} other {# unread}}",
     "seen": "Seen"
+  },
+  "devUi": {
+    "title": "Component gallery",
+    "sections": {
+      "button": "Button",
+      "googleButton": "Google button",
+      "card": "Card",
+      "badge": "Badge",
+      "avatar": "Avatar",
+      "onlineDot": "Presence dot",
+      "input": "Input",
+      "emptyState": "Empty state",
+      "dialog": "Dialog",
+      "table": "Table"
+    },
+    "button": {
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "disabled": "Disabled"
+    },
+    "google": "Continue with Google",
+    "cardContent": "Card content",
+    "badge": {
+      "neutral": "Neutral",
+      "success": "Success",
+      "warning": "Warning",
+      "danger": "Danger"
+    },
+    "input": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordError": "Password must be at least 8 characters"
+    },
+    "empty": {
+      "title": "No documents yet",
+      "description": "Upload your first document to get started.",
+      "action": "Add document"
+    },
+    "dialog": {
+      "open": "Open dialog",
+      "title": "Confirm action",
+      "body": "Are you sure you want to do this?",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "table": {
+      "document": "Document",
+      "status": "Status",
+      "residencePermit": "Residence permit",
+      "carInsurance": "Car insurance",
+      "expiringSoon": "Expiring soon",
+      "valid": "Valid"
+    }
   }
 }
