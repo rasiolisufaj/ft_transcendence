@@ -53,7 +53,7 @@
     "addDocument": "Añadir un documento",
     "empty": {
       "title": "No hay documentos en esta categoría",
-      "description": "Los documentos subidos se clasificarán aquí automáticamente cuando la clasificación esté activa."
+      "description": "Los documentos subidos se clasifican aquí automáticamente."
     },
     "fileKind": {
       "pdf": "PDF",
@@ -90,7 +90,7 @@
       "joinTitle": "Unirse a un canal",
       "joinDesc": "Explore los canales públicos y únase a uno.",
       "invitationsTitle": "Ver mis invitaciones",
-      "invitationsDesc": "Solicite acceso a un canal privado.",
+      "invitationsDesc": "Consulte las invitaciones que ha recibido.",
       "empty": "No pertenece a ningún canal.",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
       "optionsAria": "Opciones del canal",
@@ -374,7 +374,7 @@
   },
   "privacy": {
     "title": "Política de privacidad",
-    "lastUpdated": "Última actualización: octubre de 2026",
+    "lastUpdated": "Última actualización: noviembre de 2026",
     "intro": {
       "heading": "Introducción",
       "body": "MesPapiers es un servicio diseñado para ayudarle con los trámites administrativos franceses. Esta política describe qué datos personales recopilamos, cómo los utilizamos y cuáles son sus derechos. El servicio está alojado en Francia y sujeto al Reglamento General de Protección de Datos (RGPD)."
@@ -387,11 +387,11 @@
       },
       "documents": {
         "heading": "Documentos",
-        "body": "Puede importar documentos (PDF, PNG, JPEG) en su caja fuerte personal. Los archivos se almacenan en la base de datos del servicio. Solo usted, como propietario, puede acceder a sus documentos: ni siquiera los administradores pueden consultarlos."
+        "body": "Puede importar documentos (PDF, PNG, JPEG, WebP) en su caja fuerte personal. Los archivos se almacenan en la base de datos del servicio. Solo usted, como propietario, puede acceder a sus documentos: ni siquiera los administradores pueden consultarlos."
       },
       "community": {
         "heading": "Contenido comunitario",
-        "body": "Los mensajes publicados en los canales, las preguntas, las respuestas y los votos son visibles para los demás miembros del canal correspondiente. Su nombre visible está asociado a sus contribuciones."
+        "body": "Los mensajes publicados en los canales, las preguntas, las respuestas y los votos son visibles para los demás miembros del canal correspondiente. Su nombre visible está asociado a sus contribuciones. Los mensajes privados solo son visibles para las dos personas de la conversación; se eliminan si una de ellas elimina su cuenta."
       }
     },
     "aiProcessing": {
@@ -431,7 +431,7 @@
     },
     "cookies": {
       "heading": "Cookies",
-      "body": "MesPapiers utiliza dos cookies, ambas estrictamente necesarias para el funcionamiento del servicio: mp_session mantiene su sesión iniciada (30 días) y NEXT_LOCALE recuerda su idioma (hasta que se cierra el navegador). No utilizamos ninguna cookie de seguimiento, análisis ni publicidad."
+      "body": "MesPapiers utiliza tres cookies, todas estrictamente necesarias para el funcionamiento del servicio: mp_session mantiene su sesión iniciada (30 días), NEXT_LOCALE recuerda su idioma (hasta que se cierra el navegador) y mp_oauth protege el inicio de sesión con Google (10 minutos). No utilizamos ninguna cookie de seguimiento, análisis ni publicidad."
     },
     "contact": {
       "heading": "Contacto",
@@ -440,7 +440,7 @@
   },
   "terms": {
     "title": "Condiciones generales de uso",
-    "lastUpdated": "Última actualización: octubre de 2026",
+    "lastUpdated": "Última actualización: noviembre de 2026",
     "acceptance": {
       "heading": "Aceptación de las condiciones",
       "body": "Al crear una cuenta o utilizar MesPapiers, acepta las presentes condiciones generales de uso. Si no acepta estas condiciones, le rogamos que no utilice el servicio."
@@ -465,7 +465,7 @@
     },
     "documents": {
       "heading": "Documentos personales",
-      "body": "Sus documentos son privados y solo usted puede acceder a ellos. Usted es responsable de los documentos que importa. No importe documentos de los que no sea el titular legítimo. Los formatos aceptados son PDF, PNG o JPEG, con un tamaño máximo de 10 MB."
+      "body": "Sus documentos son privados y solo usted puede acceder a ellos. Usted es responsable de los documentos que importa. No importe documentos de los que no sea el titular legítimo. Los formatos aceptados son PDF, PNG, JPEG o WebP, con un tamaño máximo de 10 MB."
     },
     "ai": {
       "heading": "Inteligencia artificial",
