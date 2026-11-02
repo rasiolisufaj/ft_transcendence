@@ -12,7 +12,9 @@
     "channels": "Salons",
     "account": "Compte",
     "myData": "Mes données",
-    "profile": "Mon profil"
+    "profile": "Mon profil",
+    "notifications": "{count, plural, =0 {Notifications} one {Notifications, # non lue} other {Notifications, # non lues}}",
+    "messages": "Messages"
   },
   "localeSwitcher": {
     "label": "Langue",
@@ -269,7 +271,8 @@
       "passwordRequired": "Saisissez votre mot de passe.",
       "emailTaken": "Cette adresse e-mail est déjà associée à un compte.",
       "invalidCredentials": "Adresse e-mail ou mot de passe incorrect.",
-      "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes."
+      "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes.",
+      "oauthFailed": "La connexion avec Google n'a pas abouti. Réessayez."
     },
     "fields": {
       "email": "Adresse e-mail",
@@ -298,7 +301,8 @@
       "headline": "Vos démarches administratives, simplifiées et accompagnées.",
       "subhead": "Un coffre-fort privé pour vos documents, un assistant qui répond à vos questions, et une communauté pour vous entraider.",
       "trust": "Vos documents sont privés : vous seul(e) pouvez les consulter."
-    }
+    },
+    "continueWithGoogle": "Continuer avec Google"
   },
   "admin": {
     "forbiddenTitle": "Accès refusé",
@@ -355,7 +359,8 @@
       "cancel": "Annuler",
       "remove": "Retirer",
       "block": "Bloquer",
-      "unblock": "Débloquer"
+      "unblock": "Débloquer",
+      "message": "Écrire"
     },
     "errors": {
       "emailInvalid": "Saisissez une adresse e-mail valide.",
@@ -572,14 +577,64 @@
     "deleteTitle": "Supprimer mon compte",
     "deleteDesc": "Votre compte et vos documents seront effacés définitivement. Vos réponses dans les channels resteront, mais sans votre nom.",
     "passwordLabel": "Mot de passe",
+    "emailLabel": "Votre adresse e-mail, pour confirmer",
     "deleteButton": "Supprimer mon compte",
     "deletePending": "Suppression…",
     "wrongPassword": "Mot de passe incorrect.",
+    "wrongEmail": "Ce n'est pas l'adresse e-mail de ce compte.",
     "lastAdmin": "Vous êtes le seul administrateur : nommez un autre administrateur avant de supprimer votre compte.",
     "tooManyAttempts": "Trop de tentatives échouées. Réessayez dans 15 minutes.",
     "exportMailSubject": "MesPapiers – Export de vos données",
     "exportMailBody": "Bonjour,\n\nVos données personnelles ont été exportées.\n\nSi ce n'est pas vous, changez votre mot de passe.\n\nL'équipe MesPapiers",
     "deleteMailSubject": "MesPapiers – Votre compte a été supprimé",
     "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement.\n\nVos réponses dans les channels restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "Cette page n'existe pas, ou a été déplacée.",
+      "backHome": "Retour à l'accueil"
+    },
+    "generic": {
+      "title": "Une erreur est survenue",
+      "description": "Quelque chose s'est mal passé. Vous pouvez réessayer ou revenir à l'accueil.",
+      "retry": "Réessayer",
+      "backHome": "Retour à l'accueil"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune notification pour l'instant.",
+    "markAllRead": "Tout marquer comme lu",
+    "unreadLabel": "Non lue",
+    "deletedUser": "Un utilisateur supprimé",
+    "deletedChannel": "un channel supprimé",
+    "friendRequest": "{name} vous a envoyé une demande d'ami.",
+    "reply": "{name} a répondu à votre question dans {channel}.",
+    "message": "{name} vous a envoyé un message.",
+    "other": "Nouvelle notification.",
+    "nothingNew": "Rien de nouveau pour le moment.",
+    "seeAll": "Voir tout"
+  },
+  "chat": {
+    "title": "Messages",
+    "subtitle": "Vos conversations privées avec vos amis.",
+    "empty": "Aucune conversation pour l'instant. Écrivez à un ami depuis la page Amis.",
+    "youSaid": "Vous : {content}",
+    "back": "Toutes les conversations",
+    "with": "Conversation avec {name}",
+    "noMessages": "Aucun message pour l'instant.",
+    "label": "Votre message",
+    "submit": "Envoyer",
+    "pending": "Envoi…",
+    "cannotWrite": "Vous ne pouvez écrire qu'à vos amis.",
+    "errors": {
+      "self": "Vous ne pouvez pas vous écrire à vous-même.",
+      "notFriends": "Vous ne pouvez écrire qu'à vos amis.",
+      "empty": "Le message est vide.",
+      "tooLong": "Le message dépasse 1 000 caractères."
+    },
+    "unread": "{count, plural, one {# non lu} other {# non lus}}",
+    "seen": "Vu"
   }
 }

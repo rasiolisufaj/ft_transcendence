@@ -12,7 +12,9 @@
     "channels": "Channels",
     "account": "Account",
     "myData": "My data",
-    "profile": "My profile"
+    "profile": "My profile",
+    "notifications": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+    "messages": "Messages"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -269,7 +271,8 @@
       "passwordRequired": "Enter your password.",
       "emailTaken": "That email address is already registered.",
       "invalidCredentials": "Incorrect email or password.",
-      "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes."
+      "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
+      "oauthFailed": "Signing in with Google did not work. Try again."
     },
     "fields": {
       "email": "Email",
@@ -298,7 +301,8 @@
       "headline": "Your paperwork, simplified and supported.",
       "subhead": "A private vault for your documents, an assistant that answers your questions, and a community to help you along.",
       "trust": "Your documents are private: only you can open them."
-    }
+    },
+    "continueWithGoogle": "Continue with Google"
   },
   "admin": {
     "forbiddenTitle": "Access denied",
@@ -355,7 +359,8 @@
       "cancel": "Cancel",
       "remove": "Remove",
       "block": "Block",
-      "unblock": "Unblock"
+      "unblock": "Unblock",
+      "message": "Message"
     },
     "errors": {
       "emailInvalid": "Enter a valid email address.",
@@ -572,14 +577,64 @@
     "deleteTitle": "Delete my account",
     "deleteDesc": "Your account and your documents will be deleted forever. Your answers in channels will stay, but without your name.",
     "passwordLabel": "Password",
+    "emailLabel": "Your email address, to confirm",
     "deleteButton": "Delete my account",
     "deletePending": "Deleting…",
     "wrongPassword": "Wrong password.",
+    "wrongEmail": "That is not this account's email address.",
     "lastAdmin": "You are the only administrator: name another administrator before deleting your account.",
     "tooManyAttempts": "Too many failed attempts. Try again in 15 minutes.",
     "exportMailSubject": "MesPapiers – Export of your data",
     "exportMailBody": "Hello,\n\nYour personal data was exported.\n\nIf this wasn't you, change your password.\n\nThe MesPapiers team",
     "deleteMailSubject": "MesPapiers – Your account has been deleted",
     "deleteMailBody": "Hello,\n\nYour MesPapiers account and your documents were permanently deleted.\n\nYour answers in channels remain visible, but without your name.\n\nThe MesPapiers team"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "This page does not exist, or has been moved.",
+      "backHome": "Back to home"
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "description": "Something went wrong. You can try again or go back to home.",
+      "retry": "Try again",
+      "backHome": "Back to home"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet.",
+    "markAllRead": "Mark all as read",
+    "unreadLabel": "Unread",
+    "deletedUser": "A deleted user",
+    "deletedChannel": "a deleted channel",
+    "friendRequest": "{name} sent you a friend request.",
+    "reply": "{name} answered your question in {channel}.",
+    "message": "{name} sent you a message.",
+    "other": "New notification.",
+    "nothingNew": "Nothing new for now.",
+    "seeAll": "See all"
+  },
+  "chat": {
+    "title": "Messages",
+    "subtitle": "Your private conversations with your friends.",
+    "empty": "No conversations yet. Message a friend from the Friends page.",
+    "youSaid": "You: {content}",
+    "back": "All conversations",
+    "with": "Conversation with {name}",
+    "noMessages": "No messages yet.",
+    "label": "Your message",
+    "submit": "Send",
+    "pending": "Sending…",
+    "cannotWrite": "You can only message your friends.",
+    "errors": {
+      "self": "You cannot message yourself.",
+      "notFriends": "You can only message your friends.",
+      "empty": "The message is empty.",
+      "tooLong": "The message is over 1,000 characters."
+    },
+    "unread": "{count, plural, one {# unread} other {# unread}}",
+    "seen": "Seen"
   }
 }

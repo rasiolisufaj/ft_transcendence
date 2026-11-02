@@ -61,6 +61,22 @@ type MemberMuted = {
   at: string;
 };
 
+type NotificationCreated = {
+  type: "notification.created";
+  notificationId: number;
+  recipientId: string; // the bell of this user only
+  at: string;
+};
+
+type MessageCreated = {
+  type: "message.created";
+  conversationId: number;
+  messageId: number;
+  senderId: string;
+  recipientId: string; // the only one told: a private message has no channel
+  at: string;
+};
+
 export type RealtimeEvent =
   | ThreadCreated
   | AnswerCreated
@@ -69,7 +85,9 @@ export type RealtimeEvent =
   | MemberJoined
   | MemberLeft
   | MemberRoleChanged
-  | MemberMuted;
+  | MemberMuted
+  | NotificationCreated
+  | MessageCreated;
 
 // all member of the channel
 export const channelTopic = (channelId: number) => `channel:${channelId}`;
@@ -78,5 +96,8 @@ export const channelTopic = (channelId: number) => `channel:${channelId}`;
 export const userTopic = (userId: string) => `user:${userId}`;
 
 export function topicFor(event: RealtimeEvent): string {
+  if (event.type === "notification.created" || event.type === "message.created") {
+    return userTopic(event.recipientId);
+  }
   return channelTopic(event.channelId);
 }

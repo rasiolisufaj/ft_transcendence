@@ -50,7 +50,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         />
         <div className="min-w-0 max-w-full space-y-1">
           <h1 className="truncate text-2xl font-semibold">{user.displayName}</h1>
-          {relation === "friend" ? <OnlineDot online={isOnline(user.lastSeenAt)} /> : null}
+          {relation === "friend" ? <OnlineDot online={isOnline(user.lastSeenAt)} userId={user.id} /> : null}
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {t("memberSince", { date: format.dateTime(user.createdAt, { dateStyle: "long" }) })}
           </p>

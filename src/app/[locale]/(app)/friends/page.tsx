@@ -83,6 +83,12 @@ export default async function FriendsPage() {
               <PeopleList people={friends} empty={t("empty.friends")} linkProfiles onlineIds={onlineIds}>
                 {(person) => (
                   <>
+                    <Link href={`/messages/${person.id}`} className={linkStyle}>
+                      {t("actions.message")}
+                    </Link>
+                    <span aria-hidden="true" className="text-zinc-300 dark:text-zinc-700">
+                      ·
+                    </span>
                     <ActionButton run={removeFriendAction} person={person}>
                       {t("actions.remove")}
                     </ActionButton>
@@ -163,7 +169,7 @@ function PeopleList({
             ) : (
               <span className="min-w-0 truncate text-sm font-medium">{person.displayName}</span>
             )}
-            {onlineIds ? <OnlineDot online={onlineIds.has(person.id)} /> : null}
+            {onlineIds ? <OnlineDot online={onlineIds.has(person.id)} userId={person.id} /> : null}
           </div>
           <div className="flex items-center gap-3">{children(person)}</div>
         </li>

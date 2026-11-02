@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { OnlineDot } from "@/components/OnlineDot";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { GoogleButton } from "@/components/ui/GoogleButton";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -27,6 +29,11 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-foreground-muted">GoogleButton</h2>
+        <GoogleButton href="#">Continue with Google</GoogleButton>
+      </section>
+
+      <section className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground-muted">Card</h2>
         <Card>Card content</Card>
       </section>
@@ -48,6 +55,14 @@ export default function UiGalleryPage() {
           <Avatar name="Marie Curie" size="sm" />
           <Avatar name="Marie Curie" />
           <Avatar name="amir" size="lg" />
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-foreground-muted">OnlineDot</h2>
+        <div className="flex gap-6">
+          <OnlineDot online />
+          <OnlineDot online={false} />
         </div>
       </section>
 

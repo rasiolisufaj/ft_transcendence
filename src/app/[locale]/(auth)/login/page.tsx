@@ -1,11 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useState } from "react";
+import { use, useActionState, useState } from "react";
 import { AuthPreviewSlot } from "@/components/auth/AuthPreviewSlot";
 import { AuthShowcase } from "@/components/auth/AuthShowcase";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { GoogleButton } from "@/components/ui/GoogleButton";
 import { Input } from "@/components/ui/Input";
 import { Link } from "@/i18n/navigation";
 import type { AuthFormState } from "@/lib/auth/schemas";
@@ -13,12 +14,15 @@ import { login } from "./actions";
 
 const initialState: AuthFormState = {};
 
-export default function LoginPage() {
+export default function LoginPage({ searchParams }: PageProps<"/[locale]/login">) {
   const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState(login, initialState);
   // React resets a form's uncontrolled fields after every action, so a wrong
   // password would also wipe the email. A controlled field survives the reset.
   const [email, setEmail] = useState("");
+  // The Google callback sends every failure here as ?error=oauth (phase 8).
+  const oauthFailed = use(searchParams).error === "oauth";
+  const formError = state.error ? t(`errors.${state.error}`) : oauthFailed ? t("errors.oauthFailed") : null;
 
   const fieldError = (name: string) => {
     const key = state.fieldErrors?.[name]?.[0];
@@ -55,9 +59,9 @@ export default function LoginPage() {
               error={fieldError("password")}
             />
 
-            {state.error ? (
+            {formError ? (
               <p role="alert" className="text-sm text-danger">
-                {t(`errors.${state.error}`)}
+                {formError}
               </p>
             ) : null}
 
@@ -65,6 +69,10 @@ export default function LoginPage() {
               {pending ? t("login.pending") : t("login.submit")}
             </Button>
           </form>
+
+          <GoogleButton href="/api/auth/google/start" className="mt-4 w-full">
+            {t("continueWithGoogle")}
+          </GoogleButton>
 
           <p className="mt-6 text-sm text-foreground-muted">
             {t("login.noAccount")}{" "}

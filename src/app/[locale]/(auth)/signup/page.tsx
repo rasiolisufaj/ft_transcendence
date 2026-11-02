@@ -6,6 +6,7 @@ import { AuthPreviewSlot } from "@/components/auth/AuthPreviewSlot";
 import { AuthShowcase } from "@/components/auth/AuthShowcase";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { GoogleButton } from "@/components/ui/GoogleButton";
 import { Input } from "@/components/ui/Input";
 import { Link } from "@/i18n/navigation";
 import type { AuthFormState } from "@/lib/auth/schemas";
@@ -76,6 +77,10 @@ export default function SignupPage() {
               {pending ? t("signup.pending") : t("signup.submit")}
             </Button>
           </form>
+
+          <GoogleButton href="/api/auth/google/start" className="mt-4 w-full">
+            {t("continueWithGoogle")}
+          </GoogleButton>
 
           <p className="mt-6 text-sm text-foreground-muted">
             {t("signup.hasAccount")}{" "}
