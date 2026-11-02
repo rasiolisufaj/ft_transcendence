@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 const sizes = {
+  sm: { box: "h-7 w-7 text-xs", px: 28 },
   md: { box: "h-10 w-10 text-sm", px: 40 },
   lg: { box: "h-20 w-20 text-2xl", px: 80 },
 };
@@ -47,7 +48,7 @@ export function Avatar({
   return (
     <span
       aria-hidden="true"
-      className={`${box} inline-flex shrink-0 items-center justify-center rounded-full bg-zinc-200 font-semibold text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200`}
+      className={`${box} inline-flex shrink-0 items-center justify-center rounded-full bg-primary-subtle font-semibold text-primary-subtle-foreground`}
     >
       {initials(name)}
     </span>

@@ -21,28 +21,30 @@ export default function UiGalleryPage() {
       <h1 className="text-2xl font-semibold">{t("title")}</h1>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.button")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.button")}</h2>
         <div className="flex gap-3">
           <Button>{t("button.primary")}</Button>
           <Button variant="secondary">{t("button.secondary")}</Button>
+          <Button variant="danger">{t("button.danger")}</Button>
           <Button disabled>{t("button.disabled")}</Button>
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.googleButton")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.googleButton")}</h2>
         <GoogleButton href="#">{t("google")}</GoogleButton>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.card")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.card")}</h2>
         <Card>{t("cardContent")}</Card>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.badge")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.badge")}</h2>
         <div className="flex gap-3">
           <Badge>{t("badge.neutral")}</Badge>
+          <Badge tone="primary">{t("badge.primary")}</Badge>
           <Badge tone="success">{t("badge.success")}</Badge>
           <Badge tone="warning">{t("badge.warning")}</Badge>
           <Badge tone="danger">{t("badge.danger")}</Badge>
@@ -50,15 +52,16 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.avatar")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.avatar")}</h2>
         <div className="flex items-center gap-4">
+          <Avatar name="Marie Curie" size="sm" />
           <Avatar name="Marie Curie" />
           <Avatar name="amir" size="lg" />
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.onlineDot")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.onlineDot")}</h2>
         <div className="flex gap-6">
           <OnlineDot online />
           <OnlineDot online={false} />
@@ -66,15 +69,23 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.input")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.input")}</h2>
         <div className="max-w-sm space-y-4">
           <Input label={t("input.email")} type="email" placeholder={t("input.emailPlaceholder")} />
+          <Input
+            label={t("input.password")}
+            type="password"
+            revealable
+            showPasswordLabel={t("input.showPassword")}
+            hidePasswordLabel={t("input.hidePassword")}
+            hint={t("input.hint")}
+          />
           <Input label={t("input.password")} type="password" error={t("input.passwordError")} />
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.emptyState")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.emptyState")}</h2>
         <EmptyState
           title={t("empty.title")}
           description={t("empty.description")}
@@ -83,10 +94,10 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.dialog")}</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.dialog")}</h2>
         <Button onClick={() => setDialogOpen(true)}>{t("dialog.open")}</Button>
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={t("dialog.title")}>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm text-foreground-muted">
             {t("dialog.body")}
           </p>
           <div className="mt-6 flex justify-end gap-3">
@@ -99,8 +110,8 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{t("sections.table")}</h2>
-        <Card className="bg-zinc-50 dark:bg-zinc-900/50">
+        <h2 className="text-sm font-semibold text-foreground-muted">{t("sections.table")}</h2>
+        <Card className="bg-surface-hover">
           <Table>
             <TableHead>
               <TableRow>

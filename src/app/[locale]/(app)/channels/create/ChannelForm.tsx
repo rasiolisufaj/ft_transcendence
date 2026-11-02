@@ -4,21 +4,21 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/Button";
 import { createChannel, type CreateChannelState } from "./action";
 
 function SubmitButton() {
   const t = useTranslations("channels.create");
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="flex-1 rounded-lg bg-zinc-900 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-    >
+    <Button type="submit" className="flex-1" disabled={pending}>
       {t("submit")}
-    </button>
+    </Button>
   );
 }
+
+const fieldClass =
+  "w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-primary";
 
 export default function ChannelForm() {
   const t = useTranslations("channels.create");
@@ -30,10 +30,7 @@ export default function ChannelForm() {
   return (
     <form className="flex flex-col gap-4" action={formAction}>
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="name"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-        >
+        <label htmlFor="name" className="text-sm font-medium text-foreground">
           {t("nameLabel")}
         </label>
         <input
@@ -43,15 +40,12 @@ export default function ChannelForm() {
           required
           maxLength={100}
           placeholder={t("namePlaceholder")}
-          className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
+          className={fieldClass}
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="description"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-        >
+        <label htmlFor="description" className="text-sm font-medium text-foreground">
           {t("descriptionLabel")}
         </label>
         <textarea
@@ -60,15 +54,12 @@ export default function ChannelForm() {
           rows={3}
           maxLength={250}
           placeholder={t("descriptionPlaceholder")}
-          className="resize-none rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
+          className={`resize-none ${fieldClass}`}
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="question"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-100"
-        >
+        <label htmlFor="question" className="text-sm font-medium text-foreground">
           {t("questionLabel")}
         </label>
         <textarea
@@ -78,34 +69,29 @@ export default function ChannelForm() {
           required
           maxLength={300}
           placeholder={t("questionPlaceholder")}
-          className="resize-none rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:text-zinc-100"
+          className={`resize-none ${fieldClass}`}
         />
       </div>
 
-      <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-          {t("visibilityLabel")}
-        </legend>
-        <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-          <input
-            type="radio"
-            name="visibility"
-            value="public"
-            defaultChecked
-            required
-          />
-          <span>{t("visibilityPublic")}</span>
-        </label>
-        <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-          <input type="radio" name="visibility" value="private" />
-          <span>{t("visibilityPrivate")}</span>
-        </label>
+      <fieldset className="flex flex-col gap-1.5">
+        <legend className="text-sm font-medium text-foreground">{t("visibilityLabel")}</legend>
+        <div className="flex gap-3">
+          <label className="flex flex-1 items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-sm text-foreground has-checked:border-primary has-checked:bg-primary-subtle has-checked:text-primary-subtle-foreground">
+            <input type="radio" name="visibility" value="public" defaultChecked required className="accent-primary" />
+            {t("public")}
+          </label>
+
+          <label className="flex flex-1 items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-sm text-foreground has-checked:border-primary has-checked:bg-primary-subtle has-checked:text-primary-subtle-foreground">
+            <input type="radio" name="visibility" value="private" className="accent-primary" />
+            {t("private")}
+          </label>
+        </div>
       </fieldset>
 
       {state.error ? (
         <p
           role="alert"
-          className="rounded-lg border border-red-500/40 bg-red-500/5 px-3 py-2 text-sm text-red-500"
+          className="rounded-lg border border-danger/40 bg-danger-subtle px-3 py-2 text-sm text-danger"
         >
           {t(`errors.${state.error}`)}
         </p>
@@ -114,7 +100,7 @@ export default function ChannelForm() {
       <div className="mt-2 flex gap-3">
         <Link
           href="/channels"
-          className="flex-1 rounded-lg border border-zinc-200 py-2.5 text-center text-sm text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="flex-1 rounded-lg border border-border py-2.5 text-center text-sm text-foreground-muted transition hover:border-border-strong hover:text-foreground"
         >
           {t("cancel")}
         </Link>
