@@ -347,7 +347,14 @@
     "category": "Categoría",
     "size": "Tamaño",
     "type": "Tipo",
+    "image": "Imagen",
     "deadline": "Tipo de plazo",
+    "deadlineTypes": {
+      "HARD": "Caducidad legal",
+      "SOFT": "Renovación tácita",
+      "PERIODIC": "Declaración periódica",
+      "NONE": "Sin plazo"
+    },
     "expiry": "Fecha límite",
     "extractedFields": "Campos extraídos",
     "fields": {

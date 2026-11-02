@@ -347,7 +347,14 @@
     "category": "Catégorie",
     "size": "Taille",
     "type": "Type",
-    "deadline": "Type de deadline",
+    "image": "Image",
+    "deadline": "Type d'échéance",
+    "deadlineTypes": {
+      "HARD": "Expiration légale",
+      "SOFT": "Renouvellement tacite",
+      "PERIODIC": "Déclaration périodique",
+      "NONE": "Sans échéance"
+    },
     "expiry": "Date d'échéance",
     "extractedFields": "Champs extraits",
     "fields": {
