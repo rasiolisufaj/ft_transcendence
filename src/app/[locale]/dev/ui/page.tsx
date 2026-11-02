@@ -19,28 +19,30 @@ export default function UiGalleryPage() {
       <h1 className="text-2xl font-semibold">UI Gallery</h1>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Button</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">Button</h2>
         <div className="flex gap-3">
           <Button>Primary</Button>
           <Button variant="secondary">Secondary</Button>
+          <Button variant="danger">Danger</Button>
           <Button disabled>Disabled</Button>
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">GoogleButton</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">GoogleButton</h2>
         <GoogleButton href="#">Continue with Google</GoogleButton>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Card</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">Card</h2>
         <Card>Card content</Card>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Badge</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">Badge</h2>
         <div className="flex gap-3">
           <Badge>Neutral</Badge>
+          <Badge tone="primary">Primary</Badge>
           <Badge tone="success">Success</Badge>
           <Badge tone="warning">Warning</Badge>
           <Badge tone="danger">Danger</Badge>
@@ -48,15 +50,16 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Avatar</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">Avatar</h2>
         <div className="flex items-center gap-4">
+          <Avatar name="Marie Curie" size="sm" />
           <Avatar name="Marie Curie" />
           <Avatar name="amir" size="lg" />
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">OnlineDot</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">OnlineDot</h2>
         <div className="flex gap-6">
           <OnlineDot online />
           <OnlineDot online={false} />
@@ -64,15 +67,23 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Input</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">Input</h2>
         <div className="max-w-sm space-y-4">
           <Input label="Email" type="email" placeholder="you@example.com" />
+          <Input
+            label="Password"
+            type="password"
+            revealable
+            showPasswordLabel="Show password"
+            hidePasswordLabel="Hide password"
+            hint="At least 8 characters"
+          />
           <Input label="Password" type="password" error="Password must be at least 8 characters" />
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">EmptyState</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">EmptyState</h2>
         <EmptyState
           title="No documents yet"
           description="Upload your first document to get started."
@@ -81,10 +92,10 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Dialog</h2>
+        <h2 className="text-sm font-semibold text-foreground-muted">Dialog</h2>
         <Button onClick={() => setDialogOpen(true)}>Open Dialog</Button>
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Confirm action">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm text-foreground-muted">
             Are you sure you want to do this?
           </p>
           <div className="mt-6 flex justify-end gap-3">
@@ -97,8 +108,8 @@ export default function UiGalleryPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Table</h2>
-        <Card className="bg-zinc-50 dark:bg-zinc-900/50">
+        <h2 className="text-sm font-semibold text-foreground-muted">Table</h2>
+        <Card className="bg-surface-hover">
           <Table>
             <TableHead>
               <TableRow>

@@ -7,7 +7,7 @@ import type { AnchorHTMLAttributes } from "react";
 export function GoogleButton({ className = "", children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>) {
   return (
     <a
-      className={`inline-flex items-center justify-center gap-3 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 ${className}`}
+      className={`inline-flex items-center justify-center gap-3 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition hover:border-border-strong hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${className}`}
       {...props}
     >
       {/* Google's "G", as in its sign-in button guidelines. */}

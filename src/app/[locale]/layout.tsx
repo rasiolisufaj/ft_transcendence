@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Public_Sans } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -11,14 +11,17 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { enableStaticRendering } from "@/i18n/static";
 import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const publicSans = Public_Sans({
+  variable: "--font-public-sans",
+  subsets: ["latin", "latin-ext"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// The display face (nav wordmark, page headings): a serif, deliberately not
+// the grotesque-everywhere look a default template reaches for.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin", "latin-ext"],
+  weight: ["500", "600"],
 });
 
 export async function generateMetadata({
@@ -46,11 +49,8 @@ export default async function LocaleLayout({
   const ctx = await getCurrentUser();
 
   return (
-    <html
-      lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <html lang={locale} className={`${publicSans.variable} ${fraunces.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <NextIntlClientProvider>
           {/* Above the nav too: the bell listens to it. */}
           <RealtimeProvider signedIn={ctx !== null}>
