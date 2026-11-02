@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { writeAudit } from "@/lib/audit";
 import { assertCan } from "@/lib/auth/policy";
 import { requireUser } from "@/lib/auth/session";
+import { publish } from "@/lib/realtime/publish";
 
 export async function kickMembers(formData: FormData) {
   const channelId = formData.get("channelId");
@@ -38,7 +39,7 @@ export async function kickMembers(formData: FormData) {
   const { count } = await prisma.channelMember.deleteMany({
     where: { channelId: intChannelId, userId: targetUserIdTrim },
   });
-  if (count > 0)
+  if (count > 0) {
     await writeAudit({
       actorUserId: ctx.user.id,
       action: "channel:kick",
@@ -46,6 +47,13 @@ export async function kickMembers(formData: FormData) {
       targetId: targetUserIdTrim,
       channelId: intChannelId,
     });
+    await publish({
+      type: "member.left",
+      channelId: intChannelId,
+      userId: targetUserIdTrim,
+      at: new Date().toISOString(),
+    });
+  }
 
   revalidatePath("/[locale]/(app)/channels/[id]/kick", "page");
   revalidatePath("/[locale]/(app)/channels/[id]", "page");

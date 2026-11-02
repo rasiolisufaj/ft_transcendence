@@ -1,20 +1,22 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { can } from "@/lib/auth/policy";
-import { getCurrentUser } from "@/lib/auth/session";
+import type { SessionContext } from "@/lib/auth/session";
+import { unreadCount } from "@/lib/notifications/notifications";
+import { notificationViews } from "@/lib/notifications/views";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { MobileMenu } from "./MobileMenu";
 import { NavLinks } from "./NavLinks";
+import { NotificationBell } from "./NotificationBell";
 import { AccountLinks, UserMenu } from "./UserMenu";
 
 const link = "text-foreground-muted transition hover:text-foreground";
 const primary =
   "rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground transition hover:bg-primary-hover";
 
-// getCurrentUser(), not requireUser(): the nav also renders on /login and /signup.
-export async function Nav() {
+// ctx can be null: the nav also renders on /login and /signup.
+export async function Nav({ ctx }: { ctx: SessionContext | null }) {
   const t = await getTranslations("nav");
-  const ctx = await getCurrentUser();
 
   const isAdmin = ctx !== null && can(ctx, "user:manage", {});
   // "MesPapiers": a fixed brand name, identical in every locale (checked in messages/*.json).
@@ -77,6 +79,12 @@ export async function Nav() {
           <span className="text-primary">{brandAccent}</span>
         </Link>
         <div className="flex items-center gap-6 text-sm">
+          {ctx ? (
+            <NotificationBell
+              count={await unreadCount(ctx.user.id)}
+              notifications={await notificationViews(ctx.user.id, 5)}
+            />
+          ) : null}
           <div className="hidden items-center gap-6 md:flex">{barLinks}</div>
           <LocaleSwitcher />
           <MobileMenu>{panelLinks}</MobileMenu>

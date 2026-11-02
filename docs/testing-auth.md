@@ -23,10 +23,10 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 npm run db:generate
 
 npm test                                                                    # everything
-npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" "src/app/[locale]/(app)/channels" src/lib/users src/lib/files "src/app/[locale]/(app)/users" src/app/api/users --reporter=verbose    # auth and profile only
+npx vitest run src/lib/auth src/lib/audit.test.ts "src/app/[locale]/(auth)" "src/app/[locale]/(app)/admin" "src/app/[locale]/(app)/channels" src/lib/users src/lib/files "src/app/[locale]/(app)/users" src/app/api/users src/app/api/auth --reporter=verbose    # auth and profile only
 ```
 
-Expected: `npm test` reports **262 passed** (24 files). The auth and profile part is 13 files and 116 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓. If `npm test` dies with exit 137 and no output, memory ran out: run `npx vitest run --maxWorkers=1`.
+Expected: `npm test` reports **276 passed** (27 files). The auth and profile part is 16 files and 129 tests; the rest is the other modules' code. The verbose run prints each test name with a ✓. If `npm test` dies with exit 137 and no output, memory ran out: run `npx vitest run --maxWorkers=1`.
 
 | File | What it proves |
 |---|---|
@@ -34,6 +34,9 @@ Expected: `npm test` reports **262 passed** (24 files). The auth and profile par
 | [session.test.ts](../src/lib/auth/session.test.ts) | tokens are random and ≥128 bits; only the SHA-256 is stored; expired sessions are rejected and deleted; the expiry never slides; logout kills one session or all of them; channel memberships load; `lastSeenAt` is written when unset or older than a minute, and a fresh one is left alone. Uses the real DB. |
 | [schemas.test.ts](../src/lib/auth/schemas.test.ts) | the signup and login rules; every error key exists in fr, en and es |
 | [login/actions.test.ts](<../src/app/[locale]/(auth)/login/actions.test.ts>) | the action returns the schema's errors; 6 failures lock an email for 15 minutes |
+| [oauth.test.ts](../src/lib/auth/oauth.test.ts) | phase 8: the PKCE challenge matches RFC 7636's Appendix B pair; `resolveGoogleUser` creates a user with no password and its Google account, then signs in to the same user next time; it links an existing account even when Google sends the email in capitals (one user), and the link drops that account's password and ends every session opened before it (signup never verifies emails, so the password may be an impostor's); it refuses an email Google has not verified and links nothing; a new user with no Google name is named after the email's local part, and a 70-character name is cut to 50, between characters, never inside an emoji. Uses the real DB. |
+| [api/auth/google/start/route.test.ts](../src/app/api/auth/google/start/route.test.ts) | the start route sends the browser to Google with the client id, the redirect URI, an S256 challenge of the cookie's verifier and the cookie's state; the `mp_oauth` cookie is `HttpOnly`, `Secure`, `SameSite=Lax`, 10 minutes, on `/api/auth/google` only; with no Google client configured it goes back to `/login?error=oauth` and sets no cookie |
+| [api/auth/google/callback/route.test.ts](../src/app/api/auth/google/callback/route.test.ts) | a state that does not match its cookie is refused before Google is called; a sign-in exchanges the code with the cookie's verifier, opens a session and clears the cookie, and the same callback replayed is refused without calling Google; a cancelled consent, Google being down and Google answering an HTML error page all end on `/login?error=oauth`, not a 500; the server log says why Google refused a code (`invalid_grant`). Uses the real DB. |
 | [policy.test.ts](../src/lib/auth/policy.test.ts) | `can()` denies unknown actions, even to an admin; an admin can do everything except touch another user's documents (the vault is owner-only, even for an admin); a moderator acts only in their own channel, and moderation is never granted by ownership; owners act only on their own rows; posting needs a membership; reputation grants nothing; `user:manage` and `channel:manageRoles` are admin-only, even on your own account. Plus the C4 truth table: one row per `Action` (23) with the resource its caller passes and the answer for admin, moderator, member, owner and stranger; a new `Action` without a row fails the typecheck |
 | [admin/users/actions.test.ts](<../src/app/[locale]/(app)/admin/users/actions.test.ts>) | a non-admin cannot change a role or delete a user; an admin cannot demote or delete themselves; a role change ends that user's sessions; every change writes one `AuditLog` row; a role other than USER/ADMIN is refused; a double click or a stale page (user already gone, role already set) changes nothing and does not throw. Uses the real DB. |
 | [channels/channel-policy.test.ts](<../src/app/[locale]/(app)/channels/channel-policy.test.ts>) | phase 5, the policy in the channel actions: a plain member is refused every moderation action; a moderator of another channel cannot kick there; an admin kicks in a channel with no moderator; a member cannot edit a channel, a moderator who is not the creator can; that moderator cannot delete it, the creator can; a member cannot delete someone else's answer, a moderator can; a non-member cannot post; a moderator cannot rewrite someone else's answer, an admin's rewrite is audited; a non-member admin is sent back to `/channels` after an edit; every privileged action writes one `AuditLog` row, once, after it happened. Phase 6: a moderator cannot change a channel role; an admin promotes once, audited, a forged role or a non-member changes nothing, and the promoted member's existing session moderates on its next request; an admin may demote the last moderator, who then cannot kick or delete; a moderator, the creator included, can leave a channel, and a creator who left cannot delete it. Uses the real DB. |
@@ -130,7 +133,7 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 
 - Use a **private window** at **`https://mespapiers.local`**, the name `next.config.ts` allows for dev (`allowedDevOrigins`). Every URL below uses it. It needs `127.0.0.1 mespapiers.local` in the Windows hosts file (`C:\Windows\System32\drivers\etc\hosts`), which WSL picks up too (`getent hosts mespapiers.local`). Accept the self-signed certificate.
 - Keep DevTools open, on the **Console** and **Network** tabs.
-- After `npm run db:reset` (it wipes the local database, then seeds it), the ten seeded users log in as `<first name in lowercase>@gmail.com` (`amir@gmail.com`, `rasiol@gmail.com`, …) with the dev password **`motdepasse123`**. `rasiol@gmail.com` is the only `ADMIN`; the others are `USER`. Every step below still uses a fresh account, `moi@mespapiers.test`, so that signup is tested too.
+- After `npm run db:reset` (it wipes the local database, then seeds it), the twenty seeded users log in as `<name, lowercased, accents and spaces stripped>@mespapiers.test` (`amir@mespapiers.test`, `rasiol@mespapiers.test`, …) with the dev password **`motdepasse123`**. `rasiol@mespapiers.test` is the only `ADMIN`; the others are `USER`. Every step below still uses a fresh account, `moi@mespapiers.test`, so that signup is tested too.
 
 ### B1. The guard
 
@@ -281,12 +284,12 @@ You need a second account, `autre@mespapiers.test`, signed in **at the same time
 
 ### B11. The admin surface (phase 4)
 
-Log in as `amir@gmail.com` (USER) in one browser and `rasiol@gmail.com` (ADMIN) in another; both use `motdepasse123` (B0).
+Log in as `amir@mespapiers.test` (USER) in one browser and `rasiol@mespapiers.test` (ADMIN) in another; both use `motdepasse123` (B0).
 
 | Action | Expected |
 |---|---|
 | As amir, open `/fr/admin/users`, then `/en/…` and `/es/…` | The translated "Accès refusé" card, the URL unchanged, no *Administration* link in the nav |
-| As amir, view the page source (Ctrl+U) and search for `emma@gmail.com` | **Not found.** The page checks `can()` itself; without that, the layout shows the 403 card but the user list still ships in the RSC payload |
+| As amir, view the page source (Ctrl+U) and search for `emma@mespapiers.test` | **Not found.** The page checks `can()` itself; without that, the layout shows the 403 card but the user list still ships in the RSC payload |
 | As rasiol, open the account menu (☰ below 768 px) | An *Administration* link, which opens the user table |
 | Search `EMM` | Only Emma's row (case-insensitive, on name and email) |
 | Your own row | *Vous*, no buttons |
@@ -340,7 +343,7 @@ Two browsers (or a normal and a private window). amir and lina, seeded (`motdepa
 
 | # | Do | Expect |
 |---|---|---|
-| 0 | As amir, `/fr/friends`: add `lina@gmail.com`. As lina: accept | they are friends |
+| 0 | As amir, `/fr/friends`: add `lina@mespapiers.test`. As lina: accept | they are friends |
 | 1 | As amir: account menu → *Mon profil* | `/fr/users/<id>`: initials, *Amir*, *Membre depuis le …*, his email, the edit card; no dot |
 | 2 | Save `"  Amir K  "`, then `"R"` | *Nom enregistré.* and the nav says *Amir K* without a reload; then the error, the name unchanged |
 | 3 | Upload a portrait phone photo over 2 MB | it shows at once, upright and round; `/api/users/<id>/avatar` is a 256 × 256 `image/png` with `nosniff` and `private, no-store` |
@@ -356,6 +359,26 @@ Two browsers (or a normal and a private window). amir and lina, seeded (`motdepa
 | 13 | 375 / 768 / 1440, keyboard only | no sideways scroll; Tab reaches the name field, *Enregistrer*, the file input and *Envoyer la photo* (and *Ajouter en ami* on a stranger's profile); the console stays clean |
 
 Afterwards: `npm run db:reset` (reseeds), or rename amir back and delete the friendship and the block on `/fr/friends`.
+
+### B15. Google sign-in (phase 8)
+
+On **https://localhost**, not mespapiers.local: Google refuses `.local` redirect hosts (phase 8 plan, decision 1). Setup: `.env` has the Google client and `APP_URL=https://localhost`, then `docker compose up -d web`. Rows 4 and 6 need DevTools → Network with *Preserve log*.
+
+| # | Do | Expect |
+|---|---|---|
+| 1 | `/fr/login`, `/fr/signup`, keyboard only | *Continuer avec Google* under each form, full width, reached by Tab after the submit button |
+| 2 | Click it, pick `<you>` on Google | back on `/fr`, signed in, the nav shows your Google name. `select "passwordHash", "displayName" from "User" where email = '<you>'` → `NULL`, your name; one `OAuthAccount` row, `provider = 'google'` |
+| 3 | Log out, *Continuer avec Google* again | the same user; still one `User` and one `OAuthAccount` row |
+| 4 | *Mes données*: the field asks for your email. Type another address, then your own | *Ce n'est pas l'adresse e-mail de ce compte.*; then the account is deleted and you are on `/fr/login` |
+| 5 | `/fr/signup` with `<you>` and a password; sign in with it in a private window too; in the first window log out, then *Continuer avec Google* | signed in to that account: one `User` row, one `OAuthAccount` row (linked), and `passwordHash` now `NULL`: the link drops the password (signup never checked the address) and ends every other session, so the private window is signed out on its next page and the password gives *Adresse e-mail ou mot de passe incorrect.* |
+| 6 | After a sign-in, copy the `/api/auth/google/callback?...` URL from Network; log out; open it | `/fr/login` with *La connexion avec Google n'a pas abouti. Réessayez.* (the cookie is gone; Google also refuses a used code) |
+| 7 | On Google's screen, cancel | `/fr/login` with the same message |
+| 8 | Start on `https://mespapiers.local/fr/login` | Google, then back on `https://localhost/fr/login` with the message: the state cookie stayed on mespapiers.local. Expected |
+| 9 | `/en/login`, `/es/login` | *Continue with Google*, *Continuar con Google* |
+| 10 | 375 / 768 / 1440 on `/fr/login?error=oauth` | no sideways scroll; the console stays clean |
+| 11 | Empty `GOOGLE_CLIENT_ID` in `.env`, `docker compose up -d web`, click the button | `/fr/login` with the message, Google is never shown. Put the key back |
+
+Afterwards: delete `<you>` on *Mes données*, set `APP_URL=https://mespapiers.local` back if you test anything else, and `docker compose up -d web`.
 
 ### Cleanup
 

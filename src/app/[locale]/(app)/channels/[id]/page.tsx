@@ -16,6 +16,7 @@ import {
 import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/policy";
 import { listFriendships } from "@/lib/friends/friendships";
+import { ChannelLive } from "./ChannelLive";
 
 export default async function ChannelPage({
   params,
@@ -80,6 +81,7 @@ export default async function ChannelPage({
   });
   return (
     <div className="relative">
+      <ChannelLive channelId={channel.id} />
       <DashboardDecor />
       <div className="relative z-10">
         <Link href="/channels" className="text-sm text-foreground-muted hover:text-foreground">
