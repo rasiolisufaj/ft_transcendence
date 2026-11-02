@@ -51,7 +51,7 @@
     "pendingClassification": "{count, plural, one {# document awaiting automatic classification.} other {# documents awaiting automatic classification.}}",
     "importZone": {
       "cta": "Upload a document",
-      "hint": "PDF, JPEG or PNG — 10 MB max",
+      "hint": "PDF, JPEG, PNG or WebP — 10 MB max",
       "dropHere": "Drop your file here"
     },
     "howItWorks": {
@@ -87,7 +87,7 @@
     "addDocument": "Add a document",
     "empty": {
       "title": "No documents in this category",
-      "description": "Uploaded documents will be sorted in here automatically once classification is wired."
+      "description": "Uploaded documents are sorted in here automatically."
     },
     "fileKind": {
       "pdf": "PDF",
@@ -124,7 +124,7 @@
       "joinTitle": "Join a channel",
       "joinDesc": "Browse public channels and join one.",
       "invitationsTitle": "View my invitations",
-      "invitationsDesc": "Request access to a private channel.",
+      "invitationsDesc": "See the invitations you have received.",
       "myChannels": "My channels",
       "empty": "You don't belong to any channel.",
       "membersCount": "{count, plural, one {# member} other {# members}}",
@@ -394,7 +394,14 @@
     "category": "Category",
     "size": "Size",
     "type": "Type",
+    "image": "Image",
     "deadline": "Deadline type",
+    "deadlineTypes": {
+      "HARD": "Legal expiry",
+      "SOFT": "Automatic renewal",
+      "PERIODIC": "Periodic declaration",
+      "NONE": "No deadline"
+    },
     "expiry": "Expiry date",
     "extractedFields": "Extracted fields",
     "fields": {
@@ -414,7 +421,7 @@
   },
   "privacy": {
     "title": "Privacy Policy",
-    "lastUpdated": "Last updated: October 2026",
+    "lastUpdated": "Last updated: November 2026",
     "intro": {
       "heading": "Introduction",
       "body": "MesPapiers is a service designed to help you with French administrative paperwork. This policy describes what personal data we collect, how we use it and what your rights are. The service is hosted in France and subject to the General Data Protection Regulation (GDPR)."
@@ -427,11 +434,11 @@
       },
       "documents": {
         "heading": "Documents",
-        "body": "You can upload documents (PDF, PNG, JPEG) to your personal vault. Files are stored in the service's database. Only you, as the owner, can access your documents — even administrators cannot view them."
+        "body": "You can upload documents (PDF, PNG, JPEG, WebP) to your personal vault. Files are stored in the service's database. Only you, as the owner, can access your documents — even administrators cannot view them."
       },
       "community": {
         "heading": "Community content",
-        "body": "Messages posted in channels, questions, answers and votes are visible to other members of the relevant channel. Your display name is associated with your contributions."
+        "body": "Messages posted in channels, questions, answers and votes are visible to other members of the relevant channel. Your display name is associated with your contributions. Private messages are visible only to the two people in the conversation; they are deleted if either of them deletes their account."
       }
     },
     "aiProcessing": {
@@ -471,7 +478,7 @@
     },
     "cookies": {
       "heading": "Cookies",
-      "body": "MesPapiers uses two cookies, both strictly necessary for the service to function: mp_session keeps you logged in (30 days), and NEXT_LOCALE remembers your language (until the browser closes). We do not use any tracking, analytics or advertising cookies."
+      "body": "MesPapiers uses three cookies, all strictly necessary for the service to function: mp_session keeps you logged in (30 days), NEXT_LOCALE remembers your language (until the browser closes), and mp_oauth secures signing in with Google (10 minutes). We do not use any tracking, analytics or advertising cookies."
     },
     "contact": {
       "heading": "Contact",
@@ -480,7 +487,7 @@
   },
   "terms": {
     "title": "Terms of Service",
-    "lastUpdated": "Last updated: October 2026",
+    "lastUpdated": "Last updated: November 2026",
     "acceptance": {
       "heading": "Acceptance of terms",
       "body": "By creating an account or using MesPapiers, you accept these terms of service. If you do not accept these terms, please do not use the service."
@@ -505,7 +512,7 @@
     },
     "documents": {
       "heading": "Personal documents",
-      "body": "Your documents are private and accessible only by you. You are responsible for the documents you upload. Do not upload documents that you are not the legitimate holder of. Accepted formats are PDF, PNG or JPEG, with a maximum size of 10 MB."
+      "body": "Your documents are private and accessible only by you. You are responsible for the documents you upload. Do not upload documents that you are not the legitimate holder of. Accepted formats are PDF, PNG, JPEG or WebP, with a maximum size of 10 MB."
     },
     "ai": {
       "heading": "Artificial intelligence",
@@ -630,5 +637,64 @@
     },
     "unread": "{count, plural, one {# unread} other {# unread}}",
     "seen": "Seen"
+  },
+  "devUi": {
+    "title": "Component gallery",
+    "sections": {
+      "button": "Button",
+      "googleButton": "Google button",
+      "card": "Card",
+      "badge": "Badge",
+      "avatar": "Avatar",
+      "onlineDot": "Presence dot",
+      "input": "Input",
+      "emptyState": "Empty state",
+      "dialog": "Dialog",
+      "table": "Table"
+    },
+    "button": {
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "danger": "Danger",
+      "disabled": "Disabled"
+    },
+    "google": "Continue with Google",
+    "cardContent": "Card content",
+    "badge": {
+      "neutral": "Neutral",
+      "primary": "Primary",
+      "success": "Success",
+      "warning": "Warning",
+      "danger": "Danger"
+    },
+    "input": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "hint": "At least 8 characters",
+      "passwordError": "Password must be at least 8 characters"
+    },
+    "empty": {
+      "title": "No documents yet",
+      "description": "Upload your first document to get started.",
+      "action": "Add document"
+    },
+    "dialog": {
+      "open": "Open dialog",
+      "title": "Confirm action",
+      "body": "Are you sure you want to do this?",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "table": {
+      "document": "Document",
+      "status": "Status",
+      "residencePermit": "Residence permit",
+      "carInsurance": "Car insurance",
+      "expiringSoon": "Expiring soon",
+      "valid": "Valid"
+    }
   }
 }

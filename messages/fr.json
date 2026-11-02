@@ -51,7 +51,7 @@
     "pendingClassification": "{count, plural, one {# document en attente de classement automatique.} other {# documents en attente de classement automatique.}}",
     "importZone": {
       "cta": "Importer un document",
-      "hint": "PDF, JPEG ou PNG — 10 Mo maximum",
+      "hint": "PDF, JPEG, PNG ou WebP — 10 Mo maximum",
       "dropHere": "Déposez votre fichier ici"
     },
     "howItWorks": {
@@ -87,7 +87,7 @@
     "addDocument": "Ajouter un document",
     "empty": {
       "title": "Aucun document dans cette catégorie",
-      "description": "Les documents importés seront classés ici automatiquement dès que le classement sera actif."
+      "description": "Les documents importés sont classés ici automatiquement."
     },
     "fileKind": {
       "pdf": "PDF",
@@ -117,68 +117,68 @@
   },
   "channels": {
     "home": {
-      "title": "Channels",
-      "subtitle": "Pose des questions, partage tes astuces et aide les autres avec leurs papiers.",
-      "createTitle": "Créer un channel",
-      "createDesc": "Crée un espace pour parler d'un sujet.",
-      "joinTitle": "Rejoindre un channel",
-      "joinDesc": "Parcours les channels publics et rejoins-en un.",
+      "title": "Salons",
+      "subtitle": "Posez des questions, partagez vos astuces et aidez les autres avec leurs papiers.",
+      "createTitle": "Créer un salon",
+      "createDesc": "Créez un espace pour parler d'un sujet.",
+      "joinTitle": "Rejoindre un salon",
+      "joinDesc": "Parcourez les salons publics et rejoignez-en un.",
       "invitationsTitle": "Voir mes invitations",
-      "invitationsDesc": "Demande l'accès à un channel privé.",
-      "myChannels": "Mes channels",
-      "empty": "Tu n'appartiens à aucun channel.",
+      "invitationsDesc": "Consultez les invitations que vous avez reçues.",
+      "myChannels": "Mes salons",
+      "empty": "Vous n'appartenez à aucun salon.",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
-      "optionsAria": "Options du channel",
+      "optionsAria": "Options du salon",
       "invite": "Inviter",
       "edit": "Modifier",
       "delete": "Supprimer",
       "kick": "Retirer un membre",
       "leave": "Quitter",
       "requests": "Demandes d'adhésion",
-      "close": "Fermer le channel",
-      "reopen": "Rouvrir le channel",
-      "closed": "channel fermé",
-      "public": "channel public",
-      "private": "channel privé"
+      "close": "Fermer le salon",
+      "reopen": "Rouvrir le salon",
+      "closed": "salon fermé",
+      "public": "salon public",
+      "private": "salon privé"
     },
     "create": {
-      "title": "Créer un channel",
-      "subtitle": "Crée un espace où les gens posent des questions et s'entraident sur un sujet.",
-      "nameLabel": "Nom du channel",
+      "title": "Créer un salon",
+      "subtitle": "Créez un espace où les gens posent des questions et s'entraident sur un sujet.",
+      "nameLabel": "Nom du salon",
       "namePlaceholder": "ex. : Assurance auto",
       "descriptionLabel": "Description (facultatif)",
-      "descriptionPlaceholder": "De quoi parle ce channel ?",
+      "descriptionPlaceholder": "De quoi parle ce salon ?",
       "questionLabel": "Question (obligatoire)",
-      "questionPlaceholder": "Pose ta question en donnant le plus de détails possible pour obtenir des réponses claires.",
+      "questionPlaceholder": "Posez votre question en donnant le plus de détails possible pour obtenir des réponses claires.",
       "visibilityLabel": "Visibilité",
       "public": "Public",
       "private": "Privé",
       "cancel": "Annuler",
-      "submit": "Créer le channel",
+      "submit": "Créer le salon",
       "errors": {
         "nameEmpty": "Le nom est obligatoire.",
         "nameTooLong": "Le nom ne peut pas dépasser 100 caractères.",
-        "nameTaken": "Ce nom de channel est déjà pris.",
+        "nameTaken": "Ce nom de salon est déjà pris.",
         "descriptionTooLong": "La description ne peut pas dépasser 250 caractères.",
         "questionEmpty": "La question est obligatoire.",
         "questionTooLong": "La question ne peut pas dépasser 300 caractères.",
-        "visibilityMissing": "Choisis une visibilité : public ou privé."
+        "visibilityMissing": "Choisissez une visibilité : public ou privé."
       }
     },
     "join": {
-      "back": "← Retour aux channels",
-      "title": "Rejoindre un channel",
-      "subtitle": "Parcours les channels publics et rejoins-en un.",
-      "empty": "Aucun channel à rejoindre pour le moment.",
-      "noDescription": "Ce channel n'a pas de description.",
+      "back": "← Retour aux salons",
+      "title": "Rejoindre un salon",
+      "subtitle": "Parcourez les salons publics et rejoignez-en un.",
+      "empty": "Aucun salon à rejoindre pour le moment.",
+      "noDescription": "Ce salon n'a pas de description.",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "join": "Rejoindre",
       "requestJoin": "Demander à rejoindre",
       "pending": "Demande envoyée"
     },
     "detail": {
-      "back": "← Retour aux channels",
-      "leave": "Quitter le channel",
+      "back": "← Retour aux salons",
+      "leave": "Quitter le salon",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "friendsCount": "{count, plural, one {# ami} other {# amis}}",
       "authoredByPrefix": "par",
@@ -191,23 +191,23 @@
       "replyPlaceholder": "Écrire une réponse…",
       "replyAria": "Votre réponse",
       "send": "Envoyer",
-      "noQuestion": "Pas de question pour ce channel.",
+      "noQuestion": "Pas de question pour ce salon.",
       "editedAt": "modifié à {time}",
       "sentAt": "envoyé à {time}"
     },
     "edit": {
-      "title": "Modifier le channel",
-      "subtitle": "Change le nom, la description ou la question.",
-      "nameLabel": "Nom du channel",
+      "title": "Modifier le salon",
+      "subtitle": "Changez le nom, la description ou la question.",
+      "nameLabel": "Nom du salon",
       "descriptionLabel": "Description (optionnelle)",
       "questionLabel": "Question",
       "cancel": "Annuler",
       "save": "Enregistrer"
     },
     "invite": {
-      "back": "← Retour aux channels",
+      "back": "← Retour aux salons",
       "title": "Inviter dans {channel}",
-      "subtitle": "Choisis une personne à inviter.",
+      "subtitle": "Choisissez une personne à inviter.",
       "userAria": "Utilisateur à inviter",
       "chooseUser": "Choisir un utilisateur…",
       "submit": "Inviter"
@@ -218,19 +218,19 @@
       "save": "Enregistrer"
     },
     "invitations": {
-      "back": "← Retour aux channels",
+      "back": "← Retour aux salons",
       "title": "Mes invitations",
-      "empty": "Tu n'as aucune invitation pour le moment.",
-      "pending": "{count, plural, one {Tu as # invitation en attente.} other {Tu as # invitations en attente.}}",
-      "intro": "Un modérateur t'a invité à rejoindre son channel. Accepte pour devenir membre, ou refuse pour supprimer l'invitation.",
+      "empty": "Vous n'avez aucune invitation pour le moment.",
+      "pending": "{count, plural, one {Vous avez # invitation en attente.} other {Vous avez # invitations en attente.}}",
+      "intro": "Un modérateur vous a invité à rejoindre son salon. Acceptez pour devenir membre, ou refusez pour supprimer l'invitation.",
       "description": "description : {description}",
-      "noDescription": "Ce channel n'a pas de description.",
-      "membersCount": "Nombre de membres du channel : {count}",
+      "noDescription": "Ce salon n'a pas de description.",
+      "membersCount": "Nombre de membres du salon : {count}",
       "accept": "Accepter",
       "decline": "Refuser"
     },
     "kick": {
-      "back": "← Retour aux channels",
+      "back": "← Retour aux salons",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "kick": "Retirer",
       "member": "membre",
@@ -239,18 +239,18 @@
       "demote": "Repasser membre"
     },
     "delete": {
-      "back": "← Retour aux channels",
-      "title": "Supprimer le channel « {channel} » ?",
-      "warning": "{count, plural, one {Ce channel compte # membre. La suppression est définitive et effacera tous les messages.} other {Ce channel compte # membres. La suppression est définitive et effacera tous les messages.}}",
+      "back": "← Retour aux salons",
+      "title": "Supprimer le salon « {channel} » ?",
+      "warning": "{count, plural, one {Ce salon compte # membre. La suppression est définitive et effacera tous les messages.} other {Ce salon compte # membres. La suppression est définitive et effacera tous les messages.}}",
       "reminder": "Cette action est irréversible.",
       "cancel": "Annuler",
-      "submit": "Supprimer le channel"
+      "submit": "Supprimer le salon"
     },
     "requests": {
-      "back": "← Retour au channel",
+      "back": "← Retour au salon",
       "title": "Demandes d'adhésion",
-      "subtitle": "Les personnes qui veulent rejoindre ce channel privé.",
-      "empty": "Tu n'as aucune demande.",
+      "subtitle": "Les personnes qui veulent rejoindre ce salon privé.",
+      "empty": "Vous n'avez aucune demande.",
       "accept": "Accepter",
       "reject": "Refuser"
     }
@@ -394,7 +394,14 @@
     "category": "Catégorie",
     "size": "Taille",
     "type": "Type",
-    "deadline": "Type de deadline",
+    "image": "Image",
+    "deadline": "Type d'échéance",
+    "deadlineTypes": {
+      "HARD": "Expiration légale",
+      "SOFT": "Renouvellement tacite",
+      "PERIODIC": "Déclaration périodique",
+      "NONE": "Sans échéance"
+    },
     "expiry": "Date d'échéance",
     "extractedFields": "Champs extraits",
     "fields": {
@@ -414,7 +421,7 @@
   },
   "privacy": {
     "title": "Politique de confidentialité",
-    "lastUpdated": "Dernière mise à jour : octobre 2026",
+    "lastUpdated": "Dernière mise à jour : novembre 2026",
     "intro": {
       "heading": "Introduction",
       "body": "MesPapiers est un service conçu pour vous aider dans vos démarches administratives françaises. La présente politique décrit quelles données personnelles nous collectons, comment nous les utilisons et quels sont vos droits. Le service est hébergé en France et soumis au Règlement Général sur la Protection des Données (RGPD)."
@@ -427,11 +434,11 @@
       },
       "documents": {
         "heading": "Documents",
-        "body": "Vous pouvez importer des documents (PDF, PNG, JPEG) dans votre coffre-fort personnel. Les fichiers sont stockés dans la base de données du service. Seul vous, en tant que propriétaire, pouvez accéder à vos documents : même les administrateurs ne peuvent pas les consulter."
+        "body": "Vous pouvez importer des documents (PDF, PNG, JPEG, WebP) dans votre coffre-fort personnel. Les fichiers sont stockés dans la base de données du service. Seul vous, en tant que propriétaire, pouvez accéder à vos documents : même les administrateurs ne peuvent pas les consulter."
       },
       "community": {
         "heading": "Contenus communautaires",
-        "body": "Les messages publiés dans les channels, les questions, les réponses et les votes sont visibles par les autres membres du channel concerné. Votre nom d'affichage est associé à vos contributions."
+        "body": "Les messages publiés dans les salons, les questions, les réponses et les votes sont visibles par les autres membres du salon concerné. Votre nom d'affichage est associé à vos contributions. Les messages privés ne sont visibles que par les deux participants à la conversation ; ils sont supprimés si l'un des deux supprime son compte."
       }
     },
     "aiProcessing": {
@@ -449,7 +456,7 @@
       "items": {
         "account": "Données de compte : conservées jusqu'à la suppression de votre compte.",
         "documents": "Documents : conservés jusqu'à leur suppression par vos soins ou la suppression de votre compte.",
-        "community": "Contenus communautaires : conservés tant que le channel existe. En cas de suppression de votre compte, vos messages sont anonymisés.",
+        "community": "Contenus communautaires : conservés tant que le salon existe. En cas de suppression de votre compte, vos messages sont anonymisés.",
         "sessions": "Sessions de connexion : expiration automatique après 30 jours."
       }
     },
@@ -471,7 +478,7 @@
     },
     "cookies": {
       "heading": "Cookies",
-      "body": "MesPapiers utilise deux cookies, tous deux strictement nécessaires au fonctionnement du service : mp_session maintient votre connexion (30 jours) et NEXT_LOCALE mémorise votre langue (jusqu'à la fermeture du navigateur). Nous n'utilisons aucun cookie de suivi, d'analyse ou de publicité."
+      "body": "MesPapiers utilise trois cookies, tous strictement nécessaires au fonctionnement du service : mp_session maintient votre connexion (30 jours), NEXT_LOCALE mémorise votre langue (jusqu'à la fermeture du navigateur) et mp_oauth sécurise la connexion avec Google (10 minutes). Nous n'utilisons aucun cookie de suivi, d'analyse ou de publicité."
     },
     "contact": {
       "heading": "Contact",
@@ -480,7 +487,7 @@
   },
   "terms": {
     "title": "Conditions générales d'utilisation",
-    "lastUpdated": "Dernière mise à jour : octobre 2026",
+    "lastUpdated": "Dernière mise à jour : novembre 2026",
     "acceptance": {
       "heading": "Acceptation des conditions",
       "body": "En créant un compte ou en utilisant MesPapiers, vous acceptez les présentes conditions générales d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser le service."
@@ -491,7 +498,7 @@
       "items": {
         "vault": "Un coffre-fort numérique personnel pour stocker et organiser vos documents administratifs (carte d'identité, assurances, etc.).",
         "ai": "Un assistant basé sur l'intelligence artificielle pour analyser vos documents et répondre à vos questions sur les démarches.",
-        "community": "Un espace communautaire (channels, questions-réponses) pour échanger avec d'autres utilisateurs sur les démarches administratives."
+        "community": "Un espace communautaire (salons, questions-réponses) pour échanger avec d'autres utilisateurs sur les démarches administratives."
       }
     },
     "accounts": {
@@ -505,7 +512,7 @@
     },
     "documents": {
       "heading": "Documents personnels",
-      "body": "Vos documents sont privés et accessibles uniquement par vous. Vous êtes responsable des documents que vous importez. N'importez pas de documents dont vous n'êtes pas le détenteur légitime. Les documents acceptés sont au format PDF, PNG ou JPEG, d'une taille maximale de 10 Mo."
+      "body": "Vos documents sont privés et accessibles uniquement par vous. Vous êtes responsable des documents que vous importez. N'importez pas de documents dont vous n'êtes pas le détenteur légitime. Les documents acceptés sont au format PDF, PNG, JPEG ou WebP, d'une taille maximale de 10 Mo."
     },
     "ai": {
       "heading": "Intelligence artificielle",
@@ -513,7 +520,7 @@
     },
     "community": {
       "heading": "Règles de la communauté",
-      "body": "En participant aux channels et discussions, vous vous engagez à :",
+      "body": "En participant aux salons et discussions, vous vous engagez à :",
       "items": {
         "respectful": "Rester respectueux envers les autres utilisateurs.",
         "noSpam": "Ne pas publier de contenu promotionnel ou de spam.",
@@ -569,7 +576,7 @@
     "exportDesc": "Téléchargez une copie de vos données personnelles (profil, documents, messages et activité) dans un fichier ZIP (données en JSON + vos fichiers originaux).",
     "exportButton": "Télécharger mes données",
     "deleteTitle": "Supprimer mon compte",
-    "deleteDesc": "Votre compte et vos documents seront effacés définitivement. Vos réponses dans les channels resteront, mais sans votre nom.",
+    "deleteDesc": "Votre compte et vos documents seront effacés définitivement. Vos réponses dans les salons resteront, mais sans votre nom.",
     "passwordLabel": "Mot de passe",
     "emailLabel": "Votre adresse e-mail, pour confirmer",
     "deleteButton": "Supprimer mon compte",
@@ -581,7 +588,7 @@
     "exportMailSubject": "MesPapiers – Export de vos données",
     "exportMailBody": "Bonjour,\n\nVos données personnelles ont été exportées.\n\nSi ce n'est pas vous, changez votre mot de passe.\n\nL'équipe MesPapiers",
     "deleteMailSubject": "MesPapiers – Votre compte a été supprimé",
-    "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement.\n\nVos réponses dans les channels restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
+    "deleteMailBody": "Bonjour,\n\nVotre compte MesPapiers et vos documents ont été supprimés définitivement.\n\nVos réponses dans les salons restent visibles, mais sans votre nom.\n\nL'équipe MesPapiers"
   },
   "errors": {
     "notFound": {
@@ -602,7 +609,7 @@
     "markAllRead": "Tout marquer comme lu",
     "unreadLabel": "Non lue",
     "deletedUser": "Un utilisateur supprimé",
-    "deletedChannel": "un channel supprimé",
+    "deletedChannel": "un salon supprimé",
     "friendRequest": "{name} vous a envoyé une demande d'ami.",
     "reply": "{name} a répondu à votre question dans {channel}.",
     "message": "{name} vous a envoyé un message.",
@@ -630,5 +637,64 @@
     },
     "unread": "{count, plural, one {# non lu} other {# non lus}}",
     "seen": "Vu"
+  },
+  "devUi": {
+    "title": "Galerie de composants",
+    "sections": {
+      "button": "Bouton",
+      "googleButton": "Bouton Google",
+      "card": "Carte",
+      "badge": "Badge",
+      "avatar": "Avatar",
+      "onlineDot": "Pastille de présence",
+      "input": "Champ de saisie",
+      "emptyState": "État vide",
+      "dialog": "Boîte de dialogue",
+      "table": "Tableau"
+    },
+    "button": {
+      "primary": "Principal",
+      "secondary": "Secondaire",
+      "danger": "Danger",
+      "disabled": "Désactivé"
+    },
+    "google": "Continuer avec Google",
+    "cardContent": "Contenu de la carte",
+    "badge": {
+      "neutral": "Neutre",
+      "primary": "Principal",
+      "success": "Succès",
+      "warning": "Avertissement",
+      "danger": "Danger"
+    },
+    "input": {
+      "email": "E-mail",
+      "emailPlaceholder": "vous@exemple.fr",
+      "password": "Mot de passe",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
+      "hint": "8 caractères minimum",
+      "passwordError": "Le mot de passe doit contenir au moins 8 caractères"
+    },
+    "empty": {
+      "title": "Aucun document pour l'instant",
+      "description": "Ajoutez votre premier document pour commencer.",
+      "action": "Ajouter un document"
+    },
+    "dialog": {
+      "open": "Ouvrir la boîte de dialogue",
+      "title": "Confirmer l'action",
+      "body": "Voulez-vous vraiment faire cela ?",
+      "cancel": "Annuler",
+      "confirm": "Confirmer"
+    },
+    "table": {
+      "document": "Document",
+      "status": "Statut",
+      "residencePermit": "Titre de séjour",
+      "carInsurance": "Assurance auto",
+      "expiringSoon": "Expire bientôt",
+      "valid": "Valide"
+    }
   }
 }
