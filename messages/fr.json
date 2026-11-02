@@ -84,14 +84,14 @@
   "channels": {
     "home": {
       "title": "Channels",
-      "subtitle": "Pose des questions, partage tes astuces et aide les autres avec leurs papiers.",
+      "subtitle": "Posez des questions, partagez vos astuces et aidez les autres avec leurs papiers.",
       "createTitle": "Créer un channel",
-      "createDesc": "Crée un espace pour parler d'un sujet.",
+      "createDesc": "Créez un espace pour parler d'un sujet.",
       "joinTitle": "Rejoindre un channel",
-      "joinDesc": "Parcours les channels publics et rejoins-en un.",
+      "joinDesc": "Parcourez les channels publics et rejoignez-en un.",
       "invitationsTitle": "Voir mes invitations",
-      "invitationsDesc": "Demande l'accès à un channel privé.",
-      "empty": "Tu n'appartiens à aucun channel.",
+      "invitationsDesc": "Demandez l'accès à un channel privé.",
+      "empty": "Vous n'appartenez à aucun channel.",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
       "optionsAria": "Options du channel",
       "invite": "Inviter",
@@ -108,13 +108,13 @@
     },
     "create": {
       "title": "Créer un channel",
-      "subtitle": "Crée un espace où les gens posent des questions et s'entraident sur un sujet.",
+      "subtitle": "Créez un espace où les gens posent des questions et s'entraident sur un sujet.",
       "nameLabel": "Nom du channel",
       "namePlaceholder": "ex. : Assurance auto",
       "descriptionLabel": "Description (facultatif)",
       "descriptionPlaceholder": "De quoi parle ce channel ?",
       "questionLabel": "Question (obligatoire)",
-      "questionPlaceholder": "Pose ta question en donnant le plus de détails possible pour obtenir des réponses claires.",
+      "questionPlaceholder": "Posez votre question en donnant le plus de détails possible pour obtenir des réponses claires.",
       "visibilityLabel": "Visibilité",
       "visibilityPublic": "Public",
       "visibilityPrivate": "Privé",
@@ -127,13 +127,13 @@
         "descriptionTooLong": "La description ne peut pas dépasser 250 caractères.",
         "questionEmpty": "La question est obligatoire.",
         "questionTooLong": "La question ne peut pas dépasser 300 caractères.",
-        "visibilityMissing": "Choisis une visibilité : public ou privé."
+        "visibilityMissing": "Choisissez une visibilité : public ou privé."
       }
     },
     "join": {
       "back": "← Retour aux channels",
       "title": "Rejoindre un channel",
-      "subtitle": "Parcours les channels publics et rejoins-en un.",
+      "subtitle": "Parcourez les channels publics et rejoignez-en un.",
       "empty": "Aucun channel à rejoindre pour le moment.",
       "noDescription": "Ce channel n'a pas de description.",
       "membersCount": "{count, plural, one {# membre} other {# membres}}",
@@ -159,7 +159,7 @@
     },
     "edit": {
       "title": "Modifier le channel",
-      "subtitle": "Change le nom, la description ou la question.",
+      "subtitle": "Changez le nom, la description ou la question.",
       "nameLabel": "Nom du channel",
       "descriptionLabel": "Description (optionnelle)",
       "questionLabel": "Question",
@@ -169,7 +169,7 @@
     "invite": {
       "back": "← Retour aux channels",
       "title": "Inviter dans {channel}",
-      "subtitle": "Choisis une personne à inviter.",
+      "subtitle": "Choisissez une personne à inviter.",
       "userAria": "Utilisateur à inviter",
       "chooseUser": "Choisir un utilisateur…",
       "submit": "Inviter"
@@ -182,9 +182,9 @@
     "invitations": {
       "back": "← Retour aux channels",
       "title": "Mes invitations",
-      "empty": "Tu n'as aucune invitation pour le moment.",
-      "pending": "{count, plural, one {Tu as # invitation en attente.} other {Tu as # invitations en attente.}}",
-      "intro": "Un modérateur t'a invité à rejoindre son channel. Accepte pour devenir membre, ou refuse pour supprimer l'invitation.",
+      "empty": "Vous n'avez aucune invitation pour le moment.",
+      "pending": "{count, plural, one {Vous avez # invitation en attente.} other {Vous avez # invitations en attente.}}",
+      "intro": "Un modérateur vous a invité à rejoindre son channel. Acceptez pour devenir membre, ou refusez pour supprimer l'invitation.",
       "description": "description : {description}",
       "noDescription": "Ce channel n'a pas de description.",
       "membersCount": "Nombre de membres du channel : {count}",
@@ -212,7 +212,7 @@
       "back": "← Retour au channel",
       "title": "Demandes d'adhésion",
       "subtitle": "Les personnes qui veulent rejoindre ce channel privé.",
-      "empty": "Tu n'as aucune demande.",
+      "empty": "Vous n'avez aucune demande.",
       "accept": "Accepter",
       "reject": "Refuser"
     }
