@@ -100,4 +100,19 @@ describe("sendMessageAction", () => {
 
     expect(publish).not.toHaveBeenCalled();
   });
+
+  it("rings the recipient's bell", async () => {
+    await sendMessageAction({}, form({ userId: bob, content: "Salut" }));
+
+    const [only] = await prisma.notification.findMany({ where: { recipientId: bob } });
+    expect(only?.type).toBe("MESSAGE");
+    expect(JSON.parse(only!.content)).toEqual({ userId: alice });
+  });
+
+  it("rings no bell when the message is refused", async () => {
+    await sendMessageAction({}, form({ userId: carol, content: "Salut" }));
+    await sendMessageAction({}, form({ userId: bob, content: "  " }));
+
+    expect(await prisma.notification.count({ where: { recipientId: { in: [bob, carol] } } })).toBe(0);
+  });
 });

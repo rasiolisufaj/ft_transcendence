@@ -29,6 +29,10 @@ export function isEventOn(message: ServerMessage, topic: string): boolean {
   return message.type === "event" && message.topic === topic;
 }
 
+export function isNewNotification(message: ServerMessage): boolean {
+  return message.type === "event" && message.event.type === "notification.created";
+}
+
 export function isNewMessage(message: ServerMessage, from?: string): boolean {
   return (
     message.type === "event" &&

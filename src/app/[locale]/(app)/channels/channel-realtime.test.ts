@@ -94,6 +94,63 @@ describe("answers go out live", () => {
   });
 });
 
+describe("the reply notification", () => {
+  const notificationsOf = (userId: string) => prisma.notification.findMany({ where: { recipientId: userId } });
+
+  async function channelAskedBy(author: string, member: string) {
+    const c = await newChannel({ [author]: "MEMBER", [member]: "MEMBER" });
+    await prisma.thread.update({ where: { id: c.threadId }, data: { userId: author } });
+    return c;
+  }
+
+  it("tells the author of the question", async () => {
+    const author = await newUser();
+    const member = await newUser();
+    const c = await channelAskedBy(author.id, member.id);
+    await signInAs(member.id);
+
+    await createAnswer(form({ threadId: c.threadId, content: "Bonjour" }));
+
+    const [only] = await notificationsOf(author.id);
+    expect(only?.type).toBe("REPLY");
+    expect(JSON.parse(only!.content)).toEqual({ userId: member.id, channelId: c.id });
+  });
+
+  it("tells no one when the author answers their own question", async () => {
+    const author = await newUser();
+    const member = await newUser();
+    const c = await channelAskedBy(author.id, member.id);
+    await signInAs(author.id);
+
+    await createAnswer(form({ threadId: c.threadId, content: "Bonjour" }));
+
+    expect(await notificationsOf(author.id)).toHaveLength(0);
+  });
+
+  it("tells no one the other members", async () => {
+    const author = await newUser();
+    const member = await newUser();
+    const other = await newUser();
+    const c = await channelAskedBy(author.id, member.id);
+    await prisma.channelMember.create({ data: { channelId: c.id, userId: other.id } });
+    await signInAs(member.id);
+
+    await createAnswer(form({ threadId: c.threadId, content: "Bonjour" }));
+
+    expect(await notificationsOf(other.id)).toHaveLength(0);
+  });
+
+  it("still saves the answer when the author's account is gone", async () => {
+    const member = await newUser();
+    const c = await newChannel({ [member.id]: "MEMBER" });
+    await signInAs(member.id);
+
+    await createAnswer(form({ threadId: c.threadId, content: "Bonjour" }));
+
+    expect(await prisma.answer.count({ where: { threadId: c.threadId } })).toBe(1);
+  });
+});
+
 describe("member.left goes out live", () => {
   it("is published when a moderator kicks a member", async () => {
     const moderator = await newUser();

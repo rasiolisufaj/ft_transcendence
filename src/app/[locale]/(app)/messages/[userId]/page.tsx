@@ -6,8 +6,10 @@ import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { areFriends, listMessages, markRead, readTimes, seenMessageId } from "@/lib/messages/messages";
+import { markMessagesRead } from "@/lib/notifications/notifications";
 import { MessagesLive } from "../MessagesLive";
 import { MessageForm } from "./MessageForm";
+import { RefreshOnce } from "./RefreshOnce";
 
 export default async function ConversationPage({ params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params;
@@ -24,6 +26,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ u
     notFound();
   }
   await markRead(user.id, other.id);
+  const cleared = await markMessagesRead(user.id, other.id);
   const [messages, canWrite, { theirs }] = await Promise.all([
     listMessages(user.id, other.id),
     areFriends(user.id, other.id),
@@ -34,6 +37,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ u
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <MessagesLive from={other.id} />
+      {cleared > 0 ? <RefreshOnce /> : null}
       <div>
         <Link
           href="/messages"

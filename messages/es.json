@@ -13,6 +13,7 @@
     "account": "Cuenta",
     "myData": "Mis datos",
     "profile": "Mi perfil",
+    "notifications": "{count, plural, =0 {Notificaciones} one {Notificaciones, # sin leer} other {Notificaciones, # sin leer}}",
     "messages": "Mensajes"
   },
   "localeSwitcher": {
@@ -547,6 +548,20 @@
       "retry": "Reintentar",
       "backHome": "Volver al inicio"
     }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Aún no hay notificaciones.",
+    "markAllRead": "Marcar todo como leído",
+    "unreadLabel": "Sin leer",
+    "deletedUser": "Un usuario eliminado",
+    "deletedChannel": "un canal eliminado",
+    "friendRequest": "{name} te ha enviado una solicitud de amistad.",
+    "reply": "{name} ha respondido a tu pregunta en {channel}.",
+    "message": "{name} te ha enviado un mensaje.",
+    "other": "Nueva notificación.",
+    "nothingNew": "Nada nuevo por el momento.",
+    "seeAll": "Ver todo"
   },
   "chat": {
     "title": "Mensajes",

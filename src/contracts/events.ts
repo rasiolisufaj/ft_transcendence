@@ -61,6 +61,13 @@ type MemberMuted = {
   at: string;
 };
 
+type NotificationCreated = {
+  type: "notification.created";
+  notificationId: number;
+  recipientId: string; // the bell of this user only
+  at: string;
+};
+
 type MessageCreated = {
   type: "message.created";
   conversationId: number;
@@ -79,6 +86,7 @@ export type RealtimeEvent =
   | MemberLeft
   | MemberRoleChanged
   | MemberMuted
+  | NotificationCreated
   | MessageCreated;
 
 // all member of the channel
@@ -88,7 +96,7 @@ export const channelTopic = (channelId: number) => `channel:${channelId}`;
 export const userTopic = (userId: string) => `user:${userId}`;
 
 export function topicFor(event: RealtimeEvent): string {
-  if (event.type === "message.created") {
+  if (event.type === "notification.created" || event.type === "message.created") {
     return userTopic(event.recipientId);
   }
   return channelTopic(event.channelId);
