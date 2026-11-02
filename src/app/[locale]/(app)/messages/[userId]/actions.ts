@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { sendMessage } from "@/lib/messages/messages";
+import { notify } from "@/lib/notifications/notifications";
 import { publish } from "@/lib/realtime/publish";
 import { sendMessageSchema, type MessageErrorKey, type MessageFormState } from "@/lib/messages/schemas";
 
@@ -29,6 +30,7 @@ export async function sendMessageAction(_prev: MessageFormState, formData: FormD
     recipientId: parsed.data.userId,
     at: result.message.createdAt.toISOString(),
   });
+  await notify(parsed.data.userId, "MESSAGE", { userId: user.id });
 
   revalidatePath("/[locale]/(app)/messages", "layout");
   return {};

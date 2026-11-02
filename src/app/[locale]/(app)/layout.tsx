@@ -1,4 +1,3 @@
-import { RealtimeProvider } from "@/components/RealtimeProvider";
 import { requireUser } from "@/lib/auth/session";
 
 // Every route in this group is behind a session. requireUser() redirects to
@@ -8,5 +7,5 @@ import { requireUser } from "@/lib/auth/session";
 // private data checks the session itself — see §C-4.
 export default async function AppLayout({ children }: LayoutProps<"/[locale]">) {
   await requireUser();
-  return <RealtimeProvider>{children}</RealtimeProvider>;
+  return children;
 }

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import {
   acceptRequest,
@@ -12,6 +12,8 @@ import {
   sendRequest,
   unblock,
 } from "@/lib/friends/friendships";
+
+vi.mock("@/lib/realtime/publish", () => ({ publish: vi.fn() }));
 
 // Real Postgres from .env: `db` must be running.
 let alice: string;
@@ -83,6 +85,39 @@ describe("sendRequest", () => {
     const rows = await rowsBetween(alice, bob);
     expect(rows).toHaveLength(1);
     expect(rows[0]?.status).toBe("ACCEPTED");
+  });
+});
+
+describe("the friend request notification", () => {
+  const notificationsOf = (userId: string) => prisma.notification.findMany({ where: { recipientId: userId } });
+
+  it("tells the receiver about a new request", async () => {
+    await sendRequest(alice, bob);
+
+    const [only] = await notificationsOf(bob);
+    expect(only?.type).toBe("FRIEND_REQUEST");
+    expect(JSON.parse(only!.content)).toEqual({ userId: alice });
+  });
+
+  it("tells them once on a double click", async () => {
+    await sendRequest(alice, bob);
+    await sendRequest(alice, bob);
+
+    expect(await notificationsOf(bob)).toHaveLength(1);
+  });
+
+  it("tells them once when two clicks land together", async () => {
+    await Promise.all([sendRequest(alice, bob), sendRequest(alice, bob)]);
+
+    expect(await notificationsOf(bob)).toHaveLength(1);
+  });
+
+  it("tells no one when a block refuses the request", async () => {
+    await block(bob, alice);
+
+    await sendRequest(alice, bob);
+
+    expect(await notificationsOf(bob)).toHaveLength(0);
   });
 });
 

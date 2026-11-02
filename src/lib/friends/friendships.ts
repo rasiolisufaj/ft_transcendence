@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { notify } from "@/lib/notifications/notifications";
 
 export type FriendError = "self" | "notFound" | "blocked" | "notPending";
 export type Result = { ok: true } | { ok: false; error: FriendError };
@@ -55,7 +56,9 @@ export async function sendRequest(me: string, other: string): Promise<Result> {
     if (code === "P2003") return fail("notFound");
     // Simultaneous clicks: the unique index refused the 2nd row.
     if (code !== "P2002") throw error;
+    return ok;
   }
+  await notify(other, "FRIEND_REQUEST", { userId: me });
   return ok;
 }
 

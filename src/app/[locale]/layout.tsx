@@ -5,7 +5,9 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
+import { RealtimeProvider } from "@/components/RealtimeProvider";
 import { routing } from "@/i18n/routing";
+import { getCurrentUser } from "@/lib/auth/session";
 import { enableStaticRendering } from "@/i18n/static";
 import "../globals.css";
 
@@ -41,6 +43,7 @@ export default async function LocaleLayout({
     notFound();
   }
   enableStaticRendering(locale);
+  const ctx = await getCurrentUser();
 
   return (
     <html
@@ -49,11 +52,14 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
         <NextIntlClientProvider>
-          <Nav />
-          <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
-            {children}
-          </main>
-          <Footer />
+          {/* Above the nav too: the bell listens to it. */}
+          <RealtimeProvider signedIn={ctx !== null}>
+            <Nav ctx={ctx} />
+            <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
+              {children}
+            </main>
+            <Footer />
+          </RealtimeProvider>
         </NextIntlClientProvider>
       </body>
     </html>
