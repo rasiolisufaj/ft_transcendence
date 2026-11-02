@@ -84,14 +84,14 @@
   "channels": {
     "home": {
       "title": "Canales",
-      "subtitle": "Haz preguntas, comparte consejos y ayuda a los demás con sus trámites.",
+      "subtitle": "Haga preguntas, comparta consejos y ayude a los demás con sus trámites.",
       "createTitle": "Crear un canal",
-      "createDesc": "Crea un espacio para hablar de un tema.",
+      "createDesc": "Cree un espacio para hablar de un tema.",
       "joinTitle": "Unirse a un canal",
-      "joinDesc": "Explora los canales públicos y únete a uno.",
+      "joinDesc": "Explore los canales públicos y únase a uno.",
       "invitationsTitle": "Ver mis invitaciones",
-      "invitationsDesc": "Solicita acceso a un canal privado.",
-      "empty": "No perteneces a ningún canal.",
+      "invitationsDesc": "Solicite acceso a un canal privado.",
+      "empty": "No pertenece a ningún canal.",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
       "optionsAria": "Opciones del canal",
       "invite": "Invitar",
@@ -108,13 +108,13 @@
     },
     "create": {
       "title": "Crear un canal",
-      "subtitle": "Crea un espacio donde la gente pueda hacer preguntas y ayudarse mutuamente sobre un tema.",
+      "subtitle": "Cree un espacio donde la gente pueda hacer preguntas y ayudarse mutuamente sobre un tema.",
       "nameLabel": "Nombre del canal",
       "namePlaceholder": "p. ej.: Seguro de coche",
       "descriptionLabel": "Descripción (opcional)",
       "descriptionPlaceholder": "¿De qué trata este canal?",
       "questionLabel": "Pregunta (obligatoria)",
-      "questionPlaceholder": "Haz tu pregunta con el mayor detalle posible para obtener respuestas claras.",
+      "questionPlaceholder": "Haga su pregunta con el mayor detalle posible para obtener respuestas claras.",
       "visibilityLabel": "Visibilidad",
       "visibilityPublic": "Público",
       "visibilityPrivate": "Privado",
@@ -127,13 +127,13 @@
         "descriptionTooLong": "La descripción no puede superar los 250 caracteres.",
         "questionEmpty": "La pregunta es obligatoria.",
         "questionTooLong": "La pregunta no puede superar los 300 caracteres.",
-        "visibilityMissing": "Elige una visibilidad: público o privado."
+        "visibilityMissing": "Elija una visibilidad: público o privado."
       }
     },
     "join": {
       "back": "← Volver a los canales",
       "title": "Unirse a un canal",
-      "subtitle": "Explora los canales públicos y únete a uno.",
+      "subtitle": "Explore los canales públicos y únase a uno.",
       "empty": "No hay ningún canal al que unirse por ahora.",
       "noDescription": "Este canal no tiene descripción.",
       "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
@@ -150,8 +150,8 @@
       "noReplies": "Nadie ha respondido todavía.",
       "editReplyAria": "Modificar la respuesta",
       "deleteReplyAria": "Eliminar la respuesta",
-      "replyPlaceholder": "Escribe una respuesta…",
-      "replyAria": "Tu respuesta",
+      "replyPlaceholder": "Escriba una respuesta…",
+      "replyAria": "Su respuesta",
       "send": "Enviar",
       "noQuestion": "No hay pregunta en este canal.",
       "editedAt": "editado a las {time}",
@@ -159,7 +159,7 @@
     },
     "edit": {
       "title": "Modificar el canal",
-      "subtitle": "Cambia el nombre, la descripción o la pregunta.",
+      "subtitle": "Cambie el nombre, la descripción o la pregunta.",
       "nameLabel": "Nombre del canal",
       "descriptionLabel": "Descripción (opcional)",
       "questionLabel": "Pregunta",
@@ -169,7 +169,7 @@
     "invite": {
       "back": "← Volver a los canales",
       "title": "Invitar a {channel}",
-      "subtitle": "Elige a alguien para invitar.",
+      "subtitle": "Elija a alguien para invitar.",
       "userAria": "Usuario a invitar",
       "chooseUser": "Elegir un usuario…",
       "submit": "Invitar"
@@ -182,9 +182,9 @@
     "invitations": {
       "back": "← Volver a los canales",
       "title": "Mis invitaciones",
-      "empty": "No tienes invitaciones pendientes por ahora.",
-      "pending": "{count, plural, one {Tienes # invitación pendiente.} other {Tienes # invitaciones pendientes.}}",
-      "intro": "Un moderador te ha invitado a unirte a su canal. Acepta para convertirte en miembro o rechaza para eliminar la invitación.",
+      "empty": "No tiene invitaciones pendientes por ahora.",
+      "pending": "{count, plural, one {Tiene # invitación pendiente.} other {Tiene # invitaciones pendientes.}}",
+      "intro": "Un moderador le ha invitado a unirse a su canal. Acepte para convertirse en miembro o rechace para eliminar la invitación.",
       "description": "descripción: {description}",
       "noDescription": "Este canal no tiene descripción.",
       "membersCount": "Número de miembros del canal: {count}",
@@ -212,7 +212,7 @@
       "back": "← Volver al canal",
       "title": "Solicitudes de acceso",
       "subtitle": "Personas que quieren unirse a este canal privado.",
-      "empty": "No tienes ninguna solicitud.",
+      "empty": "No tiene ninguna solicitud.",
       "accept": "Aceptar",
       "reject": "Rechazar"
     }
@@ -274,7 +274,7 @@
     "demote": "Quitar admin",
     "delete": "Eliminar",
     "confirmDelete": "Confirmar",
-    "you": "Tú",
+    "you": "Usted",
     "empty": "Ningún usuario coincide con «{q}»."
   },
   "friends": {
@@ -338,9 +338,9 @@
       "saved": "Foto guardada."
     },
     "errors": {
-      "avatarMissing": "Elige una imagen.",
+      "avatarMissing": "Elija una imagen.",
       "avatarTooBig": "La imagen no puede superar 2 MB.",
-      "avatarType": "Elige una imagen PNG, JPEG o WebP."
+      "avatarType": "Elija una imagen PNG, JPEG o WebP."
     }
   },
   "documentDetail": {
@@ -563,28 +563,28 @@
     "unreadLabel": "Sin leer",
     "deletedUser": "Un usuario eliminado",
     "deletedChannel": "un canal eliminado",
-    "friendRequest": "{name} te ha enviado una solicitud de amistad.",
-    "reply": "{name} ha respondido a tu pregunta en {channel}.",
-    "message": "{name} te ha enviado un mensaje.",
+    "friendRequest": "{name} le ha enviado una solicitud de amistad.",
+    "reply": "{name} ha respondido a su pregunta en {channel}.",
+    "message": "{name} le ha enviado un mensaje.",
     "other": "Nueva notificación.",
     "nothingNew": "Nada nuevo por el momento.",
     "seeAll": "Ver todo"
   },
   "chat": {
     "title": "Mensajes",
-    "subtitle": "Tus conversaciones privadas con tus amigos.",
-    "empty": "Aún no hay conversaciones. Escribe a un amigo desde la página Amigos.",
-    "youSaid": "Tú: {content}",
+    "subtitle": "Sus conversaciones privadas con sus amigos.",
+    "empty": "Aún no hay conversaciones. Escriba a un amigo desde la página Amigos.",
+    "youSaid": "Usted: {content}",
     "back": "Todas las conversaciones",
     "with": "Conversación con {name}",
     "noMessages": "Aún no hay mensajes.",
-    "label": "Tu mensaje",
+    "label": "Su mensaje",
     "submit": "Enviar",
     "pending": "Enviando…",
-    "cannotWrite": "Solo puedes escribir a tus amigos.",
+    "cannotWrite": "Solo puede escribir a sus amigos.",
     "errors": {
-      "self": "No puedes escribirte a ti mismo.",
-      "notFriends": "Solo puedes escribir a tus amigos.",
+      "self": "No puede escribirse a sí mismo.",
+      "notFriends": "Solo puede escribir a sus amigos.",
       "empty": "El mensaje está vacío.",
       "tooLong": "El mensaje supera los 1000 caracteres."
     },
@@ -620,19 +620,19 @@
     },
     "input": {
       "email": "Correo electrónico",
-      "emailPlaceholder": "tu@ejemplo.es",
+      "emailPlaceholder": "nombre@ejemplo.es",
       "password": "Contraseña",
       "passwordError": "La contraseña debe tener al menos 8 caracteres"
     },
     "empty": {
       "title": "Aún no hay documentos",
-      "description": "Añade tu primer documento para empezar.",
+      "description": "Añada su primer documento para empezar.",
       "action": "Añadir documento"
     },
     "dialog": {
       "open": "Abrir cuadro de diálogo",
       "title": "Confirmar la acción",
-      "body": "¿Seguro que quieres hacer esto?",
+      "body": "¿Seguro que quiere hacer esto?",
       "cancel": "Cancelar",
       "confirm": "Confirmar"
     },
