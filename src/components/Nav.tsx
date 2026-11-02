@@ -6,23 +6,35 @@ import { unreadCount } from "@/lib/notifications/notifications";
 import { notificationViews } from "@/lib/notifications/views";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { MobileMenu } from "./MobileMenu";
+import { NavLinks } from "./NavLinks";
 import { NotificationBell } from "./NotificationBell";
 import { AccountLinks, UserMenu } from "./UserMenu";
 
-const link =
-  "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100";
+const link = "text-foreground-muted transition hover:text-foreground";
 const primary =
-  "rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
+  "rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground transition hover:bg-primary-hover";
 
 // ctx can be null: the nav also renders on /login and /signup.
 export async function Nav({ ctx }: { ctx: SessionContext | null }) {
   const t = await getTranslations("nav");
 
   const isAdmin = ctx !== null && can(ctx, "user:manage", {});
+  // "MesPapiers": a fixed brand name, identical in every locale (checked in messages/*.json).
+  // Split for a two-tone wordmark instead of a generic icon-in-a-box logo.
+  const brand = t("brand");
+  const brandLead = brand.slice(0, 3);
+  const brandAccent = brand.slice(3);
 
-  // The bar (from 768 px) groups the account links in UserMenu; the ☰ panel (below) lists the same rows.
+  // The bar (from 768 px) splits the two jobs: NavLinks for the main sections,
+  // UserMenu for account-only rows — so nothing is listed twice. The ☰ panel
+  // (below) still lists every row through AccountLinks, since it is the only
+  // menu a narrow screen gets.
   const barLinks = ctx ? (
-    <UserMenu name={ctx.user.displayName} userId={ctx.user.id} isAdmin={isAdmin} />
+    <>
+      <NavLinks />
+      <span aria-hidden="true" className="h-5 w-px bg-border" />
+      <UserMenu name={ctx.user.displayName} userId={ctx.user.id} isAdmin={isAdmin} />
+    </>
   ) : (
     <>
       <Link href="/login" className={link}>
@@ -36,7 +48,7 @@ export async function Nav({ ctx }: { ctx: SessionContext | null }) {
 
   const panelLinks = ctx ? (
     <>
-      <p className="truncate px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+      <p className="truncate px-3 py-2 text-xs text-foreground-muted">
         {ctx.user.displayName}
       </p>
       <ul>
@@ -55,10 +67,16 @@ export async function Nav({ ctx }: { ctx: SessionContext | null }) {
   );
 
   return (
-    <header className="relative border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-      <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
-        <Link href="/" className="text-xl font-semibold tracking-tight">
-          {t("brand")}
+    // A floating capsule, not a square bar wall-to-wall: the page's paper
+    // background shows at the sides, the nav reads as one object on it.
+    <header className="sticky top-3 z-30 px-4">
+      <nav className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 rounded-2xl border border-border bg-surface px-6 py-3 shadow-elevated">
+        <Link
+          href="/"
+          className="flex items-baseline gap-0.5 font-serif text-lg font-semibold tracking-tight text-foreground"
+        >
+          <span>{brandLead}</span>
+          <span className="text-primary">{brandAccent}</span>
         </Link>
         <div className="flex items-center gap-6 text-sm">
           {ctx ? (
