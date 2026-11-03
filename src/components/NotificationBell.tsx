@@ -9,7 +9,7 @@ import { isNewNotification } from "@/lib/realtime/client";
 import { useRealtimeMessage } from "./RealtimeProvider";
 
 const action =
-  "block w-full px-3 py-3 md:py-2 text-left text-sm text-zinc-600 hover:bg-zinc-100 focus-visible:bg-zinc-100 focus-visible:outline-none dark:text-zinc-400 dark:hover:bg-zinc-800 dark:focus-visible:bg-zinc-800";
+  "block w-full px-3 py-3 md:py-2 text-left text-sm text-foreground-muted transition hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none";
 
 // A disclosure like UserMenu. Below md the panel hangs from the header, not the bell: the bell is not at the bar's edge, so it would overflow.
 export function NotificationBell({ count, notifications }: { count: number; notifications: NotificationView[] }) {
@@ -63,7 +63,7 @@ export function NotificationBell({ count, notifications }: { count: number; noti
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className="relative block rounded-lg p-1 text-zinc-600 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 dark:focus-visible:outline-zinc-100"
+        className="relative block rounded-lg p-1 text-foreground-muted transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <svg
           aria-hidden="true"
@@ -83,7 +83,7 @@ export function NotificationBell({ count, notifications }: { count: number; noti
         {count > 0 ? (
           <span
             aria-hidden="true"
-            className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white"
+            className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-primary-foreground"
           >
             {count > 99 ? "99+" : count}
           </span>
@@ -93,27 +93,27 @@ export function NotificationBell({ count, notifications }: { count: number; noti
       <div
         id={panelId}
         hidden={!open}
-        className="absolute inset-x-4 top-full z-10 mt-2 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg md:inset-x-auto md:end-0 md:w-80 dark:border-zinc-700 dark:bg-zinc-900"
+        className="absolute inset-x-4 top-full z-10 mt-2 overflow-hidden rounded-xl border border-border bg-surface shadow-elevated md:inset-x-auto md:end-0 md:w-80"
       >
-        <p className="border-b border-zinc-200 px-3 py-2 text-sm font-semibold dark:border-zinc-800">{t("title")}</p>
+        <p className="border-b border-border px-3 py-2 text-sm font-semibold text-foreground">{t("title")}</p>
 
         {notifications.length === 0 ? (
-          <p className="px-3 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">{t("nothingNew")}</p>
+          <p className="px-3 py-6 text-center text-sm text-foreground-muted">{t("nothingNew")}</p>
         ) : (
           <>
-            <ul className="max-h-80 divide-y divide-zinc-200 overflow-y-auto dark:divide-zinc-800">
+            <ul className="max-h-80 divide-y divide-border overflow-y-auto">
               {notifications.map((notification) => (
                 <li key={notification.id}>
                   <form action={openNotificationAction} onSubmit={() => setOpen(false)}>
                     <input type="hidden" name="id" value={notification.id} />
                     <button
                       type="submit"
-                      className="block w-full px-3 py-2 text-left hover:bg-zinc-100 focus-visible:bg-zinc-100 focus-visible:outline-none dark:hover:bg-zinc-800 dark:focus-visible:bg-zinc-800"
+                      className="block w-full px-3 py-2 text-left transition hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none"
                     >
                       <span className={`block text-sm break-words ${notification.isRead ? "" : "font-semibold"}`}>
                         {notification.text}
                       </span>
-                      <time dateTime={notification.at} className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <time dateTime={notification.at} className="text-xs text-foreground-subtle">
                         {notification.time}
                       </time>
                     </button>
@@ -121,7 +121,7 @@ export function NotificationBell({ count, notifications }: { count: number; noti
                 </li>
               ))}
             </ul>
-            <div className="border-t border-zinc-200 dark:border-zinc-800">
+            <div className="border-t border-border">
               {count > 0 ? (
                 <form action={markAllReadAction}>
                   <button type="submit" className={action}>
