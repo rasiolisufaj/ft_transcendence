@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as OTPAuth from "otpauth";
 import { createSecret, generateRecoveryCodes, otpauthUri, verifyCode } from "./totp";
 
@@ -27,40 +27,34 @@ describe("otpauthUri", () => {
 
 describe("verifyCode", () => {
   const secret = createSecret();
+  const totp = new OTPAuth.TOTP({ secret: OTPAuth.Secret.fromBase32(secret) }); // SHA1, 6 digits, 30 s
+  // 15 s into a 30-second window, so ±30 s is one window away and −60 s two.
+  const NOW = Date.UTC(2026, 10, 4, 12, 0, 15);
+  const codeAt = (offsetSeconds: number) => totp.generate({ timestamp: NOW + offsetSeconds * 1000 });
 
-  function generateValidCode(offsetSeconds = 0): string {
-    const totp = new OTPAuth.TOTP({
-      issuer: "MesPapiers",
-      algorithm: "SHA1",
-      digits: 6,
-      period: 30,
-      secret: OTPAuth.Secret.fromBase32(secret),
-    });
-    const now = Date.now() + offsetSeconds * 1000;
-    vi.setSystemTime(now);
-    const code = totp.generate({ timestamp: now });
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(NOW);
+  });
+
+  afterEach(() => {
     vi.useRealTimers();
-    return code;
-  }
+  });
 
   it("accepts the current code", () => {
-    const code = generateValidCode(0);
-    expect(verifyCode(secret, code)).toBe(true);
+    expect(verifyCode(secret, codeAt(0))).toBe(true);
   });
 
   it("accepts a code from the previous window", () => {
-    const code = generateValidCode(-30);
-    expect(verifyCode(secret, code)).toBe(true);
+    expect(verifyCode(secret, codeAt(-30))).toBe(true);
   });
 
   it("accepts a code from the next window", () => {
-    const code = generateValidCode(30);
-    expect(verifyCode(secret, code)).toBe(true);
+    expect(verifyCode(secret, codeAt(30))).toBe(true);
   });
 
   it("rejects a code two windows out", () => {
-    const code = generateValidCode(-90);
-    expect(verifyCode(secret, code)).toBe(false);
+    expect(verifyCode(secret, codeAt(-60))).toBe(false);
   });
 
   it("rejects a garbage string", () => {
