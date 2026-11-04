@@ -119,6 +119,7 @@ export default async function ChannelPage({
                 <input type="hidden" name="channelId" value={channel.id} />
                 <button
                   type="submit"
+                  aria-label={t("leave")}
                   className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-danger transition hover:border-danger hover:bg-danger-subtle"
                 >
                   <LeaveIcon />

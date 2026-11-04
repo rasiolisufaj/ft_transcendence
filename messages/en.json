@@ -202,7 +202,10 @@
       "descriptionLabel": "Description (optional)",
       "questionLabel": "Question",
       "cancel": "Cancel",
-      "save": "Save"
+      "save": "Save",
+      "errors": {
+        "nameTaken": "This channel name is already taken."
+      }
     },
     "invite": {
       "back": "← Back to channels",

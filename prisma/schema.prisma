@@ -157,6 +157,7 @@ model ChannelMember {
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([channelId, userId])
+  @@index([userId])
 }
 
 // a community channel around one topic
@@ -204,6 +205,8 @@ model Answer {
   thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
   author User?  @relation("AnswerAuthor", fields: [userId], references: [id], onDelete: SetNull)
   votes  Vote[]
+
+  @@index([threadId])
 }
 
 // a vote from a user on an answer plus one or minus one
@@ -233,6 +236,7 @@ model Friendship {
   receiver  User @relation("ReceivedFriendships", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@unique([requesterId, receiverId])
+  @@index([receiverId])
 }
 
 // a private chat between two users
@@ -263,6 +267,8 @@ model Message {
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
 }
 
 // a notification sent to a user
@@ -276,6 +282,8 @@ model Notification {
   updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
 
   recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId])
 }
 
 // a login session

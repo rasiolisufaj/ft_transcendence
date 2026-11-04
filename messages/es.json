@@ -202,7 +202,10 @@
       "descriptionLabel": "Descripción (opcional)",
       "questionLabel": "Pregunta",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "errors": {
+        "nameTaken": "Este nombre de canal ya está en uso."
+      }
     },
     "invite": {
       "back": "← Volver a los canales",
