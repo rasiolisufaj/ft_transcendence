@@ -69,6 +69,7 @@ export function UploadDropzone() {
           ref={inputRef}
           type="file"
           name="file"
+          aria-label={t("importZone.cta")}
           accept={ACCEPT}
           onChange={(event) => {
             const file = event.target.files?.[0];

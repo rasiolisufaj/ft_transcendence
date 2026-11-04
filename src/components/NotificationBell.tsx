@@ -83,7 +83,7 @@ export function NotificationBell({ count, notifications }: { count: number; noti
         {count > 0 ? (
           <span
             aria-hidden="true"
-            className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-primary-foreground"
+            className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-primary-foreground dark:bg-[#dc2626]"
           >
             {count > 99 ? "99+" : count}
           </span>

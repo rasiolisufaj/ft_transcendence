@@ -202,7 +202,10 @@
       "descriptionLabel": "Description (optionnelle)",
       "questionLabel": "Question",
       "cancel": "Annuler",
-      "save": "Enregistrer"
+      "save": "Enregistrer",
+      "errors": {
+        "nameTaken": "Ce nom de salon est déjà pris."
+      }
     },
     "invite": {
       "back": "← Retour aux salons",
