@@ -23,7 +23,7 @@ export default async function SecurityPage() {
             {t("twoFactor.title")}
           </h2>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            {t(user.totpEnabled ? "twoFactor.enabledDescription" : "twoFactor.disabledDescription")}
+            {user.totpEnabled ? t("twoFactor.enabledDescription") : t("twoFactor.disabledDescription")}
           </p>
 
           <div className="mt-4">

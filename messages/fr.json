@@ -415,16 +415,6 @@
     },
     "expiry": "Date d'échéance",
     "extractedFields": "Champs extraits",
-    "changeCategory": "Changer la catégorie",
-    "categoryChanged": "Catégorie mise à jour",
-    "save": "Enregistrer",
-    "saving": "Enregistrement…",
-    "errors": {
-      "missingFields": "Champs manquants",
-      "invalidId": "Document introuvable",
-      "invalidCategory": "Catégorie invalide",
-      "notFound": "Document introuvable"
-    },
     "fields": {
       "fullName": "Nom complet",
       "documentNumber": "Numéro de document",
