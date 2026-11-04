@@ -133,7 +133,7 @@ docker exec mespapiers_web chown -R 1000:1000 /app/src/generated
 
 - Use a **private window** at **`https://mespapiers.local`**, the name `next.config.ts` allows for dev (`allowedDevOrigins`). Every URL below uses it. It needs `127.0.0.1 mespapiers.local` in the Windows hosts file (`C:\Windows\System32\drivers\etc\hosts`), which WSL picks up too (`getent hosts mespapiers.local`). Accept the self-signed certificate.
 - Keep DevTools open, on the **Console** and **Network** tabs.
-- After `npm run db:reset` (it wipes the local database, then seeds it), the twenty seeded users log in as `<name, lowercased, accents and spaces stripped>@mespapiers.test` (`amir@mespapiers.test`, `rasiol@mespapiers.test`, …) with the dev password **`motdepasse123`**. `rasiol@mespapiers.test` is the only `ADMIN`; the others are `USER`. Every step below still uses a fresh account, `moi@mespapiers.test`, so that signup is tested too.
+- After `npm run db:reset` (it wipes the local database, then seeds it), the twenty seeded users log in as `<name, lowercased, accents stripped, spaces → dots>@mespapiers.test` (`amir@mespapiers.test`, `rasiol@mespapiers.test`, …) with the dev password **`motdepasse123`**. `rasiol@mespapiers.test` is the only `ADMIN`; the others are `USER`. Every step below still uses a fresh account, `moi@mespapiers.test`, so that signup is tested too.
 
 ### B1. The guard
 
@@ -370,7 +370,7 @@ On **https://localhost**, not mespapiers.local: Google refuses `.local` redirect
 | 2 | Click it, pick `<you>` on Google | back on `/fr`, signed in, the nav shows your Google name. `select "passwordHash", "displayName" from "User" where email = '<you>'` → `NULL`, your name; one `OAuthAccount` row, `provider = 'google'` |
 | 3 | Log out, *Continuer avec Google* again | the same user; still one `User` and one `OAuthAccount` row |
 | 4 | *Mes données*: the field asks for your email. Type another address, then your own | *Ce n'est pas l'adresse e-mail de ce compte.*; then the account is deleted and you are on `/fr/login` |
-| 5 | `/fr/signup` with `<you>` and a password; sign in with it in a private window too; in the first window log out, then *Continuer avec Google* | signed in to that account: one `User` row, one `OAuthAccount` row (linked), and `passwordHash` now `NULL`: the link drops the password (signup never checked the address) and ends every other session, so the private window is signed out on its next page and the password gives *Adresse e-mail ou mot de passe incorrect.* |
+| 5 | `/fr/signup` with `<you>` (a `@gmail.com` address: since `9499ec2` only Gmail addresses link, plan decision 11) and a password; sign in with it in a private window too; in the first window log out, then *Continuer avec Google* | signed in to that account: one `User` row, one `OAuthAccount` row (linked), and `passwordHash` now `NULL`: the link drops the password (signup never checked the address) and ends every other session, so the private window is signed out on its next page and the password gives *Adresse e-mail ou mot de passe incorrect.* |
 | 6 | After a sign-in, copy the `/api/auth/google/callback?...` URL from Network; log out; open it | `/fr/login` with *La connexion avec Google n'a pas abouti. Réessayez.* (the cookie is gone; Google also refuses a used code) |
 | 7 | On Google's screen, cancel | `/fr/login` with the same message |
 | 8 | Start on `https://mespapiers.local/fr/login` | Google, then back on `https://localhost/fr/login` with the message: the state cookie stayed on mespapiers.local. Expected |
