@@ -7,6 +7,7 @@ import { redirect } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { writeAudit } from "@/lib/audit";
 import { assertCan } from "@/lib/auth/policy";
+import { Prisma } from "@/generated/prisma/client";
 
 export async function editChannel(formData: FormData) {
   const ctx = await requireUser();
@@ -24,19 +25,19 @@ export async function editChannel(formData: FormData) {
     return;
 
   const intId = parseInt(strTrueId, 10);
-  if (Number.isNaN(intId) || intId <= 0)
+  if (Number.isNaN(intId) || intId <= 0 || String(intId) !== strTrueId)
     return;
 
   if (typeof newNameChannel !== "string" || typeof newDescriptionChannel !== "string" || typeof newQuestionChannel !== "string")
     return;
-  else if (!newNameChannel || !newDescriptionChannel || !newQuestionChannel)
+  else if (!newNameChannel || !newQuestionChannel)
     return;
 
   const truenewNameChannel = newNameChannel.trim();
   const truenewDescriptionChannel = newDescriptionChannel.trim();
   const truenewQuestionChannel = newQuestionChannel.trim();
 
-  if (truenewNameChannel.length === 0 || truenewDescriptionChannel.length === 0 || truenewQuestionChannel.length === 0)
+  if (truenewNameChannel.length === 0 || truenewQuestionChannel.length === 0)
     return;
   else if (truenewNameChannel.length >= 100 || truenewDescriptionChannel.length >= 251 || truenewQuestionChannel.length >= 301)
     return;
@@ -51,18 +52,25 @@ export async function editChannel(formData: FormData) {
 
   assertCan(ctx, "channel:update", { channelId: intId });
 
-  await prisma.channel.update({
-    where: { id: intId },
-    data: {
-      title: truenewNameChannel,
-      description: truenewDescriptionChannel,
-    },
-  });
+  try {
+    await prisma.channel.update({
+      where: { id: intId },
+      data: {
+        title: truenewNameChannel,
+        description: truenewDescriptionChannel.length > 0 ? truenewDescriptionChannel : null,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      redirect({ href: `/channels/${intId}/edit?error=nameTaken`, locale: await getLocale() });
+    }
+    throw error;
+  }
 
   const strQuestionId = formData.get("questionId");
   if (typeof strQuestionId === "string") {
     const questionId = parseInt(strQuestionId, 10);
-    if (!Number.isNaN(questionId) && questionId > 0) {
+    if (!Number.isNaN(questionId) && questionId > 0 && String(questionId) === strQuestionId) {
       await prisma.thread.updateMany({
         where: { id: questionId, channelId: intId },
         data: { content: truenewQuestionChannel },

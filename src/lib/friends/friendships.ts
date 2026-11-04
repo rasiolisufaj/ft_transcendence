@@ -31,35 +31,54 @@ export async function sendRequest(me: string, other: string): Promise<Result> {
     return fail("self");
   }
 
-  const rows = await prisma.friendship.findMany({ where: between(me, other) });
+  // The read (between) and the write below must be atomic, or A→B and B→A sent at the
+  // same instant both pass the read and both insert — two rows instead of one accepted
+  // friendship. Serializable makes Postgres abort one side (P2034) instead; retry once.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const { result, created } = await prisma.$transaction(
+        async (tx) => {
+          const rows = await tx.friendship.findMany({ where: between(me, other) });
 
-  if (rows.some((row) => row.status === "BLOCKED")) {
-    return fail("blocked");
-  }
+          if (rows.some((row) => row.status === "BLOCKED")) {
+            return { result: fail("blocked"), created: false };
+          }
 
-  // Already friends or already asked (double click): nothing to do.
-  if (rows.some((row) => row.status === "ACCEPTED" || row.requesterId === me)) {
-    return ok;
-  }
+          // Already friends or already asked (double click): nothing to do.
+          if (rows.some((row) => row.status === "ACCEPTED" || row.requesterId === me)) {
+            return { result: ok, created: false };
+          }
 
-  const theirs = rows.find((row) => row.requesterId === other && row.status === "PENDING");
-  if (theirs) {
-    await prisma.friendship.update({ where: { id: theirs.id }, data: { status: "ACCEPTED" } });
-    return ok;
-  }
+          const theirs = rows.find((row) => row.requesterId === other && row.status === "PENDING");
+          if (theirs) {
+            await tx.friendship.update({ where: { id: theirs.id }, data: { status: "ACCEPTED" } });
+            return { result: ok, created: false };
+          }
 
-  try {
-    await prisma.friendship.create({ data: { requesterId: me, receiverId: other } });
-  } catch (error) {
-    const code = (error as { code?: string }).code;
-    // The other user was deleted since the lookup: the foreign key refused the row.
-    if (code === "P2003") return fail("notFound");
-    // Simultaneous clicks: the unique index refused the 2nd row.
-    if (code !== "P2002") throw error;
-    return ok;
+          try {
+            await tx.friendship.create({ data: { requesterId: me, receiverId: other } });
+          } catch (error) {
+            const code = (error as { code?: string }).code;
+            // The other user was deleted since the lookup: the foreign key refused the row.
+            if (code === "P2003") return { result: fail("notFound"), created: false };
+            // Simultaneous clicks: the unique index refused the 2nd row.
+            if (code !== "P2002") throw error;
+            return { result: ok, created: false };
+          }
+          return { result: ok, created: true };
+        },
+        { isolationLevel: "Serializable" },
+      );
+      if (created) await notify(other, "FRIEND_REQUEST", { userId: me });
+      return result;
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === "P2034" && attempt === 0) continue;
+      throw error;
+    }
   }
-  await notify(other, "FRIEND_REQUEST", { userId: me });
-  return ok;
+  // Unreachable: the loop always returns or throws.
+  throw new Error("sendRequest: retry loop exhausted");
 }
 
 export async function acceptRequest(me: string, requester: string): Promise<Result> {
