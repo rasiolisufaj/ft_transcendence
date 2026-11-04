@@ -415,16 +415,6 @@
     },
     "expiry": "Fecha límite",
     "extractedFields": "Campos extraídos",
-    "changeCategory": "Cambiar categoría",
-    "categoryChanged": "Categoría actualizada",
-    "save": "Guardar",
-    "saving": "Guardando…",
-    "errors": {
-      "missingFields": "Campos faltantes",
-      "invalidId": "Documento no encontrado",
-      "invalidCategory": "Categoría inválida",
-      "notFound": "Documento no encontrado"
-    },
     "fields": {
       "fullName": "Nombre completo",
       "documentNumber": "Número de documento",

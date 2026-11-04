@@ -415,16 +415,6 @@
     },
     "expiry": "Expiry date",
     "extractedFields": "Extracted fields",
-    "changeCategory": "Change category",
-    "categoryChanged": "Category updated",
-    "save": "Save",
-    "saving": "Saving…",
-    "errors": {
-      "missingFields": "Missing fields",
-      "invalidId": "Document not found",
-      "invalidCategory": "Invalid category",
-      "notFound": "Document not found"
-    },
     "fields": {
       "fullName": "Full name",
       "documentNumber": "Document number",
