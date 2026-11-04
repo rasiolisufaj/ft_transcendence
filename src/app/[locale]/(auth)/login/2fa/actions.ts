@@ -3,7 +3,13 @@
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { createRateLimiter } from "@/lib/auth/rate-limit";
-import { getPendingTwoFactorSession } from "@/lib/auth/session";
+import {
+  createSession,
+  getPendingTwoFactorSession,
+  hashToken,
+  invalidateSession,
+  setSessionCookie,
+} from "@/lib/auth/session";
 import { consumeRecoveryCode, markTwoFactorVerified, verifyCode } from "@/lib/auth/totp";
 
 const twoFactorLimiter = createRateLimiter();
@@ -44,7 +50,13 @@ export async function verifyTwoFactor(
   }
 
   twoFactorLimiter.clearAttempts(ctx.user.id);
-  await markTwoFactorVerified(ctx.session.id);
+  // A new session for the new privilege, as login does (C11). Its Set-Cookie also makes Next send
+  // the whole page back: a redirect alone is a client navigation that keeps the root layout, so
+  // the nav would still show the signed-out links.
+  const { token, expiresAt } = await createSession(ctx.user.id);
+  await markTwoFactorVerified(hashToken(token));
+  await setSessionCookie(token, expiresAt);
+  await invalidateSession(ctx.session.id);
   return redirect({ href: "/", locale: await getLocale() });
 }
 
