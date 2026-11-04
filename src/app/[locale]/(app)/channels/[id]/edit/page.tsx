@@ -13,12 +13,12 @@ const fieldClass =
 
 export default async function EditChannelPage({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+  searchParams,
+}: PageProps<"/[locale]/channels/[id]/edit">) {
   const t = await getTranslations("channels.edit");
   const promise = await params;
   const idChannel = promise.id;
+  const { error } = await searchParams;
 
   const id = parseInt(idChannel, 10);
   if (Number.isNaN(id) || id <= 0 || String(id) !== idChannel) {
@@ -53,6 +53,15 @@ export default async function EditChannelPage({
         <form className="mt-6 flex flex-col gap-4" action={editChannel}>
           <input type="hidden" name="channelId" value={channel.id} />
           <input type="hidden" name="questionId" value={question?.id ?? ""} />
+
+          {error === "nameTaken" ? (
+            <p
+              role="alert"
+              className="rounded-lg border border-danger/40 bg-danger-subtle px-3 py-2 text-sm text-danger"
+            >
+              {t("errors.nameTaken")}
+            </p>
+          ) : null}
 
           <div className="flex flex-col gap-1">
             <label htmlFor="name" className="text-sm font-medium text-foreground">

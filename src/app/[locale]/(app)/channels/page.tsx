@@ -24,7 +24,7 @@ export default async function ChannelsHomePage() {
           <p className="mt-2 text-sm text-foreground-muted">{t("subtitle")}</p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Link
             href="/channels/create"
             className="group block rounded-xl border border-border bg-surface p-5 shadow-card transition hover:border-primary hover:shadow-elevated"
@@ -66,7 +66,7 @@ export default async function ChannelsHomePage() {
         )}
 
         {channelsMember.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {channelsMember.map((channel) => (
             <Card key={channel.id} className="flex items-start justify-between gap-4">
               <Link href={`/channels/${channel.id}`} className="group flex min-w-0 flex-1 items-start gap-3">
@@ -236,9 +236,11 @@ export default async function ChannelsHomePage() {
                     <input type="hidden" name="channelId" value={channel.id} />
                     <button
                       type="submit"
+                      aria-label={t("leave")}
                       className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-danger hover:bg-danger-subtle"
                     >
                       <svg
+                        aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
