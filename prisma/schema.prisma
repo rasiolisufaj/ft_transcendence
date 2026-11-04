@@ -22,6 +22,7 @@ enum FriendshipStatus {
 
 enum NotificationType {
   DEADLINE
+  DEADLINE_PASSED
   REPLY
   MESSAGE
   FRIEND_REQUEST
@@ -111,6 +112,7 @@ model Document {
 
   identity      DocumentIdentity?
   insuranceAuto DocumentInsuranceAuto?
+  notifications Notification[]
 
   @@unique([ownerId, fileHash])
   @@index([ownerId])
@@ -279,11 +281,14 @@ model Notification {
   type        NotificationType
   content     String           @db.VarChar(255)
   isRead      Boolean          @default(false) @map("is_read")
+  documentId  Int?             @map("document_id")
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
 
-  recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  recipient User      @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  document  Document? @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
+  @@unique([documentId, type])
   @@index([recipientId])
 }
 
