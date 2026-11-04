@@ -1,8 +1,7 @@
-*This project has been created as part of the 42 curriculum by  *
+*This project has been created as part of the 42 curriculum by risufaj, amkhelif, TODO_LOGIN_ADRIEN, TODO_LOGIN_ALEXANDRE*
 
-<!-- TODO(team): replace the TODO_LOGIN_* placeholders with real 42 logins, and
-     confirm `risufaj` and `amkhelif` are the right ones. The subject requires
-     logins here, not first names. -->
+<!-- TODO(team): replace TODO_LOGIN_ADRIEN and TODO_LOGIN_ALEXANDRE with their real
+     42 logins (not first names) before the evaluation — the subject requires it. -->
 
 # MesPapiers
 
@@ -32,7 +31,7 @@ can answer, and the kind only someone who has been through the procedure can.
   "is what I'm paying for this reasonable?" — with any figure labelled explicitly as
   indicative and never as financial advice.
 - **Mutual-aid community.** Topic channels (*titre de séjour*, *assurance auto*, CAF) with
-  questions, voted answers, reputation, direct messaging, friends and per-channel moderation.
+  questions and answers, direct messaging, friends and per-channel moderation.
 - **A hard boundary between the two.** Nothing from a user's private document vault ever
   reaches the community layer.
 
@@ -115,7 +114,7 @@ npm run lint
 | Backend | Next.js Server Actions + Route Handlers, plus a dedicated Node `ws` process | Next.js has no supported WebSocket server API, so long-lived connections live in a plain Node process rather than in a custom server that would forfeit `next start`. |
 | Database | PostgreSQL 17 | Relational data with real constraints. Uniqueness and transactions — not application code — are what make concurrent actions safe. |
 | ORM | Prisma | Type-safe queries and versioned migrations; the generated types are shared by all three processes. |
-| Real-time bus | Redis Pub/Sub | Publishing is fire-and-forget, so posting to a channel still succeeds when the realtime process is down. |
+| Real-time bus | Internal HTTP `/publish` on the `ws` process | Fire-and-forget: `fetch` with a timeout, so posting to a channel still succeeds when the realtime process is down. |
 | AI | Anthropic `claude-opus-5` | Vision extraction into strict JSON, and the streaming assistant. |
 | i18n | `next-intl` | FR / EN / ES, locale-prefixed routing. |
 | Infrastructure | Docker Compose + NGINX | One image, three processes; NGINX terminates TLS so every browser-facing request is HTTPS. |
@@ -124,7 +123,9 @@ npm run lint
 
 PostgreSQL 17, accessed through Prisma 6 with the `prisma-client` generator
 (output: `src/generated/prisma/`). The whole schema lives in [`prisma/schema.prisma`](prisma/schema.prisma)
-and is applied by a single consolidated migration `prisma/migrations/20261019000000_init/`.
+and is applied by four migrations under `prisma/migrations/` (`20261019000000_init`
+is the consolidated base, followed by `add_profile`, `add_conversation_read_at` and
+`add_missing_fk_indexes`).
 Every foreign key is declared with a real `@relation`, timestamps are stored in UTC and
 `updatedAt` is set by Prisma on each write.
 
@@ -233,7 +234,24 @@ erDiagram
 <!-- TODO(team): fill in as features land — feature, owner, what it does.
      Keep it honest; evaluators cross-check it against the code. -->
 
-TODO
+| Feature | Owner | What it does |
+|---|---|---|
+| Email/password auth | Rasiol | Signup, login, Argon2id hashing, hand-rolled sessions (30-day cookie, never slides). |
+| OAuth sign-in with Google | Rasiol | PKCE authorization-code flow; links or creates an account from a verified Google email. |
+| Permissions (`can`/`assertCan`) + audit log | Rasiol | Default-deny policy over a fixed action list; every privileged action writes an `AuditLog` row. |
+| Admin surface | Rasiol | User search, promote/demote, two-step delete, each gated by the policy layer. |
+| Community channels | Amir | Create/edit/delete, public/private visibility, join requests, invites, moderator/admin roles. |
+| Threads, answers and moderation | Amir | One question thread per channel, answers, kick/leave, channel closing. |
+| Document vault | Adrien | Upload, per-category dashboard, deadline tracking, status derived at read time. |
+| AI extraction | Adrien | Claude-based structured extraction from an uploaded document into typed fields. |
+| Streaming AI assistant | Adrien | Per-document chat over SSE, rate-limited, answers scoped to the owner's document. |
+| Friends | Alexandre | Requests, accept/decline/block. |
+| Profile and avatar | Rasiol | Editable display name, cropped avatar upload, "last seen" online status. |
+| Real-time transport | Alexandre | Ticket-authenticated WebSocket server; topic subscribe/unsubscribe; presence for friends. |
+| Notifications | Amir | In-app notification bell and list, fed by the real-time channel. |
+| GDPR account data | Amir | Self-service ZIP export and account deletion, with a last-admin guard. |
+| i18n (FR/EN/ES) | Alexandre | `next-intl` routing and catalogues, with a CI check for missing/unused keys. |
+| Privacy and Terms pages | Adrien | Static, accessible legal pages linked from the footer and from account deletion/export. |
 
 ## Modules
 
@@ -272,6 +290,36 @@ step that does not retrieve scores zero.
 
 <!-- TODO(team): detailed per-person breakdown, plus challenges faced and how
      they were overcome. Required by the subject and read closely. -->
+
+### Amir
+
+Owned the community layer (channels, threads, answers, moderation) and the GDPR account-data
+feature (export, deletion), and reviews everything under `prisma/`.
+
+- Built the channel system end to end: creation, editing, deletion, join requests, invites,
+  per-channel moderator/admin roles, kicking and leaving, and the question/answer threads —
+  plus the seed data used by the whole team for manual testing.
+- Built the self-service GDPR export (an in-memory ZIP with the original files and a
+  `data.json`) and account deletion, including the last-admin guard that has to run inside a
+  transaction with a row lock so two admins deleting themselves at the same time cannot both
+  succeed.
+- Consolidated the migration history into one base migration and tightened upload validation
+  (a daily extraction cap, server-side magic-byte checks on the document route).
+- Built the in-app notification bell and list.
+- Main challenge: the last-admin delete guard. A naive check-then-delete has a race where two
+  concurrent requests both see "not the last admin" and both delete — fixed by reading the
+  admin rows `FOR UPDATE` inside the same transaction as the delete, so the second request
+  blocks until the first commits.
+
+### Alexandre
+
+TODO
+
+### Adrien
+
+TODO
+
+### Rasiol
 
 TODO
 
