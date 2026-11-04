@@ -98,17 +98,30 @@ export async function invalidateAllSessions(userId: string): Promise<void> {
   await prisma.session.deleteMany({ where: { userId } });
 }
 
-/** Reads the session cookie. Returns null when absent or invalid. */
+/** Reads the session cookie. Returns null when absent, invalid, or pending 2FA. */
 export async function getCurrentUser(): Promise<SessionContext | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  return validateSessionToken(token);
+  const ctx = await validateSessionToken(token);
+  if (!ctx) return null;
+  if (ctx.user.totpEnabled && !ctx.session.twoFactorVerified) return null;
+  return ctx;
 }
 
 /** The guard. Redirects to /login when there is no valid session. */
 export async function requireUser(): Promise<SessionContext> {
   const ctx = await getCurrentUser();
   if (!ctx) redirect("/login");
+  return ctx;
+}
+
+/** For the /login/2fa page only: returns the session even when 2FA is pending. */
+export async function getPendingTwoFactorSession(): Promise<SessionContext | null> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+  const ctx = await validateSessionToken(token);
+  if (!ctx) return null;
+  if (!ctx.user.totpEnabled || ctx.session.twoFactorVerified) return null;
   return ctx;
 }
 
