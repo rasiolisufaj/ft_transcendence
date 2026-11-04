@@ -106,6 +106,7 @@ export function AccountLinks({
         { href: `/users/${userId}`, label: t("profile") },
         { href: "/messages", label: t("messages") },
         { href: "/account/data", label: t("myData") },
+        { href: "/account/security", label: t("security") },
         ...(isAdmin ? [{ href: "/admin/users", label: t("admin") }] : []),
       ].map((page) => {
         const active = pathname === page.href;

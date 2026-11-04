@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     omit: {
       passwordHash: true,
       totpSecret: true,
+      recoveryCodes: true,
     },
     include: {
       documents: { include: { identity: true, insuranceAuto: true } },

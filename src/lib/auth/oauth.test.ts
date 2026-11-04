@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { createSession, validateSessionToken } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { challengeFor, googleProfileSchema, resolveGoogleUser } from "./oauth";
+import { createSecret, generateRecoveryCodes } from "./totp";
 
 describe("challengeFor", () => {
   it("is base64url(sha256(verifier)): RFC 7636's Appendix B pair", () => {
@@ -67,17 +68,29 @@ describe("resolveGoogleUser", () => {
     expect(await prisma.oAuthAccount.count({ where: { userId: owner.id } })).toBe(1);
   });
 
-  it("takes a linked account back from whoever set its password: the password and every open session end", async () => {
-    // Signup never checks that you own the address, so that password may be an impostor's (final review).
+  it("takes a linked account back from whoever set its password: the password, its 2FA and every open session end", async () => {
+    // Signup never checks that you own the address, so that password, and its 2FA, may be an impostor's.
     const email = newEmail("gmail.com");
     const squatter = await prisma.user.create({
-      data: { email, displayName: "Squatter", passwordHash: await hashPassword("motdepasse123") },
+      data: {
+        email,
+        displayName: "Squatter",
+        passwordHash: await hashPassword("motdepasse123"),
+        totpEnabled: true,
+        totpSecret: createSecret(),
+        recoveryCodes: generateRecoveryCodes().digests,
+      },
     });
     const { token } = await createSession(squatter.id);
 
     await resolveGoogleUser(google({ email }));
 
-    expect((await prisma.user.findUniqueOrThrow({ where: { id: squatter.id } })).passwordHash).toBeNull();
+    expect(
+      await prisma.user.findUniqueOrThrow({
+        where: { id: squatter.id },
+        select: { passwordHash: true, totpEnabled: true, totpSecret: true, recoveryCodes: true },
+      }),
+    ).toEqual({ passwordHash: null, totpEnabled: false, totpSecret: null, recoveryCodes: [] });
     expect(await validateSessionToken(token)).toBeNull();
   });
 
