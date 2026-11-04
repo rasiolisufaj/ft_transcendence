@@ -64,11 +64,14 @@ export async function resolveGoogleUser(profile: GoogleProfile): Promise<string 
     // its password. The email is already lowercased by emailField.
     if (!profile.email.endsWith("@gmail.com")) return null;
     // Signup never checks that you own the address, so the password may be an impostor's who
-    // signed up first. Google has just proved the mailbox: drop that password and end every
-    // session it opened, or the impostor keeps a way into the owner's account (final review).
+    // signed up first. Google has just proved the mailbox: drop that password, any 2FA it set up
+    // (or the owner would be stopped at /login/2fa) and every session it opened (final review).
     await prisma.$transaction([
       prisma.oAuthAccount.create({ data: { ...identity, userId: existing.id } }),
-      prisma.user.update({ where: { id: existing.id }, data: { passwordHash: null } }),
+      prisma.user.update({
+        where: { id: existing.id },
+        data: { passwordHash: null, totpSecret: null, totpEnabled: false, recoveryCodes: [] },
+      }),
       prisma.session.deleteMany({ where: { userId: existing.id } }),
     ]);
     return existing.id;
