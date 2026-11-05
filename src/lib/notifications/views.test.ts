@@ -32,6 +32,22 @@ afterEach(async () => {
   await prisma.user.deleteMany({ where: { id: { in: [alice, bob] } } });
 });
 
+async function deadlineFor(recipientId: string, type: "DEADLINE" | "DEADLINE_PASSED") {
+  const document = await prisma.document.create({
+    data: {
+      ownerId: recipientId,
+      fileName: "carte.pdf",
+      fileType: "application/pdf",
+      fileSize: 1,
+      fileData: Buffer.from("x"),
+      fileHash: randomUUID(),
+      deadlineType: "HARD",
+      targetDate: new Date("2027-03-15T00:00:00Z"),
+    },
+  });
+  await prisma.notification.create({ data: { recipientId, type, documentId: document.id, content: "{}" } });
+}
+
 describe("notificationViews", () => {
   it("gives the text and the state of a friend request", async () => {
     await notify(alice, "FRIEND_REQUEST", { userId: bob });
@@ -67,5 +83,21 @@ describe("notificationViews", () => {
     await notify(alice, "REPLY", { userId: bob, channelId });
 
     expect(await notificationViews(alice, 1)).toHaveLength(1);
+  });
+
+  it("names the document that expires soon, with its date", async () => {
+    await deadlineFor(alice, "DEADLINE");
+
+    const [view] = await notificationViews(alice);
+
+    expect(view?.text).toBe('deadline{"name":"carte.pdf","date":"formatted"}');
+  });
+
+  it("names the document that has expired", async () => {
+    await deadlineFor(alice, "DEADLINE_PASSED");
+
+    const [view] = await notificationViews(alice);
+
+    expect(view?.text).toBe('deadlinePassed{"name":"carte.pdf","date":"formatted"}');
   });
 });

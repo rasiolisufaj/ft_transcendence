@@ -628,6 +628,8 @@
     "reply": "{name} a répondu à votre question dans {channel}.",
     "message": "{name} vous a envoyé un message.",
     "other": "Nouvelle notification.",
+    "deadline": "Votre document « {name} » expire le {date}.",
+    "deadlinePassed": "Votre document « {name} » a expiré le {date}.",
     "nothingNew": "Rien de nouveau pour le moment.",
     "seeAll": "Voir tout"
   },
