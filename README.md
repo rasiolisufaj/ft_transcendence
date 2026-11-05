@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by risufaj, amkhelif, adregis, alehamad*
+*This project has been created as part of the 42 curriculum by raisufaj, amkhelif, adregis, alehamad*
 
 
 # MesPapiers
@@ -84,7 +84,7 @@ npm run lint
 | Member | 42 login | Role(s) | Responsibilities |
 |---|---|---|---|
 | Adrien | TODO | Product Owner · Developer | Product vision and backlog, prioritisation, validation of completed work. Infrastructure, CI, AI extraction and the assistant. |
-| Rasiol | risufaj | Project Manager · Developer | Project plan, progress and risk tracking, meetings and team communication. Authentication, security and permissions. |
+| Rasiol | raisufaj | Project Manager · Developer | Project plan, progress and risk tracking, meetings and team communication. Authentication, security and permissions. |
 | Alexandre | alehamad | Developer | Real-time and WebSockets, messaging, notifications, i18n, UI shell. |
 | Amir | amkhelif | Technical Lead · Developer | Technical architecture and stack decisions, code review and best practices. Database, storage, community data layer, GDPR. |
 
@@ -345,7 +345,38 @@ TODO
 
 ### Rasiol
 
-TODO
+Project manager. Owned authentication, security and permissions: user management, the
+permission system, Google sign-in, the user profile, and the expiry notifications.
+
+- Built email/password authentication by hand: Argon2id password hashing, sessions stored in
+  the database (the cookie holds a random token, the database only its SHA-256), a new session
+  at every login, `HttpOnly` / `Secure` / `SameSite=Lax` cookies, one error message for an
+  unknown email and a wrong password, and a login rate limit (6 failures per 15 minutes).
+- Built the permission system: one default-deny `can()` / `assertCan()` function over a fixed
+  list of actions, with global roles (user, admin) and per-channel roles (member, moderator).
+  The document vault stays owner-only, admins included. Every privileged action writes an
+  `AuditLog` row. Then applied it to every channel action and added admin-assigned channel
+  moderators.
+- Built the admin surface: user search, promote/demote (which ends the user's sessions) and a
+  two-step delete, with guards so an admin cannot demote or delete themselves.
+- Built Google sign-in with OAuth 2.0, written without a library: authorization code with PKCE,
+  a `state` checked against a cookie, and account resolution by Google's permanent id. An
+  existing account is linked only for a `@gmail.com` address, and linking drops the old
+  password and ends its sessions, so someone who signed up first with your address loses
+  access.
+- Built the profile page: display name editing, an avatar cropped in the browser and checked
+  on the server by its magic bytes, and friends' online status from a "last seen" timestamp.
+- Built the expiry notifications: a `worker` process scans documents every minute and warns
+  the owner once when an identity document is 90 days from expiring and once when it has
+  expired. A unique constraint in the database, not application code, makes sure each warning
+  is sent only once.
+- Minted the single-use WebSocket tickets the realtime server checks, and fixed teammates' PRs
+  after review: the GDPR export and the last-admin guard's race (`FOR UPDATE`), and the 2FA
+  flow (a new session after the code, Google linking clearing 2FA).
+- Main challenge: a layout check in Next.js does not protect its page. With the admin check only
+  in `layout.tsx`, a normal user saw the "forbidden" card, but the page still ran and every
+  user's email was in the HTML sent to the browser. Fixed by checking permissions in each page
+  and each Server Action, and treating the layout only as a convenience.
 
 ## Resources
 
