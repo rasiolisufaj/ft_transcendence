@@ -40,9 +40,15 @@ async function withNames(rows: Notification[]) {
   const data = rows.map((row) => parse(row.content));
   const userIds = [...new Set(data.flatMap((d) => (d ? [d.userId] : [])))];
   const channelIds = [...new Set(data.flatMap((d) => (d?.channelId ? [d.channelId] : [])))];
-  const [users, channels] = await Promise.all([
+  const documentIds = [...new Set(rows.flatMap((row) => (row.documentId ? [row.documentId] : [])))];
+  const [users, channels, documents] = await Promise.all([
     prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, displayName: true } }),
     prisma.channel.findMany({ where: { id: { in: channelIds } }, select: { id: true, title: true } }),
+    // Written only by the deadline scan, for the document's owner.
+    prisma.document.findMany({
+      where: { id: { in: documentIds } },
+      select: { id: true, fileName: true, targetDate: true },
+    }),
   ]);
   return rows.map((row, i) => ({
     id: row.id,
@@ -51,6 +57,7 @@ async function withNames(rows: Notification[]) {
     createdAt: row.createdAt,
     actor: users.find((user) => user.id === data[i]?.userId) ?? null,
     channel: channels.find((channel) => channel.id === data[i]?.channelId) ?? null,
+    document: documents.find((document) => document.id === row.documentId) ?? null,
   }));
 }
 
@@ -95,6 +102,7 @@ export function notificationHref(notification: {
   type: NotificationType;
   actor: { id: string } | null;
   channel: { id: number } | null;
+  document?: { id: number } | null;
 }): string {
   switch (notification.type) {
     case "FRIEND_REQUEST":
@@ -103,6 +111,9 @@ export function notificationHref(notification: {
       return notification.channel ? `/channels/${notification.channel.id}` : "/channels";
     case "MESSAGE":
       return notification.actor ? `/messages/${notification.actor.id}` : "/notifications";
+    case "DEADLINE":
+    case "DEADLINE_PASSED":
+      return notification.document ? `/documents/view/${notification.document.id}` : "/notifications";
     default:
       return "/notifications";
   }

@@ -13,6 +13,7 @@
     "build": "next build",
     "start": "next start",
     "realtime": "tsx src/realtime/main.ts",
+    "worker": "tsx src/worker/main.ts",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "i18n:check": "tsx scripts/i18n-check.ts",

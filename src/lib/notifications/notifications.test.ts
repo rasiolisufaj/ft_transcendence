@@ -147,6 +147,12 @@ describe("notificationHref", () => {
     expect(notificationHref({ type: "MESSAGE", actor: null, channel: null })).toBe("/notifications");
     expect(notificationHref({ type: "OTHER", actor, channel: null })).toBe("/notifications");
   });
+
+  it("opens the document of a deadline", () => {
+    expect(notificationHref({ type: "DEADLINE_PASSED", actor: null, channel: null, document: { id: 7 } })).toBe(
+      "/documents/view/7",
+    );
+  });
 });
 
 describe("openNotification", () => {

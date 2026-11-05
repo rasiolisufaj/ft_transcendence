@@ -9,6 +9,12 @@ export async function notificationViews(me: string, take?: number) {
 
   return notifications.map((notification) => {
     const name = notification.actor?.displayName ?? t("deletedUser");
+    const deadline = notification.document?.targetDate
+      ? {
+          name: notification.document.fileName,
+          date: format.dateTime(notification.document.targetDate, { dateStyle: "long" }),
+        }
+      : null;
     let text: string;
     switch (notification.type) {
       case "FRIEND_REQUEST":
@@ -19,6 +25,12 @@ export async function notificationViews(me: string, take?: number) {
         break;
       case "MESSAGE":
         text = t("message", { name });
+        break;
+      case "DEADLINE":
+        text = deadline ? t("deadline", deadline) : t("other");
+        break;
+      case "DEADLINE_PASSED":
+        text = deadline ? t("deadlinePassed", deadline) : t("other");
         break;
       default:
         text = t("other");
