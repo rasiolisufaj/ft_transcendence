@@ -1,7 +1,5 @@
-*This project has been created as part of the 42 curriculum by risufaj, amkhelif, TODO_LOGIN_ADRIEN, TODO_LOGIN_ALEXANDRE*
+*This project has been created as part of the 42 curriculum by risufaj, amkhelif, adregis, alehamad*
 
-<!-- TODO(team): replace TODO_LOGIN_ADRIEN and TODO_LOGIN_ALEXANDRE with their real
-     42 logins (not first names) before the evaluation — the subject requires it. -->
 
 # MesPapiers
 
@@ -87,7 +85,7 @@ npm run lint
 |---|---|---|---|
 | Adrien | TODO | Product Owner · Developer | Product vision and backlog, prioritisation, validation of completed work. Infrastructure, CI, AI extraction and the assistant. |
 | Rasiol | risufaj | Project Manager · Developer | Project plan, progress and risk tracking, meetings and team communication. Authentication, security and permissions. |
-| Alexandre | TODO | Developer | Real-time and WebSockets, messaging, notifications, i18n, UI shell. |
+| Alexandre | alehamad | Developer | Real-time and WebSockets, messaging, notifications, i18n, UI shell. |
 | Amir | amkhelif | Technical Lead · Developer | Technical architecture and stack decisions, code review and best practices. Database, storage, community data layer, GDPR. |
 
 ## Project Management
@@ -246,9 +244,10 @@ erDiagram
 | AI extraction | Adrien | Claude-based structured extraction from an uploaded document into typed fields. |
 | Streaming AI assistant | Adrien | Per-document chat over SSE, rate-limited, answers scoped to the owner's document. |
 | Friends | Alexandre | Requests, accept/decline/block. |
+| Direct messages | Alexandre | 1-to-1 chat between friends, live delivery, unread counts and a "seen" mark. |
 | Profile and avatar | Rasiol | Editable display name, cropped avatar upload, "last seen" online status. |
 | Real-time transport | Alexandre | Ticket-authenticated WebSocket server; topic subscribe/unsubscribe; presence for friends. |
-| Notifications | Amir | In-app notification bell and list, fed by the real-time channel. |
+| Notifications | Alexandre, Rasiol | In-app bell, panel and list, pushed live over the real-time channel (Alexandre; page redesign: Amir). Expiry notifications from a background worker that scans documents every minute (Rasiol). |
 | GDPR account data | Amir | Self-service ZIP export and account deletion, with a last-admin guard. |
 | i18n (FR/EN/ES) | Alexandre | `next-intl` routing and catalogues, with a CI check for missing/unused keys. |
 | Privacy and Terms pages | Adrien | Static, accessible legal pages linked from the footer and from account deletion/export. |
@@ -313,7 +312,32 @@ feature (export, deletion), and reviews everything under `prisma/`.
 
 ### Alexandre
 
-TODO
+Owned the real-time layer (the WebSocket server and its browser client), direct messages,
+notifications, friends, i18n and the UI shell.
+
+- Built the WebSocket server (`src/realtime/`) as its own Node process: heartbeat to drop dead
+  clients, JSON logs, graceful shutdown, and a size cap on every message.
+- Designed the handshake: the realtime process cannot read the session cookie, so the browser
+  first asks `web` for a short-lived, single-use HMAC ticket, checked in `verifyClient` before
+  the socket exists (a bad ticket gets a 401, with no socket).
+- Topics: each socket is subscribed to its own `user:<id>`, and can take `channel:<id>` only
+  if the database says it is a member; malformed messages are rejected with Zod.
+- Publishing without Redis: `web` posts each event to an internal, secret-protected
+  `POST /publish` (never exposed by nginx), after the database write, and never fails the
+  user's action if the realtime process is down.
+- Friends' presence, counted per user so that two tabs make one "online", and the browser
+  client: exponential-backoff reconnection with a fresh ticket each time, and a React provider
+  that refreshes pages live (`router.refresh()`) on events.
+- Friends (requests, accept, decline, block), direct messages between friends (one
+  conversation per pair, unread counts, "seen"), and notifications (friend request, reply to
+  your question, new message) stored as ids and translated at display time.
+- i18n: `next-intl` with locale-prefixed routes, the FR/EN/ES catalogues (French as the typed
+  reference) and the `i18n:check` script that reports missing, orphan and unused keys.
+- UI shell: the first primitives and the `/dev/ui` gallery, the nav, the account menu and the
+  mobile menu.
+- Main challenge: React's development mode mounts, unmounts and remounts the provider, which
+  opened two sockets because each `connect()` awaits a ticket first. Fixed with a generation
+  counter: after the `await`, a `connect()` that is no longer the latest one gives up.
 
 ### Adrien
 
