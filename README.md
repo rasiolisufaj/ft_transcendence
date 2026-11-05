@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by adregis, risufaj, amkhelif, alehamad*
+*This project has been created as part of the 42 curriculum by adregis, raisufaj, amkhelif, alehamad*
 
 # MesPapiers
 
@@ -40,37 +40,69 @@ Execution plan: [`PROJECT_PLAN.md`](PROJECT_PLAN.md).
 
 | Tool | Version | Notes |
 |---|---|---|
-| Docker + Docker Compose | v2 | The whole stack runs in containers. |
-| Node.js | 22 LTS | Only needed for running the app outside Docker or running tests. |
+| Docker + Docker Compose, or Podman + `podman compose` | Compose v2 / Podman 4+ | The whole stack runs in containers: nothing else is needed to run it. |
+| Node.js | 22 LTS | Only needed for development outside Docker or running tests. |
 | npm | 10+ | Ships with Node 22. One lockfile, at the repository root. |
 | `mkcert` | latest | Optional — issues a locally-trusted TLS certificate for a green padlock. Without it, the entrypoint generates a self-signed cert automatically. |
 
 ### Running the project
 
+From a fresh clone:
+
 ```bash
-git clone git@github.com:rasiolisufaj/ft_transcendence.git
+git clone https://github.com/rasiolisufaj/ft_transcendence.git
 cd ft_transcendence
-
-cp .env.example .env          # then edit .env and set real values (see comments inside)
-docker compose up --build     # starts all services: nginx, web, realtime, db, mailpit
+cp .env.example .env            # runs as is; see "Configuration" below for the optional keys
+docker compose up -d --build    # 6 services: nginx, web, realtime, worker, db, mailpit
+docker compose logs -f web      # wait for "Ready", then Ctrl-C
 ```
 
-Add this line to your `/etc/hosts` (or `C:\Windows\System32\drivers\etc\hosts`):
+The first start builds the image (a few minutes) and applies the database migrations.
 
-```
-127.0.0.1  mespapiers.local
-```
-
-Then open **https://mespapiers.local:8443** (accept the self-signed cert warning).
-
-The first launch runs database migrations automatically. To seed the database with test data:
+**Load the seed data** once `web` is ready:
 
 ```bash
-npm run db:reset    # resets + seeds (destroys existing data)
+docker compose exec web npm run db:seed    # empties every table, then loads the test data
 ```
 
-Seeded users: `amir@gmail.com`, `rasiol@gmail.com` (admin), `alexandre@gmail.com`,
-`adrien@gmail.com`, etc. — all with the password `motdepasse123`.
+Open **https://localhost:8443** and accept the self-signed certificate warning. Log in as
+`rasiol@mespapiers.test` (admin), `amir@mespapiers.test`, `adrien@mespapiers.test`,
+`alexandre@mespapiers.test`, etc. — all with the password `motdepasse123`. The first visit to
+each page is slow: the app runs in development mode and compiles each page on demand.
+
+To stop: `docker compose down` (keeps the data). To start over with an empty database:
+`docker compose down -v`, then run the steps above again from `docker compose up`.
+
+**Configuration (`.env`).** Every key has a working default. The optional ones:
+
+- `ANTHROPIC_API_KEY`: enables document extraction and the AI assistant. Left empty, uploads
+  still work and documents stay *pending*.
+- `POSTGRES_PASSWORD` (and the same value inside `DATABASE_URL`), `WS_TICKET_SECRET`,
+  `REALTIME_PUBLISH_SECRET`: on a shared machine, replace `change_me_locally` with random values
+  (`openssl rand -hex 32`) **before the first start** — the database keeps the password it was
+  created with.
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: Google sign-in. The OAuth client's redirect URI
+  must be `https://localhost:8443/api/auth/google/callback` (`APP_URL` + `/api/auth/google/callback`).
+
+After editing `.env`, run `docker compose up -d` to apply it.
+
+**Podman (e.g. Fedora).** Use `podman compose` wherever this section says `docker compose`.
+Once per user account, before the first build:
+
+```bash
+mkdir -p ~/.config/containers
+# SELinux: let the containers read the bind-mounted source folders
+printf '[containers]\nlabel = false\n' > ~/.config/containers/containers.conf
+# Resolve the short image names (node, nginx, postgres, mailpit) on Docker Hub
+printf 'unqualified-search-registries = ["docker.io"]\n' > ~/.config/containers/registries.conf
+```
+
+These two commands overwrite those files: merge by hand if you already have them. If
+`podman compose` reports no compose provider, install one with
+`python3 -m pip install --user podman-compose`.
+
+**Optional — `https://mespapiers.local:8443`:** add `127.0.0.1  mespapiers.local` to `/etc/hosts`
+(needs sudo).
 
 **Optional — for a green padlock:**
 
@@ -84,7 +116,7 @@ mkcert mespapiers.local localhost
 
 | Service | URL | Purpose |
 |---|---|---|
-| App | https://mespapiers.local:8443 | The main application |
+| App | https://localhost:8443 | The main application (http://localhost:8080 redirects to it) |
 | Mailpit | http://localhost:8025 | Catches all emails (GDPR export, account deletion) |
 | PostgreSQL | localhost:5432 | Direct DB access for dev tools |
 
@@ -110,7 +142,7 @@ npm test               # requires the db service to be running for DB tests
 | Member | 42 login | Role(s) | Responsibilities |
 |---|---|---|---|
 | Adrien | adregis | Product Owner, Developer | Product vision and backlog, prioritisation, validation of completed work. Infrastructure (Docker, nginx), AI extraction and the streaming assistant, 2FA, i18n. |
-| Rasiol | risufaj | Project Manager, Developer | Project plan, progress and risk tracking, meetings and team communication. Authentication, security, permissions, profile, expiry notifications. |
+| Rasiol | raisufaj | Project Manager, Developer | Project plan, progress and risk tracking, meetings and team communication. Authentication, security, permissions, profile, expiry notifications. |
 | Alexandre | alehamad | Developer | Real-time WebSocket server, messaging, notifications, friends, i18n catalogues, UI shell. |
 | Amir | amkhelif | Technical Lead, Developer | Technical architecture and stack decisions, code review and best practices. Database, community channels, threads, GDPR, seed data. |
 
