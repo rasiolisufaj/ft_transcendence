@@ -249,7 +249,7 @@ erDiagram
 | Direct messages | Alexandre | 1-to-1 chat between friends, live delivery, unread counts and a "seen" mark. |
 | Profile and avatar | Rasiol | Editable display name, cropped avatar upload, "last seen" online status. |
 | Real-time transport | Alexandre | Ticket-authenticated WebSocket server; topic subscribe/unsubscribe; presence for friends. |
-| Notifications | Alexandre | In-app bell, panel and list, pushed live over the real-time channel (page redesign: Amir). |
+| Notifications | Alexandre, Rasiol | In-app bell, panel and list, pushed live over the real-time channel (Alexandre; page redesign: Amir). Expiry notifications from a background worker that scans documents every minute (Rasiol). |
 | GDPR account data | Amir | Self-service ZIP export and account deletion, with a last-admin guard. |
 | i18n (FR/EN/ES) | Alexandre | `next-intl` routing and catalogues, with a CI check for missing/unused keys. |
 | Privacy and Terms pages | Adrien | Static, accessible legal pages linked from the footer and from account deletion/export. |
